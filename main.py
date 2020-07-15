@@ -1,7 +1,9 @@
 import sys
 import PyQt5
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QSplitter, QGridLayout, QAction, QTableWidget, QApplication, QMainWindow, QTableWidgetItem, QPushButton, QFileDialog
+from PyQt5.QtWidgets import QDesktopWidget,\
+    QSplitter, QGridLayout, QAction, QTableWidget, QApplication, QMainWindow, \
+    QTableWidgetItem, QPushButton, QFileDialog, QTableView
 import pandas as pd
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
@@ -31,6 +33,8 @@ class MainWindow(QMainWindow):
 
     def UI(self):
         self.setGeometry(self.left, self.top, self.width, self.height)
+        self.setWindowTitle('File manager')
+        self.move_to_center()
 
         self.table = MyTable(self, 10, 5)
         # layout = QGridLayout(self)
@@ -67,11 +71,19 @@ class MainWindow(QMainWindow):
         self.add_db_action.triggered.connect(lambda: self.create_subwindow_subw())
 
 
-        self.frame = QFrame(self)
+        self.frame_left = QFrame(self)
+        self.frame_left.setStyleSheet("QFrame {background-color: rgb(255, 255, 255);"
+                                       "border-width: 1;"
+                                       "border-radius: 3;"
+                                       "border-style: solid;"
+                                       "border-color: rgb(50,50,50)}"
+                                       )
+
+
 
         self.frame_button_lay = QFrame()
-        self.button_lay = QVBoxLayout(self)
 
+        self.button_lay = QVBoxLayout(self)
         self.pushButton = QPushButton(self)
         self.pushButton.setGeometry(QRect(350, 100, 80, 20))
         self.pushButton.setText('Show data')
@@ -84,33 +96,73 @@ class MainWindow(QMainWindow):
         # self.pushButton2.clicked.connect(self.create_database)
         self.button_lay.addWidget(self.pushButton2)
 
-
         self.line = QLineEdit(self)
         self.line.setGeometry(QRect(350, 100, 80, 20))
         self.button_lay.addWidget(self.line)
 
-
         self.frame_button_lay.setLayout(self.button_lay)
 
-        hor_lay = QVBoxLayout()
-        self.frame.setLayout(hor_lay)
-        hor_lay.addWidget(self.frame_button_lay)
-        hor_lay.addWidget(self.table)
+
+        hor_lay_left = QVBoxLayout()
+        hor_lay_left.addWidget(self.frame_button_lay)
+        hor_lay_left.addWidget(self.table)
+
+        self.frame_left.setLayout(hor_lay_left)
+
+
+
+
+        self.frame_right = QFrame(self)
+        self.frame_2 = QFrame(self)
+        self.frame_right.setStyleSheet("QFrame {background-color: rgb(255, 255, 255);"
+                                "border-width: 1;"
+                                "border-radius: 3;"
+                                "border-style: solid;"
+                                "border-color: rgb(50,50,50)}"
+                                )
+
+        # self.p = QPushButton(self)
+        # self.p.setGeometry(QRect(350, 100, 80, 20))
+        # self.p.setText('Show data')
+        # self.frame_2.addWidget(self.p)
+
+        self.right_lay = QVBoxLayout(self)
+        self.right_lay.addWidget(self.canv)
+        self.right_lay.addWidget(self.frame_2)
+        self.frame_right.setLayout(self.right_lay)
 
         self.splitter = QSplitter(Qt.Horizontal)
-        self.splitter.addWidget(self.frame)
-        self.splitter.addWidget(self.canv)
-        self.main_layout.addWidget(self.splitter)
+        self.splitter.addWidget(self.frame_left)
+        self.splitter.addWidget(self.frame_right)
 
-        # self.main_layout.addWidget(self.button_lay)
+        self.main_layout.addWidget(self.splitter)
         self.show()
+
+    def move_to_center(self):
+        qtRectangle = self.frameGeometry()
+        center_point = QDesktopWidget().availableGeometry().center()
+        qtRectangle.moveCenter(center_point)
+        self.move(qtRectangle.topLeft())
 
     def button(self):
         print('button')
+        # self.tableview = QTableView()
+        # self.tableview.setModel(self.table)
+        # print(self.table.selectedRanges())
+        cols = self.table.selectionModel().selectedColumns()
+        indexes = []
+        for c in cols: # c is QModelndex object
+            print(c.column())
+            indexes.append(c.column())
+        print('indexes ', indexes)
+        self.canv.plot2(indexes)
+
+
 
     def create_subwindow_subw(self):
         print('ddd')
         self.db_subwindow = Subwindow(self)
+
 
 
 
