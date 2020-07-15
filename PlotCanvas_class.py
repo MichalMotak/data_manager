@@ -34,3 +34,11 @@ class PlotCanvas(FigureCanvas):
         print('data shape', self.table.data.shape)
         self.ax.plot(self.table.data[:12,1], self.table.data[:12,2])
         self.draw()
+
+
+    def plot2(self, cols):
+        print('plot2')
+        print(cols)
+        print('data shape', self.table.data.shape)
+        self.ax.plot(self.table.data[:12,cols[0]], self.table.data[:12,cols[1]])
+        self.draw()

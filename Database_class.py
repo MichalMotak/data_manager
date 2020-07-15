@@ -63,8 +63,6 @@ class Database():
         print('add')
         print(self.mycursor)
         self.mycursor.execute(text)
-        # for x in self.mycursor:  # wyswietli info o db
-        #     print(x)
 
 
 

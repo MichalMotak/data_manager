@@ -1,7 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="8dbe5dbd-2e96-43fe-a958-7a2a2f7c1985" name="Default Changelist" comment="" />
+    <list default="true" id="8dbe5dbd-2e96-43fe-a958-7a2a2f7c1985" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Database_class.py" beforeDir="false" afterPath="$PROJECT_DIR$/Database_class.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlotCanvas_class.py" beforeDir="false" afterPath="$PROJECT_DIR$/PlotCanvas_class.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Product.xlsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Subwindow_class.py" beforeDir="false" afterPath="$PROJECT_DIR$/Subwindow_class.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/countries.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dent.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pyqt5 excel — kopia.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test.csv" beforeDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -15,9 +27,13 @@
       </list>
     </option>
   </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
   <component name="ProjectId" id="1e30mFIwnkVT2zOowZHi98xH3PO" />
   <component name="PropertiesComponent">
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../Git" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RunDashboard">
@@ -168,6 +184,17 @@
     </task>
     <servers />
   </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
@@ -180,11 +207,6 @@
           <url>file://$PROJECT_DIR$/MyTable_class.py</url>
           <line>60</line>
           <option name="timeStamp" value="2" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/Database_class.py</url>
-          <line>65</line>
-          <option name="timeStamp" value="3" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

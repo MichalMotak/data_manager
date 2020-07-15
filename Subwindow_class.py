@@ -113,7 +113,7 @@ class Subwindow(QMainWindow):
 
     def update_table(self):
         print('update table')
-        text = self.line.text()
+        text = self.el_com_line.text()
         print(text)
         self.database.add_command(text)
         self.database.db_show_data()
