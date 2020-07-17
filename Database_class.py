@@ -1,4 +1,5 @@
 import mysql.connector as sql
+import pandas as pd
 from PyQt5.QtWidgets import *
 from PyQt5.QtWidgets import QTableWidget, QLabel, QComboBox, QApplication, QMainWindow, \
                             QTableWidgetItem, QPushButton, QLineEdit
@@ -45,24 +46,28 @@ class Database():
         # self.mycursor.execute("SELECT * FROM customers")
         # self.mycursor.execute('SELECT * FROM test')
 
-        self.table.setRowCount(0)
-        # self.table.setColumnCount(0)
-        self.table.setColumnCount(len(self.get_db_column_names()))
-
-        for row_data in self.mycursor:
-            # print('row', row_data)
-            row = self.table.rowCount()
-            self.table.insertRow(row)
-            # if len(row_data) > 100:
-            #     self.setColumnCount(len(row_data))
-            for column, stuff in enumerate(row_data):
-                item = QTableWidgetItem(str(stuff))
-                self.table.setItem(row, column, item)
+        xx = pd.read_sql(self.command, self.db)
+        print(xx.head(5))
+        self.table.update_from_df(xx)
+        # self.table.setRowCount(0)
+        # # self.table.setColumnCount(0)
+        # self.table.setColumnCount(len(self.get_db_column_names()))
+        #
+        # for row_data in self.mycursor:
+        #     # print('row', row_data)
+        #     row = self.table.rowCount()
+        #     self.table.insertRow(row)
+        #     # if len(row_data) > 100:
+        #     #     self.setColumnCount(len(row_data))
+        #     for column, stuff in enumerate(row_data):
+        #         item = QTableWidgetItem(str(stuff))
+        #         self.table.setItem(row, column, item)
 
     def add_command(self, text):
         print('add')
-        print(self.mycursor)
-        self.mycursor.execute(text)
+        self.command = text
+        # print(self.mycursor)
+        # self.mycursor.execute(text)
 
 
 
