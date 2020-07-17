@@ -1,20 +1,19 @@
-import mysql.connector as sql
-import PyQt5
-from PyQt5.QtWidgets import *
+# from PyQt5.QtWidgets import *
 from PyQt5.QtWidgets import  QLineEdit, QWidget, QTableWidget,QVBoxLayout, QLabel, QComboBox, QApplication, QMainWindow, \
-                            QTableWidgetItem, QPushButton, QLineEdit
+                            QTableWidgetItem, QPushButton, QLineEdit, QFrame, QGridLayout
 from PyQt5 import QtCore
+
 
 
 
 from Database_class import Database
 
-class Subwindow(QMainWindow):
+class Subwindow_Database(QMainWindow):
     def __init__(self, parent):
         print('subwindow init')
         QWidget.__init__(self)
         self.left, self.top =  300, 200
-        self.width, self.height = 500, 300
+        self.width, self.height = 500, 200
 
         self.title = "SQL Manager"
         self.mw = parent
@@ -75,12 +74,12 @@ class Subwindow(QMainWindow):
         self.b_update_table = QPushButton('show database', self)
         # self.b_update_table.setGeometry(QRect(0, 0, 100, 30))
         self.b_update_table.clicked.connect(lambda: self.update_table())
-        self.b_update_table.setFixedSize(120, 30)
+        # self.b_update_table.setFixedSize(120, 30)
 
         self.b_create_db = QPushButton('create database', self)
         # self.b_load_db.setGeometry(QRect(200, 200, 100, 30))
         self.b_create_db.clicked.connect(lambda: self.create_database())
-        self.b_create_db.setFixedSize(120, 30)
+        # self.b_create_db.setFixedSize(120, 30)
         # self.b_create_db.setAlignment(QtCore.Qt.AlignCenter)
 
 
@@ -91,12 +90,11 @@ class Subwindow(QMainWindow):
         self.el_com_line.setText('SELECT * FROM customers')
         # self.el_com_line.setFixedSize(500,100)
 
-
-        self.layout2.addWidget(self.b_create_db)
-        self.layout2.addWidget(self.b_update_table)
         self.layout2.addWidget(self.l_com_line)
         self.layout2.addWidget(self.el_com_line)
-        #
+        self.layout2.addWidget(self.b_create_db)
+        self.layout2.addWidget(self.b_update_table)
+
 
         self.main_layout.addWidget(self.frame)
         self.main_layout.addWidget(self.frame2)
