@@ -53,21 +53,12 @@ class MyTable(QTableWidget):
         self.show()
         # self.resizeColumnsToContents()
 
-    def load_file(self, file_path):
 
-        ext = os.path.splitext(file_path)[1]
-        print(ext)
+    def update_from_df(self, dataframe):
+        self.dataframe = dataframe
+        self.col_labels = self.dataframe.columns
 
-        print('show data')
-        if ext == '.csv':
-            dataframe = pd.read_csv(file_path)
-        elif ext == '.xlsx':
-            dataframe = pd.read_excel(file_path)
-        else:
-            return None
-        self.col_labels = dataframe.columns
-
-        self.data = dataframe.values
+        self.data = self.dataframe.values
         print(self.data.shape)
 
         self.setRowCount(0)
@@ -81,4 +72,21 @@ class MyTable(QTableWidget):
             #     self.setColumnCount(len(row_data))
             for column, stuff in enumerate(row_data):
                 item = QTableWidgetItem(str(stuff))
-                self.setItem(row,column, item)
+                self.setItem(row, column, item)
+
+    def load_file(self, file_path):
+
+        ext = os.path.splitext(file_path)[1]
+        print(ext)
+
+        print('show data')
+        if ext == '.csv':
+            self.dataframe = pd.read_csv(file_path)
+        elif ext == '.xlsx':
+            self.dataframe = pd.read_excel(file_path)
+        else:
+            return None
+
+        self.update_from_df(self.dataframe)
+
+
