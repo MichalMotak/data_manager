@@ -13,11 +13,14 @@ import csv
 from MyTable_class import MyTable
 from PlotCanvas_class import PlotCanvas
 from MLWidget_class import MLWidget
+from Right_table_class import Right_Table, Right_Table_Widget
 
 
 
 
 class MainWindow(QMainWindow):
+
+
     def __init__(self):
         super(MainWindow, self).__init__()
 
@@ -31,6 +34,8 @@ class MainWindow(QMainWindow):
         self.setGeometry(self.left, self.top, self.width, self.height)
         self.setWindowTitle('File manager')
         self.move_to_center()
+
+
 
         self.table = MyTable(self, 10, 5)
 
@@ -72,6 +77,11 @@ class MainWindow(QMainWindow):
         self.manage_layout_menu.addAction(self.manage_layout_action_MLWidget)
         self.manage_layout_action_MLWidget.setChecked(True)
         self.manage_layout_action_MLWidget.triggered.connect(self.manage_layout_checked_action)
+
+        self.manage_layout_action_right_table = QAction('Right Table', checkable=True)
+        self.manage_layout_menu.addAction(self.manage_layout_action_right_table)
+        self.manage_layout_action_right_table.setChecked(True)
+        self.manage_layout_action_right_table.triggered.connect(self.manage_layout_checked_action)
 
         self.main_layout = QtWidgets.QHBoxLayout(self._main)
 
@@ -117,6 +127,7 @@ class MainWindow(QMainWindow):
         self.pushButton2.setGeometry(QRect(350, 100, 80, 20))
         self.pushButton2.setText('Clear table')
         self.pushButton2.clicked.connect(self.clear_table)
+
         self.button_lay.addWidget(self.pushButton2)
 
         self.le_add_col = QLineEdit(self)
@@ -188,6 +199,37 @@ class MainWindow(QMainWindow):
         self.layout_MLWidget.setContentsMargins(5,5,5,5)
 
 
+        # ============== RIGHT TABLE WIDGET  ================================
+
+
+        self.frame_right_table = QFrame(self)
+        self.frame_right_table.setStyleSheet("QFrame {background-color: rgb(250, 255, 255);"
+                                      "border-width: 1;"
+                                      "border-radius: 3;"
+                                      "border-style: solid;"
+                                      "border-color: rgb(50,50,50)}"
+                                      )
+
+        self.layout_right_table = QGridLayout()
+
+        # self.label = QLabel()
+        # self.label.setAlignment(Qt.AlignCenter)
+        # self.label.setText(' labelllllllllllllllllllll ')
+        #
+        #
+        self.right_table = Right_Table_Widget()
+        # self.b_right_table = QPushButton(self)
+        # self.b_right_table.setText('predict')
+        # self.b_right_table.clicked.connect(self.predict)
+
+
+        self.layout_right_table.addWidget(self.right_table)
+        # self.layout_right_table.addWidget(self.label)
+        # self.layout_right_table.addWidget(self.b_right_table)
+
+
+
+        self.frame_right_table.setLayout(self.layout_right_table)
 
         # ============== FINAL SPLITTER ================================
 
@@ -195,6 +237,7 @@ class MainWindow(QMainWindow):
         self.splitter.addWidget(self.frame_left)
         self.splitter.addWidget(self.frame_center)
         self.splitter.addWidget(self.frame_MLWidget)
+        self.splitter.addWidget(self.frame_right_table)
 
         self.splitter.setStretchFactor(10, 10)
 
@@ -268,6 +311,8 @@ class MainWindow(QMainWindow):
         self.center_lay.addWidget(self.splitter_center)
 
 
+        self.right_table.signal_for_ml_widget.connect(self.ml_widget.get_signal_for_right_table)
+        self.ml_widget.signal_for_right_table.connect(self.right_table.get_signal_for_ml_widget)
 
         self.table.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)  # +++
         self.table.customContextMenuRequested.connect(self.generateMenu)  # +++
@@ -330,6 +375,12 @@ class MainWindow(QMainWindow):
                 self.frame_MLWidget.show()
             else:
                 self.frame_MLWidget.hide()
+
+        elif x == 'Right Table':
+            if is_checked:
+                self.frame_right_table.show()
+            else:
+                self.frame_right_table.hide()
 
     # Menu for right mouse click on cells in table, with functions
 
@@ -649,9 +700,11 @@ class MainWindow(QMainWindow):
     def clear_plot(self):
         self.canv.ax.clear()
 
+
     def clear_table(self):
         print('clear table')
-        self.table.reset()
+        # self.table.reset()
+
 
 
 
@@ -716,3 +769,4 @@ class MainWindow(QMainWindow):
                         else:
                             row_data.append('')
                     writer.writerow(row_data)
+

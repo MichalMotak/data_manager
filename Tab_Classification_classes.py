@@ -118,6 +118,11 @@ class Tab_Decision_Tree_Clas(QWidget):
         print('\n Classification report: \n', classification_report(y_test, y_pred, labels=labels))
 
 
+    def get_parameters(self):
+        print('get parameters from ')
+        print(self.get_parameters.__name__)
+
+
 # Random Forest
 class Tab_Random_Forest_Clas(QWidget):
     def __init__(self):

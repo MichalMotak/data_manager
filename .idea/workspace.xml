@@ -2,23 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="8dbe5dbd-2e96-43fe-a958-7a2a2f7c1985" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/MLWidget_class.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/MainWindow_class.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Tab_Classification_classes.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Tab_Regression_classes.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Upgraded_widgets.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/metrics.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/MainWindow_class.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/PyQt5 excel.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/PyQt5 excel.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Right_table_class.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Database_class.py" beforeDir="false" afterPath="$PROJECT_DIR$/Database_class.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MyTable_class.py" beforeDir="false" afterPath="$PROJECT_DIR$/MyTable_class.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PlotCanvas_class.py" beforeDir="false" afterPath="$PROJECT_DIR$/PlotCanvas_class.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Subwindow_class.py" beforeDir="false" afterPath="$PROJECT_DIR$/Subwindow_class.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/test" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/test.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/test.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MLWidget_class.py" beforeDir="false" afterPath="$PROJECT_DIR$/MLWidget_class.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MainWindow_class.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainWindow_class.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Tab_Classification_classes.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tab_Classification_classes.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />

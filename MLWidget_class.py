@@ -36,6 +36,7 @@ class Tab_classification(QWidget):
 
         self.main_layout = QVBoxLayout(self)
         self.height, self.width,  = 100, 100
+        self.name = 'Classification'
         self.frame = QFrame()
         # self.frame.setStyleSheet("QFrame {background-color: rgb(255, 255, 255);"
         #                         "border-width: 1;"
@@ -154,7 +155,7 @@ class Tab_Regression(Tab_classification):
 
     def create_widgets(self):
         print('add widgets tab regression')
-
+        self.name = 'Regression'
         self.w = Tab_Decision_Tree_Reg()
         self.w2 = Tab_Random_Forest_Reg()
 
@@ -196,6 +197,8 @@ class Tab_Regression(Tab_classification):
 
 
 class MLWidget(QWidget):
+    signal_for_right_table = pyqtSignal(list)
+
     def __init__(self):
         print('subwindow init')
         QWidget.__init__(self)
@@ -262,6 +265,42 @@ class MLWidget(QWidget):
 
         self.show()
 
+    # ======================= SIGNALS ==============================
+
+    @pyqtSlot(str)
+    def get_signal_for_right_table(self, message):
+        print("signal_for_right_table " + message)
+        self.raise_()
+
+    @pyqtSlot()
+    def emit_signal_for_right_table(self):
+        parameters = self.get_parameters()
+        print('emit_signal_for_right_table ', parameters)
+        self.signal_for_right_table.emit(parameters)
+
+
+
+    # ======================= METHODS ==============================
+
+    def get_parameters(self):
+        print('get parameters')
+
+        # parameters from layout_MLWidget_lower
+        cv_type = self.l_combobox_cv_type.getText()
+        number = self.sp.get_value()
+
+        # Tab and Widget, . Classification, Recision Tree
+        _ , current_tab = self.which_tab_is_opened()
+        current_tab_name = current_tab.name
+        _, current_widget = self.which_widget_is_opened()
+        current_widget_name = current_widget.name
+
+        # parameters from Widget
+        current_widget.get_parameters()
+
+        parameters = [cv_type, number, current_tab_name, current_widget_name]
+        print(parameters)
+        return parameters
 
     def which_tab_is_opened(self):
         # this function returns index and object of current opened Tab
@@ -290,19 +329,25 @@ class MLWidget(QWidget):
         return current_widget_index, current_widget
 
     def predict(self):
+        # Emit signal with prediction results etc.
+        self.emit_signal_for_right_table()
 
-        try:
-            current_tab_index, current_tab = self.which_tab_is_opened()
-            current_widget_index, current_widget = self.which_widget_is_opened()
-
-            cv_type = self.l_combobox_cv_type.getText()
-            number = self.sp.get_value()
-
-            # jeśli trzeba coś dodać w predict dla danego tabu to 1 wybór
-            current_tab.predict(current_widget, self.dataframe, cv_type, number)
-            # current_tab.current_widget.predict(tab, out)
-        except:
-            pass
+        # try:
+        #     current_tab_index, current_tab = self.which_tab_is_opened()
+        #     current_widget_index, current_widget = self.which_widget_is_opened()
+        #
+        #     cv_type = self.l_combobox_cv_type.getText()
+        #     number = self.sp.get_value()
+        #
+        #     # jeśli trzeba coś dodać w predict dla danego tabu to 1 wybór
+        #     current_tab.predict(current_widget, self.dataframe, cv_type, number)
+        #     # current_tab.current_widget.predict(tab, out)
+        #
+        #     # check if its needed to update Right Table with results
+        #
+        #
+        # except:
+        #     pass
 
     def set_dataframe(self, df):
         self.dataframe = df
