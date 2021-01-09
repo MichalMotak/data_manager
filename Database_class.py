@@ -14,6 +14,9 @@ class Database():
         self.passwd = passwd
         self.database = database
 
+
+        self.x = 111
+
         self.db = sql.connect(
             host=self.host,  # łaczymy sie jako nasz komputer, localhost
             user=self.user,  # nowy uzytkownik lub ten utworzony przy instalacji
