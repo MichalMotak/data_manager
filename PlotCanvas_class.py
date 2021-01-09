@@ -1,6 +1,7 @@
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import seaborn as sns
+import pandas as pd
 
 class PlotCanvas(FigureCanvas):
 
@@ -17,36 +18,20 @@ class PlotCanvas(FigureCanvas):
         self.setParent(table)
         self.table = table
 
-        # self.setParent(parent)
-
-        # FigureCanvas.setSizePolicy(self,
-        #                            QSizePolicy.Expanding,
-        #                            QSizePolicy.Expanding)
-        # FigureCanvas.updateGeometry(self)
-
 
 
     def plot_indexes(self, t, x, y, h):
 
-        print('plot3')
+        print('plot indexes')
         self.ax.clear()
         print(type(int(x)))
 
-
-        # Dla jednego y
-        # if t == 'Line plot':
-        #     self.ax.plot(self.table.data[:50, int(x)], self.table.data[:50, int(y)])
-        # elif t =='Bar plot':
-        #     self.ax.bar(self.table.data[:50, int(x)], self.table.data[:50, int(y)])
-        # elif t =='Scatter plot':
-        #     self.ax.scatter(self.table.data[:50, int(x)], self.table.data[:50, int(y)])
-        # else:
-        #     None
         c = self.table.col_labels.tolist()
         ys = y.split(',')
         xs = x.split(',')
         hs = h.split(',')
 
+        print(h)
         # ..............................................
         labels = []
         if len(xs) == 1:
@@ -66,6 +51,9 @@ class PlotCanvas(FigureCanvas):
             elif not h:
                 for y in ys:
                     if t == 'Line plot':
+                        x2 = c[int(x)]
+                        y2= c[int(y)]
+                        print(x2,y2)
                         sns.lineplot(x=c[int(x)], y=c[int(y)], data=self.table.dataframe, ax=self.ax)
                     elif t == 'Bar plot':
                         sns.barplot(x = c[int(x)], y = c[int(y)], data = self.table.dataframe, ax = self.ax)
@@ -92,7 +80,7 @@ class PlotCanvas(FigureCanvas):
 
 
 
-            print(labels)
+            print('labels', labels)
             self.ax.set_xlabel(c[int(x)])
             self.ax.set_ylabel(c[int(y)])
             # self.ax.legend(labels = labels)

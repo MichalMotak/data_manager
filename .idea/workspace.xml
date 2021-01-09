@@ -2,17 +2,23 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="8dbe5dbd-2e96-43fe-a958-7a2a2f7c1985" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/MLWidget_class.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/MainWindow_class.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Tab_Classification_classes.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Tab_Regression_classes.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Upgraded_widgets.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/metrics.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/venv/MainWindow_class.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/PyQt5 excel.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/PyQt5 excel.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Database_class.py" beforeDir="false" afterPath="$PROJECT_DIR$/Database_class.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MyTable_class.py" beforeDir="false" afterPath="$PROJECT_DIR$/MyTable_class.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/PlotCanvas_class.py" beforeDir="false" afterPath="$PROJECT_DIR$/PlotCanvas_class.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Product.xlsx" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Subwindow_class.py" beforeDir="false" afterPath="$PROJECT_DIR$/Subwindow_class.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/countries.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dent.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pyqt5 excel — kopia.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/test" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/test.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/test" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/test.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/test.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -33,7 +39,7 @@
   <component name="ProjectId" id="1e30mFIwnkVT2zOowZHi98xH3PO" />
   <component name="PropertiesComponent">
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../PyQt5 projekt exp/double_slider_dialog.py" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RunDashboard">
@@ -48,7 +54,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.Main">
+  <component name="RunManager" selected="Python.main (1)">
     <configuration name="Main" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="PyQt5 excel" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -62,6 +68,48 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Main.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="MainWindow_class" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="PyQt5 excel" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/venv" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/venv/MainWindow_class.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="main (1)" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="PyQt5 excel" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="C:\ProgramData\Anaconda3\python.exe" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -91,27 +139,6 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="pokedex" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="PyQt5 excel" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../Pokedex" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/../Pokedex/pokedex.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <configuration name="pokedex2" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="PyQt5 excel" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -133,41 +160,20 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="tech with tim 3" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="PyQt5 excel" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../SQL/tech with tim 1" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/../SQL/tech with tim 1/tech with tim 3.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <list>
       <item itemvalue="Python.Main" />
-      <item itemvalue="Python.tech with tim 3" />
-      <item itemvalue="Python.pokedex" />
       <item itemvalue="Python.pokedex2" />
       <item itemvalue="Python.main" />
+      <item itemvalue="Python.main (1)" />
+      <item itemvalue="Python.MainWindow_class" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.Main" />
+        <item itemvalue="Python.main (1)" />
         <item itemvalue="Python.main" />
+        <item itemvalue="Python.MainWindow_class" />
+        <item itemvalue="Python.Main" />
         <item itemvalue="Python.pokedex2" />
-        <item itemvalue="Python.pokedex" />
-        <item itemvalue="Python.tech with tim 3" />
       </list>
     </recent_temporary>
   </component>
@@ -189,7 +195,9 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="COLUMN_ORDER" />
+            </State>
           </value>
         </entry>
       </map>
@@ -200,12 +208,12 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/PlotCanvas_class.py</url>
-          <line>4</line>
+          <line>5</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/MyTable_class.py</url>
-          <line>60</line>
+          <line>167</line>
           <option name="timeStamp" value="2" />
         </line-breakpoint>
       </breakpoints>

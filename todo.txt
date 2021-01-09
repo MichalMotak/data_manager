@@ -1,0 +1,103 @@
+
+
+
+#===================================
+# Main Window
+#--------------------------------
+> Menu Bar
+    > File
+        > Load File
+        > Save File
+    > Database
+        > add database
+> Table
+> Table UI
+    > Clear table button
+> Canvas Ploter
+> Plot UI
+    > EditLines for X,Y axis, hue
+        > allows to write column index or name
+    > RadioButton changing index to name and other way
+    > ComboBox choosing plot type(line, bar, scatter)
+    > Plot button
+    > Clear plot button
+
+
+#===================================
+# Table
+#--------------------------------
+# Table menu pod PPM, tylko na komórce
+# dodawanie kolumn, wierszy w środku, pod PPM
+# czyszczenie danych, kolumn, wierszy
+# usuwanie kolumn, wierszy
+# dodawanie column do xaxis, yaxis, hue
+
+
+# ===================================
+# add Database Subwindow
+#- - - - - - - - - -----------------
+# Host, user, passwd, database
+# Create Database button
+# LineEdit do komend, strzałka góra/dół zmienia komendy z listy 3 poprzednich.
+# Execute Comman button
+
+
+#===================================
+# MLWidget
+#--------------------------------
+# Tab 1
+# Klasyfikacja
+# Decision Tree Clas
+# Random Forest Clas
+#
+#
+#
+#
+#
+#
+#
+#
+
+
+# Tab 2
+# Regresja
+# Decision Tree Reg
+# Random Forest Reg
+#
+#
+#
+#
+#
+#
+#
+#
+#
+
+#  ##############       To do     #################
+# =========== Table ==============
+# dodawanie nowych wierszy, column w database
+# usuwanie headera podczas kolumny
+#
+#
+#
+#
+#
+#
+
+# =========== Plot ==============
+# dodatkowe wykresy
+# zamiana X axis i Y axis ( jakaś strzałka, przycisk pomiędzy)
+#
+#
+#
+#
+#
+
+# =========== ML Widget ==============
+# dodanie nowych algorytmów, ogarnięcie kodu dziedziczenia itd.
+
+
+
+# =========== Nowe ==============
+# Widget do zapisu wyników predykcji
+# może jakieś dashboardy z wybranymi wykresami, wynikami?

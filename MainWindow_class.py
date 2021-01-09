@@ -14,12 +14,15 @@ from MyTable_class import MyTable
 from PlotCanvas_class import PlotCanvas
 from MLWidget_class import MLWidget
 
+
+
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
 
         self.left, self.top  = 100, 100
-        self.height, self.width,  = 500, 1600
+        self.height, self.width,  = 800, 1600
 
         self.UI()
         self.show()
@@ -38,8 +41,6 @@ class MainWindow(QMainWindow):
         self.canv = PlotCanvas(self.table, 5, 3)
 
 
-        # self.pushButton2 = QPushButton(self)
-
         self.menubar = self.menuBar()
         self.File_menu = self.menubar.addMenu('&File')
 
@@ -52,12 +53,32 @@ class MainWindow(QMainWindow):
         self.load_file_action.triggered.connect(lambda:self.load_file_act())
         self.save_file_action.triggered.connect(lambda: self.save_file_act())
 
-        # self.Plotting_menu = self.menubar.addMenu('&Plot')
 
+        # Menu Manage Layout
+
+        self.manage_layout_menu = self.menubar.addMenu('&Manage layout')
+
+        self.manage_layout_action_table = QAction('Table', checkable=True)
+        self.manage_layout_menu.addAction(self.manage_layout_action_table)
+        self.manage_layout_action_table.setChecked(True)
+        self.manage_layout_action_table.triggered.connect(self.manage_layout_checked_action)
+
+        self.manage_layout_action_plot = QAction('Plot', checkable=True)
+        self.manage_layout_menu.addAction(self.manage_layout_action_plot)
+        self.manage_layout_action_plot.setChecked(True)
+        self.manage_layout_action_plot.triggered.connect(self.manage_layout_checked_action)
+
+        self.manage_layout_action_MLWidget = QAction('ML Widget', checkable=True)
+        self.manage_layout_menu.addAction(self.manage_layout_action_MLWidget)
+        self.manage_layout_action_MLWidget.setChecked(True)
+        self.manage_layout_action_MLWidget.triggered.connect(self.manage_layout_checked_action)
 
         self.main_layout = QtWidgets.QHBoxLayout(self._main)
 
         # self.frame_up = QFrame(self)
+
+
+        # ========================== Menu Database
 
         self.Database_menu = self.menubar.addMenu('&Database')
         self.add_db_action = QAction('add database')
@@ -74,6 +95,7 @@ class MainWindow(QMainWindow):
                                       "border-color: rgb(50,50,50)}"
                                       )
 
+        # ======================= Left upper frame
 
         self.frame_button_lay = QFrame(self)
         # self.frame_button_lay.setStyleSheet("QFrame {} ")
@@ -107,6 +129,8 @@ class MainWindow(QMainWindow):
         self.frame_button_lay.setLayout(self.button_lay)
 
 
+        # =================== Layout of frame and table on the left
+
         self.hor_lay_left = QVBoxLayout()
         self.hor_lay_left.addWidget(self.frame_button_lay)
         self.hor_lay_left.addWidget(self.table)
@@ -116,48 +140,30 @@ class MainWindow(QMainWindow):
         # table_width = self.frame_left.frameGeometry().width()
         # table_height = self.frame_left.frameGeometry().height()
         # print('d', table_width, table_height)
-        self.frame_left.setMinimumWidth(self.width/4)
+        self.frame_left.setMinimumWidth(self.width/6)
 
 
 
+        # ================== Center Frame and Layout
 
-        self.frame_right = QFrame(self)
-        self.frame_2 = QFrame(self)
-        self.layout = QGridLayout()
-        self.frame_2.setLayout(self.layout)
-
-        self.frame_right.setStyleSheet("QFrame {background-color: rgb(255, 255, 255);"
+        self.frame_center = QFrame(self)
+        self.frame_center.setStyleSheet("QFrame {background-color: rgb(255, 255, 255);"
                                 "border-width: 1;"
                                 "border-radius: 3;"
                                 "border-style: solid;"
-                                "border-color: rgb(50,50,50);"
-                                       
-                                       "}")
+                                "border-color: rgb(50,50,50)}")
+        self.frame_center.setMinimumWidth(self.width / 6)
 
-        self.frame_right.setMinimumWidth(self.width / 3)
-        # self.p = QPushButton(self)
-        # self.p.setGeometry(QRect(350, 100, 80, 20))
-        # self.p.setText('Show data')
-        # self.frame_2.addWidget(self.p)
+        self.center_lay = QVBoxLayout(self)
 
 
-
-        self.right_lay = QVBoxLayout(self)
-        # self.right_lay.addWidget(self.canv)
-        # self.right_lay.addWidget(self.frame_2)
-        self.splitter_right = QSplitter(Qt.Vertical)
-        self.splitter_right.addWidget(self.canv)
-        self.splitter_right.addWidget(self.frame_2)
-        self.right_lay.addWidget(self.splitter_right)
-
-
-        self.frame_right.setLayout(self.right_lay)
-        # self.frame_right.setSizePolicy(QSizePolicy.Ignored,QSizePolicy.Maximum)
-        # table_width = self.frame_right.frameGeometry().width()
-        # table_height = self.frame_right.frameGeometry().height()
+        self.frame_center.setLayout(self.center_lay)
+        # self.frame_center.setSizePolicy(QSizePolicy.Ignored,QSizePolicy.Maximum)
+        # table_width = self.frame_center.frameGeometry().width()
+        # table_height = self.frame_center.frameGeometry().height()
         # print('d', table_width, table_height)
-        # self.frame_right.setMinimumWidth(table_width)
-        # self.frame_right.setMinimumHeight(table_height)
+        # self.frame_center.setMinimumWidth(table_width)
+        # self.frame_center.setMinimumHeight(table_height)
         #
 
 
@@ -166,45 +172,41 @@ class MainWindow(QMainWindow):
         self.layout_MLWidget = QGridLayout()
 
         self.ml_widget = MLWidget()
+
         self.layout_MLWidget.addWidget(self.ml_widget)
 
-        self.frame_MLWidget.setStyleSheet("QFrame {background-color: rgb(255, 255, 255);"
-                                "border-width: 1;"
-                                "border-radius: 3;"
-                                "border-style: solid;"
-                                "border-color: rgb(50,50,50)}"
-                                )
-
+        self.frame_MLWidget.setStyleSheet("QFrame {background-color: rgb(250, 255, 255);"
+                                      "border-width: 1;"
+                                      "border-radius: 3;"
+                                      "border-style: solid;"
+                                      "border-color: rgb(50,50,50)}"
+                                      )
 
         self.frame_MLWidget.setLayout(self.layout_MLWidget)
-        self.frame_MLWidget.setMinimumWidth(self.width / 4)
+        self.frame_MLWidget.setMinimumWidth(self.width / 6)
+
+        self.layout_MLWidget.setContentsMargins(5,5,5,5)
 
 
-        self.frame_MLWidget_lower = QFrame()
-        self.layout_MLWidget_lower = QGridLayout()
-        self.label222 = QLabel(self)
-        self.label222.setText('tutaj coś wstaw')
 
-        self.label333 = QPushButton(self)
-        self.label333.setText('tutaj coś wstaw')
-
-        self.layout_MLWidget_lower.addWidget(self.label222)
-        self.layout_MLWidget_lower.addWidget(self.label333)
-
-        self.frame_MLWidget_lower.setLayout(self.layout_MLWidget_lower)
-
-        self.layout_MLWidget.addWidget(self.frame_MLWidget_lower)
-
-
+        # ============== FINAL SPLITTER ================================
 
         self.splitter = QSplitter(Qt.Horizontal)
         self.splitter.addWidget(self.frame_left)
-        self.splitter.addWidget(self.frame_right)
+        self.splitter.addWidget(self.frame_center)
         self.splitter.addWidget(self.frame_MLWidget)
 
         self.splitter.setStretchFactor(10, 10)
 
         self.main_layout.addWidget(self.splitter)
+
+
+        # =============== Frame and layout under canvas ======================================
+
+        self.under_canv_layout = QGridLayout()
+
+        self.frame_under_canv = QFrame(self)
+        self.frame_under_canv.setLayout(self.under_canv_layout)
 
         self.label_pt = QLabel(self)
         self.label_pt.setText('Plot type')
@@ -245,21 +247,27 @@ class MainWindow(QMainWindow):
         self.checkbox =QCheckBox("col_names/indexes ", self)
         self.checkbox.stateChanged.connect(lambda:self.checkbox_changed(self.checkbox))
 
-        self.layout.addWidget(self.label_pt, 0, 1)
-        self.layout.addWidget(self.label_x, 0, 2)
-        self.layout.addWidget(self.label_y, 0, 3)
-        self.layout.addWidget(self.label_h, 0, 4)
-        self.layout.addWidget(self.b_plot, 0, 5)
-        self.layout.addWidget(self.b_clear_plot, 0, 6)
+        self.under_canv_layout.addWidget(self.label_pt, 0, 1)
+        self.under_canv_layout.addWidget(self.label_x, 0, 2)
+        self.under_canv_layout.addWidget(self.label_y, 0, 3)
+        self.under_canv_layout.addWidget(self.label_h, 0, 4)
+        self.under_canv_layout.addWidget(self.b_plot, 0, 5)
+        self.under_canv_layout.addWidget(self.b_clear_plot, 0, 6)
+        self.under_canv_layout.addWidget(self.cb_plot_type, 1, 1)
+        self.under_canv_layout.addWidget(self.le_x_axis, 1, 2)
+        self.under_canv_layout.addWidget(self.le_y_axis, 1, 3)
+        self.under_canv_layout.addWidget(self.le_hue, 1, 4)
+        self.under_canv_layout.addWidget(self.checkbox, 1,5)
 
 
-        self.layout.addWidget(self.cb_plot_type, 1, 1)
-        self.layout.addWidget(self.le_x_axis, 1, 2)
-        self.layout.addWidget(self.le_y_axis, 1, 3)
-        self.layout.addWidget(self.le_hue, 1, 4)
-        self.layout.addWidget(self.checkbox, 1,5)
+        # ================= Center splitter between canv and frame under canv =======================
 
-        self.frame_2.setLayout(self.layout)
+        self.splitter_center = QSplitter(Qt.Vertical)
+        self.splitter_center.addWidget(self.canv)
+        self.splitter_center.addWidget(self.frame_under_canv)
+        self.center_lay.addWidget(self.splitter_center)
+
+
 
         self.table.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)  # +++
         self.table.customContextMenuRequested.connect(self.generateMenu)  # +++
@@ -267,12 +275,68 @@ class MainWindow(QMainWindow):
 
         self.show()
 
+    def predict(self):
+        print('predict')
+        # self.frame_center.show()
+
+        combobox_output = self.combo_box_Y.currentText()
+        print(combobox_output)
+        self.ml_widget.predict(self.table, combobox_output)
+
+    def manage_layout_checked_action(self):
+
+        # dokończyć implementacje layout managment - znikanie widgetów itd.
+
+        # x = self.sender().text()
+        sender = self.sender()
+        print(sender)
+        x = sender.text()
+        print(x)
+        is_checked = sender.isChecked()
+        print(is_checked)
+
+        # print(self.main_layout.count())
+        # for i in range(self.main_layout.count()):
+        #     print(self.main_layout.itemAt(i))
+        #
+        # spliter = self.main_layout.itemAt(0)
+        # num_of_splitter_widgets = spliter.widget().count()
+        # print(num_of_splitter_widgets)
+        # print(spliter)
+        # # print(spliter.widget())
+        # # print(spliter.widget().widget(0))
+        #
+        # spliter_widgets_list = [spliter.widget().widget(i) for i in range(num_of_splitter_widgets)]
+        # print(spliter_widgets_list)
+        #
+        # spliter.removeWidget(spliter_widgets_list[0])
+        # spliter_widgets_list[0].setParent(None)
+        # spliter_widgets_list[0].deleteLater()
+
+        if x == 'Plot':
+            if is_checked:
+                self.frame_center.show()
+            else:
+                self.frame_center.hide()
+
+        elif x == 'Table':
+            if is_checked:
+                self.frame_left.show()
+            else:
+                self.frame_left.hide()
+
+        elif x == 'ML Widget':
+            if is_checked:
+                self.frame_MLWidget.show()
+            else:
+                self.frame_MLWidget.hide()
 
     # Menu for right mouse click on cells in table, with functions
 
     def eventFilter(self, source, event):
-        if(event.type() == QEvent.MouseButtonPress and event.buttons() == Qt.RightButton
-           and source is self.table.viewport()):
+        if(event.type() == QEvent.MouseButtonPress
+            and event.buttons() == Qt.RightButton
+            and source is self.table.viewport()):
 
             item = self.table.itemAt(event.pos())
 
@@ -306,7 +370,7 @@ class MainWindow(QMainWindow):
                 self.submenu_add_data.addAction(self.act4)
 
 
-                self.submenu_clear_data = QMenu('Clear Data',self)
+                self.submenu_clear_data = QMenu('Clear data',self)
                 self.act5 = QAction('Clear column')
                 self.act6 = QAction('Clear row')
                 self.act5.triggered.connect(lambda: self.clear_column(item))
@@ -314,7 +378,7 @@ class MainWindow(QMainWindow):
                 self.submenu_clear_data.addAction(self.act5)
                 self.submenu_clear_data.addAction(self.act6)
 
-                self.submenu_del_data = QMenu('Delete Data', self)
+                self.submenu_del_data = QMenu('Delete data', self)
                 self.act7 = QAction('Delete column')
                 self.act8 = QAction('Delete row')
                 self.act7.triggered.connect(lambda: self.delete_column(item))
@@ -322,7 +386,7 @@ class MainWindow(QMainWindow):
                 self.submenu_del_data.addAction(self.act7)
                 self.submenu_del_data.addAction(self.act8)
 
-                self.act9 = QAction('Clear selected data')
+                self.act9 = QAction('Clear cell')
                 self.act9.triggered.connect(lambda: self.clear_sel_data())
                 self.submenu_clear_data.addAction(self.act9)
 
@@ -419,7 +483,7 @@ class MainWindow(QMainWindow):
         print(l)
         text = self.le_y_axis.text()
         if text:
-            text = text +  ',' +l
+            text = text +  ',' + l
         else:
             text = text + l
         print(text)
@@ -570,11 +634,17 @@ class MainWindow(QMainWindow):
         # self.tableview.setModel(self.table)
         # print(self.table.selectedRanges())
 
-        self.bbb = QPushButton(self)
-        self.bbb.setText('bbb')
-        self.bbb = Subwindow_Database(self)
+        # self.bbb = QPushButton(self)
+        # self.bbb.setText('bbb')
+        # self.bbb = Subwindow_Database(self)
 
-        self.hor_lay_left.addWidget(self.bbb)
+        # self.hor_lay_left.addWidget(self.bbb)
+
+
+        self.center_lay.removeWidget(self.canv)
+        self.canv.deleteLater()
+        self.canv.setParent(None)
+
 
     def clear_plot(self):
         self.canv.ax.clear()
@@ -616,7 +686,13 @@ class MainWindow(QMainWindow):
         self.file_path = path[0]
         print(self.file_path)
         self.table.load_file(self.file_path)
+        print('ddd', self.table.col_labels)
 
+        # self.combo_box_Y.clear()
+        # self.combo_box_Y.addItems(self.table.col_labels.tolist())
+        print(self.table.dataframe)
+        self.ml_widget.set_dataframe(self.table.dataframe)
+        self.ml_widget.set_col_labels(self.table.col_labels)
 
 
     def save_file_act(self):

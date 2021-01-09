@@ -26,6 +26,18 @@ class Database():
 
         self.table = parent
 
+        self.commands_list = []
+
+
+    def handle_commands_list(self):
+        print('handle commands list')
+        len_ = len(self.commands_list)
+        if len_ == 3:
+            return None
+        else:
+            self.commands_list.append(self.command)
+
+
 
 
 
@@ -44,27 +56,36 @@ class Database():
         print(self.mycursor)
         # mycursor = self.db.cursor()
         # self.mycursor.execute("SELECT * FROM customers")
-        # self.mycursor.execute('SELECT * FROM test')
 
-        xx = pd.read_sql(self.command, self.db)
-        print(xx.head(5))
-        self.table.update_from_df(xx)
-        # self.table.setRowCount(0)
-        # # self.table.setColumnCount(0)
-        # self.table.setColumnCount(len(self.get_db_column_names()))
-        #
-        # for row_data in self.mycursor:
-        #     # print('row', row_data)
-        #     row = self.table.rowCount()
-        #     self.table.insertRow(row)
-        #     # if len(row_data) > 100:
-        #     #     self.setColumnCount(len(row_data))
-        #     for column, stuff in enumerate(row_data):
-        #         item = QTableWidgetItem(str(stuff))
-        #         self.table.setItem(row, column, item)
+
+        if self.command[:6] == 'SELECT':
+            print('select command')
+            xx = pd.read_sql(self.command, self.db)
+            self.handle_commands_list()
+            print(xx.head(5))
+            self.table.update_from_df(xx)
+        else:
+            print('d')
+            self.mycursor.execute(self.command)
+            self.handle_commands_list()
+            self.db.commit()
+            # self.table.setRowCount(0)
+            # # self.table.setColumnCount(0)
+            # self.table.setColumnCount(len(self.get_db_column_names()))
+            #
+            # for row_data in self.mycursor:
+            #     # print('row', row_data)
+            #     row = self.table.rowCount()
+            #     self.table.insertRow(row)
+            #     # if len(row_data) > 100:
+            #     #     self.setColumnCount(len(row_data))
+            #     for column, stuff in enumerate(row_data):
+            #         item = QTableWidgetItem(str(stuff))
+            #         self.table.setItem(row, column, item)
 
     def add_command(self, text):
         print('add')
+        print(text)
         self.command = text
         # print(self.mycursor)
         # self.mycursor.execute(text)

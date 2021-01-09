@@ -8,7 +8,9 @@ import os.path
 class MyTable(QTableWidget):
     resized = QtCore.pyqtSignal()
     def __init__(self, mainw, r ,c ):
-        super().__init__(r,c )
+        super().__init__(r,c)
+        self.rows = r
+        self.columns = c
         # print('mywindow', mainw.data.shape)
         # self.data = mainw.data
         print(mainw)
@@ -20,8 +22,6 @@ class MyTable(QTableWidget):
         self.table_test = 'table_test'
 
         self.resized.connect(self.resized_fun)
-
-
         self.show()
 
     def resizeEvent(self, event):
@@ -39,16 +39,13 @@ class MyTable(QTableWidget):
         for item in self.selectedItems():
             print(item.text())
         print('c')
-        # item = self.currentItem()
-        #
-        # # item = self.item(2,2)
-        # print(item)
-        # print(item.text())
+
 
     def set_column_labels(self, list):
         print('sel column labels')
         print(list)
-        self.c = len(list)
+        self.col_labels = list
+        print(self.col_labels)
         self.setHorizontalHeaderLabels(list)
         self.show()
         # self.resizeColumnsToContents()
@@ -57,6 +54,7 @@ class MyTable(QTableWidget):
     def update_from_df(self, dataframe):
         self.dataframe = dataframe
         self.col_labels = self.dataframe.columns
+
 
         self.data = self.dataframe.values
         print(self.data.shape)
@@ -73,6 +71,94 @@ class MyTable(QTableWidget):
             for column, stuff in enumerate(row_data):
                 item = QTableWidgetItem(str(stuff))
                 self.setItem(row, column, item)
+
+
+    def add_row_bottom(self, row):
+
+        df1 = self.dataframe.iloc[:row+1,:]  # split df
+        df2 = self.dataframe.iloc[row+1:,:]
+        df1 = df1.append(pd.Series(), ignore_index = True) # add empty row
+        ind = df2.index.values.tolist()
+        ind = [i+1 for i in ind]
+        df2 = df2.set_index([ind])
+        final_df = pd.concat([df1,df2], ignore_index = True)  # concat
+
+        self.update_from_df(final_df)
+
+    def add_col_right(self, col, header_name):
+        print('add col right')
+
+        final_df = self.dataframe
+        final_df[header_name] = ""
+        col = col+1
+        column = self.dataframe.columns.tolist()
+        c1 = column[:col]
+        c1.append(header_name)
+        c3 = column[col:-1]
+        column = c1 + c3
+        final_df = final_df[column]
+
+        self.update_from_df(final_df)
+
+
+
+    def clear_selected_data(self):
+        items = self.selectedItems()
+        for c in items:
+            row = c.row()
+            col = c.column()
+            item = self.takeItem(row,col)
+            item.setText('')
+
+    def clear_column(self, col):
+        print(col)
+        rows = self.rowCount()
+        print(rows)
+
+        for row in range(rows):
+            item = self.takeItem(row, col)
+            item.setText('')
+
+    def clear_row(self, row):
+        print(row)
+        columns = self.columnCount()
+
+        for col in range(columns):
+            item = self.takeItem(row, col)
+            item.setText('')
+
+
+    def sort_columns(self, columns_l, type):
+
+        print(columns_l)
+        c = self.col_labels.tolist()
+        columns_l = [c[i] for i in columns_l]
+        print(columns_l)
+
+
+        if type == 'ascending':
+            asc = True
+            print('asc')
+        elif type == 'descending':
+            asc = False
+            print('desc')
+
+
+        df = self.dataframe.sort_values(by=columns_l, ascending=asc)
+        print('d')
+        self.update_from_df(df)
+
+
+
+    def reset(self):
+        self.setRowCount(0)
+        self.setColumnCount(0)
+        self.setRowCount(self.rows)
+        self.setColumnCount(self.columns)
+        # self.update()
+
+
+
 
     def load_file(self, file_path):
 

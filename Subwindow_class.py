@@ -71,7 +71,7 @@ class Subwindow_Database(QMainWindow):
         self.frame2 = QFrame()
         self.frame2.setLayout(self.layout2)
         #
-        self.b_update_table = QPushButton('show database', self)
+        self.b_update_table = QPushButton('Execute command', self)
         # self.b_update_table.setGeometry(QRect(0, 0, 100, 30))
         self.b_update_table.clicked.connect(lambda: self.update_table())
         # self.b_update_table.setFixedSize(120, 30)
@@ -83,15 +83,75 @@ class Subwindow_Database(QMainWindow):
         # self.b_create_db.setAlignment(QtCore.Qt.AlignCenter)
 
 
+
+
+        class LE(QLineEdit):
+
+            # klasa jest zrobiona aby keyPressEvent umozliwiał wpisanie znaków do LE
+
+            def __init__(self, parent):
+                QLineEdit.__init__(self)
+                self.setText('SELECT * FROM customers')
+                self.sw = parent
+
+                self.i = 2
+
+            def keyPressEvent(self, event):
+                super(LE, self).keyPressEvent(event)
+                print(event.key())
+                print(self.cursorPosition())
+                # 16777235 gora
+                # 16777237 dół
+                curr_text = self.text()
+                print(len(curr_text))
+                # if self.cursorPosition() == 0:
+
+                if len(self.sw.database.commands_list) == 3:
+
+                    if event.key() == 16777235: # gorna strzałka
+                        print('gora')
+                        if (self.i-1) < 0:
+                            None
+                        else:
+                            self.i = self.i - 1
+
+                            text = self.sw.database.commands_list[self.i]
+                            print('i, ', self.i)
+                            print('text, ', text)
+                            self.setText(text)
+
+                            print(self.sw.database.commands_list)
+
+                    elif event.key() == 16777237:
+                        print('doł')
+                        if (self.i+1) > 2:
+                            None
+                        else:
+                            self.i = self.i + 1
+
+                            text = self.sw.database.commands_list[self.i]
+                            print('i, ', self.i)
+                            print('text, ', text)
+                            self.setText(text)
+
+                            print(self.sw.database.commands_list)
+
+
+
+
+
         self.l_com_line = QLabel(self)
         self.l_com_line.setText('Command line')
-        self.el_com_line = QLineEdit(self)
+        # self.el_com_line = QLineEdit(self)
         # self.line.setGeometry(QRect(50, 50, 300, 50))
-        self.el_com_line.setText('SELECT * FROM customers')
+        # self.el_com_line.setText('SELECT * FROM customers')
+        # self.el_com_line.keyPressEvent = self.keyPressEvent
         # self.el_com_line.setFixedSize(500,100)
 
+        self.le_com_line = LE(self)
+
         self.layout2.addWidget(self.l_com_line)
-        self.layout2.addWidget(self.el_com_line)
+        self.layout2.addWidget(self.le_com_line)
         self.layout2.addWidget(self.b_create_db)
         self.layout2.addWidget(self.b_update_table)
 
@@ -109,9 +169,17 @@ class Subwindow_Database(QMainWindow):
         self.setFixedSize(self.size())
         self.show()
 
+
+
+    # def keyPressEvent(self, event):
+    #     print(event.text())
+    #
+    # def fun1(self):
+    #     print('fun1')
+
     def update_table(self):
         print('update table')
-        text = self.el_com_line.text()
+        text = self.le_com_line.text()
         print(text)
         self.database.add_command(text)
         self.database.db_show_data()
@@ -129,10 +197,4 @@ class Subwindow_Database(QMainWindow):
 
         self.database = Database(self.mw.table, host=host, user=user,
                                  passwd=passwd, database=database)
-
-        # self.database.db_show_data()
-        # col = self.database.get_db_column_names()
-        # print(col)
-        # self.mw.table.set_column_labels(col)
-
 
