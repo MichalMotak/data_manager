@@ -78,8 +78,8 @@ class Tab_classification(QWidget):
         self.setLayout(self.main_layout)
 
     def create_widgets(self):
-        self.w = Tab_Random_Forest_Clas()
-        self.w2 = Tab_Decision_Tree_Clas()
+        self.w = Random_Forest_Clas_Widget('Random Forest')
+        self.w2 = Decision_Tree_Clas_Widget('Decision Tree')
 
         self.radiobutton = QRadioButton("")
         self.radiobutton.widget = self.w
@@ -148,6 +148,16 @@ class Tab_classification(QWidget):
         self.l_combobox_prediction.clear()
         self.l_combobox_prediction.addItems(col_labels)
 
+    def get_parameters(self):
+        print('get parameters ' + self.name)
+        metrics = self.l_combobox_metrics.getText()
+        metrics = list(metrics.split(', '))
+        predict_label = self.l_combobox_prediction.getText()
+
+        parameters = predict_label
+        return parameters
+
+
 
 class Tab_Regression(Tab_classification):
     def __init__(self):
@@ -197,7 +207,7 @@ class Tab_Regression(Tab_classification):
 
 
 class MLWidget(QWidget):
-    signal_for_right_table = pyqtSignal(list)
+    signal_for_right_table = pyqtSignal(tuple)
 
     def __init__(self):
         print('subwindow init')
@@ -295,12 +305,43 @@ class MLWidget(QWidget):
         _, current_widget = self.which_widget_is_opened()
         current_widget_name = current_widget.name
 
-        # parameters from Widget
-        current_widget.get_parameters()
+        lens = []
 
-        parameters = [cv_type, number, current_tab_name, current_widget_name]
+        parameters = [current_tab_name, current_widget_name, cv_type, number]
+        parameters_labels = ['Algorithm Type', 'Algoritm name', 'CV type', 'CV number par']
+        lens.append(len(parameters_labels)+1)
+
+        # parameters from Tab
+        tab_par = current_tab.get_parameters()
+        parameters_labels.append('Precition')
+        parameters.append(tab_par)
+        print('tab par: ', tab_par)
+
+        # parameters from Widget
+        widget_par, widget_labels = current_widget.get_parameters(as_list=True, return_labels = True)
+        parameters_labels.extend(widget_labels)
+        parameters.extend(widget_par)
+        print('widget par :', widget_par)
+
+        # scores from Widget
+        scores_dict = current_widget.get_last_results()
+        print('d')
+        scores_keys = list(scores_dict.keys())
+        scores_values = list(scores_dict.values())
+        print(scores_dict)
+        # print(scores_keys)
+        # print(scores_values)
+        parameters_labels.extend(scores_keys)
+        parameters.extend(scores_values)
+
         print(parameters)
-        return parameters
+
+        lens.append(len(widget_labels))
+        lens.append(len(scores_keys))
+        # lens = [len(parameters_labels)+1, len(widget_labels), len(scores_keys)]
+        print('lens : ', lens)
+
+        return (parameters, parameters_labels, lens)
 
     def which_tab_is_opened(self):
         # this function returns index and object of current opened Tab
@@ -330,24 +371,27 @@ class MLWidget(QWidget):
 
     def predict(self):
         # Emit signal with prediction results etc.
+
+        try:
+            current_tab_index, current_tab = self.which_tab_is_opened()
+            current_widget_index, current_widget = self.which_widget_is_opened()
+
+            cv_type = self.l_combobox_cv_type.getText()
+            number = self.sp.get_value()
+
+            # jeśli trzeba coś dodać w predict dla danego tabu to 1 wybór
+            current_tab.predict(current_widget, self.dataframe, cv_type, number)
+            # current_tab.current_widget.predict(tab, out)
+
+            # check if its needed to update Right Table with results
+
+
+        except:
+            pass
+
         self.emit_signal_for_right_table()
 
-        # try:
-        #     current_tab_index, current_tab = self.which_tab_is_opened()
-        #     current_widget_index, current_widget = self.which_widget_is_opened()
-        #
-        #     cv_type = self.l_combobox_cv_type.getText()
-        #     number = self.sp.get_value()
-        #
-        #     # jeśli trzeba coś dodać w predict dla danego tabu to 1 wybór
-        #     current_tab.predict(current_widget, self.dataframe, cv_type, number)
-        #     # current_tab.current_widget.predict(tab, out)
-        #
-        #     # check if its needed to update Right Table with results
-        #
-        #
-        # except:
-        #     pass
+
 
     def set_dataframe(self, df):
         self.dataframe = df
