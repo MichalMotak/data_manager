@@ -7,6 +7,7 @@
 > Menu Bar
     > File
         > Load File
+        zapis plików .csv, .xslx, .json
         > Save File
     > Database
         > add database
@@ -41,61 +42,155 @@
 # LineEdit do komend, strzałka góra/dół zmienia komendy z listy 3 poprzednich.
 # Execute Comman button
 
+# ===================================
+# Plot Canvas
+#- - - - - - - - - -----------------
+#
+# Wykresy = relplot
+
+Caterogical data  https://seaborn.pydata.org/tutorial/categorical.html
+    Categorical scatterplots:
+        stripplot, swarmplot
+    Categorical distribution plots:
+        boxplot, violinplot, boxenplot
+    Categorical estimate plots:
+        pointplot, barplot, countplot
+    
+    u wszystkich - dodge, color, palette
+
+    # wspólne size, edgecolor, linewidth
+    stripplot (X lub X,Y)
+        linewidth
+        size
+        jitter
+    swarmplot (X lub X,Y)
+        linewidth
+        size
+
+    # wspólne linewidth, saturation
+    boxplot (X lub X,Y)
+        whis
+        width
+        fliersize
+        
+    violinplot (X lub X,Y)
+        bw - scott silverman
+        cut
+        scale - area count width
+        gridsize
+        inner - box quartile point stick
+        split
+        
+    boxenplot (X lub X,Y)
+        k_depth - tukey, proportion, trsutworthy, fully
+        outlier_prop
+        trust alpha
+        showfliers
+        width
+        scale
+
+
+    pointplot (X,Y)
+        estimator
+        ci
+        units
+        seed
+        capsize
+        errwidth
+        n_boot
+    barplot (X,Y)
+        estimator
+        ci
+        units
+        seed
+        capsize 
+        errwidth
+        n_boot
+            saturation
+
+
+    countplot (X lub Y)
+        saturation
+        linewidth
+
+
+
+Visualizing distributions of data https://seaborn.pydata.org/tutorial/distributions.html
+    distplot, jointplot, pairplot
+
+    distplot: https://seaborn.pydata.org/generated/seaborn.displot.html#seaborn.displot
+        X lub X,Y
+        kind - hist, kde, ecdf,
+        rug - dodatkowo rugplot 
+        bins 
+        binwidth
+        log scale?
+        multiple= dodge,stack
+
+    jointplot https://seaborn.pydata.org/generated/seaborn.jointplot.html#seaborn.jointplot
+        X i Y
+        kind - reg, hist, hex
+
+    pairplot 
+
+Visualizing statistical relationships https://seaborn.pydata.org/tutorial/relational.html
+    scatterplot, lineplot
+
 
 #===================================
-# MLWidget
-#--------------------------------
-# Tab 1
-# Klasyfikacja
-# Decision Tree Clas
-# Random Forest Clas
-#
-#
-#
-#
-#
-#
-#
-#
+**** MLWidget ****
+
+===== Cross Validation type ComboBox
+    Cross Validation
+    K-Fold
+
+===== Predict button
+
+===== ML Widget Tab
+
+    ***** Tab 1 ****
+    Klasyfikacja
+    Decision Tree Clas
+    Random Forest Clas
 
 
-# Tab 2
-# Regresja
-# Decision Tree Reg
-# Random Forest Reg
-#
-#
-#
-#
-#
-#
-#
-#
-#
+    ***** Tab 2 ****
+    Regresja
+    Decision Tree Reg
+    Random Forest Reg
+
+    ==== Linear Regression
+    Linear Regression
+    Ridge - alpha
+    Lasso
+    Elastic-Net
+
+
+
+#===================================
+**** Right Table ****
 
 #  ##############       To do     #################
 # =========== Table ==============
-# dodawanie nowych wierszy, column w database
-# usuwanie headera podczas kolumny
+# pandas describe, jako dodatkowa mała tabela pod spodem?
 #
 #
-#
-#
-#
-#
+
 
 # =========== Plot ==============
-# dodatkowe wykresy
-# zamiana X axis i Y axis ( jakaś strzałka, przycisk pomiędzy)
+# 
+# 
+# 
 #
-#
-#
-#
-#
+
 
 # =========== ML Widget ==============
-# dodanie nowych algorytmów, ogarnięcie kodu dziedziczenia itd.
-
+# dodanie nowych algorytmów
+#
+#
+#
+#
+#
 
 
 # =========== Nowe ==============

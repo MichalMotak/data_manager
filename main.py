@@ -1,8 +1,8 @@
 import sys
 from MainWindow_class import MainWindow
-from PyQt5.QtWidgets import QApplication
+from PyQt5 import QtWidgets
 
 if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    table = MainWindow()
+    app = QtWidgets.QApplication(sys.argv)
+    mw = MainWindow()
     sys.exit(app.exec_())

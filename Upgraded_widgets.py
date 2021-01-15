@@ -12,11 +12,12 @@ class Improved_Slider(QWidget):
         self.lower_range = lower_range
         self.upper_range = upper_range
         self.name = name
+        self.to_float = False
 
         self.slider = QSlider(Qt.Horizontal, self)
         self.slider.setRange(self.lower_range, self.upper_range)
         self.slider.setTickPosition(QSlider.TicksBelow)
-        self.slider.setTickInterval(10)
+        # self.slider.setTickInterval(10)
 
         self.label_name = QLabel(name)
         self.label_name.setAlignment(Qt.AlignCenter)
@@ -34,9 +35,8 @@ class Improved_Slider(QWidget):
         # self.slider_hbox.addStretch()
 
         self.label_minimum = QLabel("Min Value : "+ str(self.lower_range))
-        # label_minimum.setText("Min Value : "+ str(self.lower_range))
-        # self.slider.minimumChanged.connect(label_minimum.setNum)
         self.label_maximum = QLabel("Max Value : "+ str(self.upper_range))
+
         self.lineedit_value = QLineEdit("Current Value : ")
         self.lineedit_value.textEdited.connect(self.lineedit_value_edited)
 
@@ -58,6 +58,8 @@ class Improved_Slider(QWidget):
     def slider_value_changed(self):
         print('slider value changed')
         self.current_value = self.slider.value()
+        if self.to_float:
+            self.current_value /= 100.0
         self.lineedit_value.setText("Current Value : "+ str(self.current_value))
 
     def lineedit_value_edited(self):
@@ -75,7 +77,16 @@ class Improved_Slider(QWidget):
         self.current_value = new_value
 
     def get_current_value(self):
+        print('current valueeee')
+        le_value = self.slider.value()
+        print(le_value)
+        print(self.current_value)
         return self.current_value
+
+    def set_float(self):
+        self.to_float = True
+        self.label_minimum.setText("Min Value : "+ str(self.lower_range /100.0))
+        self.label_maximum.setText("Min Value : "+ str(self.upper_range /100.0))
 
 
 class CheckableComboBox(QComboBox):
@@ -196,26 +207,59 @@ class CheckableComboBox(QComboBox):
         return res
 
 class Label_and_Lineedit(QWidget):
-    def __init__(self):
+    def __init__(self, name, lay_dir = 'Horizontal', stretches = [5,5],  minimal_size = None):
         super(Label_and_Lineedit, self).__init__()
 
-        self.main_layout = QHBoxLayout()
+        if lay_dir == 'Horizontal':
+            self.main_layout = QHBoxLayout()
+        elif lay_dir == 'Vertical':
+            self.main_layout = QVBoxLayout()
         self.main_layout.setContentsMargins(0, 0, 0, 0)
 
         self.label = QLabel()
         self.label.setAlignment(Qt.AlignCenter)
-        self.label.setText(' labelllllllllllllllllllll ')
+        self.label.setText(name)
 
-        self.lineedit = QLineEdit("lineedit")
+        self.lineedit = QLineEdit()
         self.lineedit.setAlignment(Qt.AlignCenter)
 
-        self.main_layout.addWidget(self.label)
-        self.main_layout.addWidget(self.lineedit)
+        self.main_layout.addWidget(self.label, stretches[0])
+        # self.main_layout.addStretch(1)
+
+        self.main_layout.addWidget(self.lineedit, stretches[1])
+        # self.main_layout.addStretch(1)
+
+
+        if minimal_size is not None:
+            self.label.setMinimumHeight(minimal_size[0])
+            self.label.setMinimumWidth(minimal_size[1])
+            self.lineedit.setMinimumHeight(minimal_size[0])
+            self.lineedit.setMinimumWidth(minimal_size[1])
 
         self.setLayout(self.main_layout)
 
     def get_text(self):
         return self.lineedit.text()
+    
+    def set_lineedit_text(self, text):
+        self.lineedit.setText(text)
+
+    def update_text(self, text):
+        """This function add string after coma
+
+        Returns:
+            [type]: [description]
+        """
+        current_text = self.get_text()
+        print(current_text)
+        if current_text is '':
+            self.set_lineedit_text(text)
+            print('pusty')
+        else:
+            new_text = f"{current_text}, {text}"
+            self.set_lineedit_text(new_text)
+
+    
 
 class Label_and_spinbox(QWidget):
     def __init__(self, name, lay_dir = 'Horizontal'):
@@ -239,10 +283,21 @@ class Label_and_spinbox(QWidget):
         self.main_layout.addWidget(self.label)
         self.main_layout.addWidget(self.sp)
 
+
+
         self.setLayout(self.main_layout)
 
     def get_value(self):
         return self.sp.value()
+
+    def set_range(self, min, max):
+        self.sp.setRange(min, max)
+
+    def set_step(self, step):
+        self.sp.setSingleStep(step)
+
+    def set_value(self, value):
+        self.sp.value = value
 
 class Label_and_combobox_checkable(QWidget):
     def __init__(self, name):
@@ -263,17 +318,20 @@ class Label_and_combobox_checkable(QWidget):
 
         self.setLayout(self.main_layout)
 
-    def addItems(self, items):
+    def add_items(self, items):
         self.combobox.addItems(items)
     #
-    def getText(self):
+    def get_text(self):
         return self.combobox.currentText()
 
 class Label_and_combobox(QWidget):
-    def __init__(self, name):
+    def __init__(self, name, lay_dir = 'Horizontal', stretches = None,  minimal_size = None):
         super(Label_and_combobox, self).__init__()
+        if lay_dir == 'Horizontal':
+            self.main_layout = QHBoxLayout()
+        elif lay_dir == 'Vertical':
+            self.main_layout = QVBoxLayout()
 
-        self.main_layout = QVBoxLayout()
         self.main_layout.setContentsMargins(0, 0, 0, 0)
         self.name = name
 
@@ -282,16 +340,26 @@ class Label_and_combobox(QWidget):
         self.label.setText(name)
 
         self.combobox = QComboBox()
+    
+        if minimal_size is not None:
+            self.label.setMinimumHeight(minimal_size[0])
+            self.label.setMinimumWidth(minimal_size[1])
+            self.combobox.setMinimumHeight(minimal_size[0])
+            self.combobox.setMinimumWidth(minimal_size[1])
 
-        self.main_layout.addWidget(self.label)
-        self.main_layout.addWidget(self.combobox)
+        if stretches is not None:
+            self.main_layout.addWidget(self.label, stretches[0])
+            self.main_layout.addWidget(self.combobox, stretches[1])
+        else:
+            self.main_layout.addWidget(self.label)
+            self.main_layout.addWidget(self.combobox)
 
         self.setLayout(self.main_layout)
 
-    def addItems(self, items):
+    def add_items(self, items):
         self.combobox.addItems(items)
 
-    def getText(self):
+    def get_text(self):
         return self.combobox.currentText()
 
     def clear(self):

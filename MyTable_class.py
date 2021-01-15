@@ -16,13 +16,12 @@ class MyTable(QTableWidget):
         print(mainw)
         # self.signals()
         # mainw.pushButton.hide()
-
         # self.setGeometry(QtCore.QRect(0,0, 80, 20))
 
         self.table_test = 'table_test'
-
+        self.horizontalHeader().setDefaultAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.Alignment(QtCore.Qt.TextWordWrap))
         self.resized.connect(self.resized_fun)
-        self.show()
+        # self.show()
 
     def resizeEvent(self, event):
         self.resized.emit()
@@ -40,18 +39,19 @@ class MyTable(QTableWidget):
             print(item.text())
         print('c')
 
-
-    def set_column_labels(self, list):
+    def set_column_labels(self, list_):
+        """ This function sets self.HorizontalHeaderLabels
+        Args:
+            list ([type]): list of new header labels
+        """
         print('sel column labels')
-        print(list)
-        self.col_labels = list
-        print(self.col_labels)
-        self.setHorizontalHeaderLabels(list)
+        print(list_)
+        self.col_labels = list_
+        self.setHorizontalHeaderLabels(list_)
         self.show()
-        # self.resizeColumnsToContents()
-
 
     def update_from_df(self, dataframe):
+        print('update from df')
         self.dataframe = dataframe
         self.col_labels = self.dataframe.columns
 
@@ -127,15 +127,28 @@ class MyTable(QTableWidget):
             item = self.takeItem(row, col)
             item.setText('')
 
+    def delete_row(self, row):
+        print(row)
+        self.removeRow(row)
+
+    def delete_column(self, column):
+        print(column)
+        print(self.col_labels)
+        self.removeColumn(column)
+        print(self.col_labels)
+        current_labels = self.col_labels.tolist()
+        print(current_labels)
+        current_labels.pop(column)
+        print(current_labels)
+        self.set_column_labels(current_labels)
+        # print(self.col_labels)
+
 
     def sort_columns(self, columns_l, type):
 
-        print(columns_l)
         c = self.col_labels.tolist()
         columns_l = [c[i] for i in columns_l]
         print(columns_l)
-
-
         if type == 'ascending':
             asc = True
             print('asc')
@@ -155,6 +168,7 @@ class MyTable(QTableWidget):
         self.setColumnCount(0)
         self.setRowCount(self.rows)
         self.setColumnCount(self.columns)
+
         # self.update()
 
 
@@ -170,6 +184,8 @@ class MyTable(QTableWidget):
             self.dataframe = pd.read_csv(file_path)
         elif ext == '.xlsx':
             self.dataframe = pd.read_excel(file_path)
+        elif ext == '.json':
+            self.dataframe = pd.read_json(file_path)
         else:
             return None
 

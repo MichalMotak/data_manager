@@ -1,0 +1,3 @@
+Algorithm Type,Algoritm name,CV type,CV number par,Precition,Number of estimators,train_accuracy,test_accuracy
+Classification,Random Forest,Cross Validation,12,Outcome,20,99.692,75.911
+Classification,Random Forest,Cross Validation,10,Outcome,20,99.595,75.911

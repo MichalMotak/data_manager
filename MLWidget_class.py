@@ -4,7 +4,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
 from Upgraded_widgets import *
-from metrics import *
+from globals_ import *
 from Tab_Classification_classes import *
 from Tab_Regression_classes import *
 
@@ -53,6 +53,19 @@ class Tab_classification(QWidget):
         self.main_layout.addWidget(self.frame)
 
 
+        self.create_layout()
+        self.frame.setLayout(self.lay2)
+        self.bottom_layout = QVBoxLayout(self)
+
+
+
+        self.create_bottom_layout()
+
+        self.main_layout.addLayout(self.bottom_layout)
+        self.main_layout.setContentsMargins(0, 0, 0, 0)
+        self.setLayout(self.main_layout)
+
+    def create_layout(self):
         self.lay2 = QVBoxLayout(self)
 
         self.formLayout = QFormLayout()
@@ -66,16 +79,6 @@ class Tab_classification(QWidget):
         self.scroll.setWidget(self.groupBox)
 
         self.lay2.addWidget(self.scroll)
-        self.frame.setLayout(self.lay2)
-        self.bottom_layout = QVBoxLayout(self)
-
-
-
-        self.create_bottom_layout()
-
-        self.main_layout.addLayout(self.bottom_layout)
-        self.main_layout.setContentsMargins(0, 0, 0, 0)
-        self.setLayout(self.main_layout)
 
     def create_widgets(self):
         self.w = Random_Forest_Clas_Widget('Random Forest')
@@ -99,7 +102,7 @@ class Tab_classification(QWidget):
 
     def create_bottom_layout(self):
         self.l_combobox_metrics = Label_and_combobox_checkable('Metrics')
-        self.l_combobox_metrics.addItems(class_metrics_list)
+        self.l_combobox_metrics.add_items(class_metrics_list)
 
         self.bottom_layout.addWidget(self.l_combobox_metrics)
 
@@ -134,9 +137,9 @@ class Tab_classification(QWidget):
 
     def predict(self, current_widget, tab, cv_type, number):
         print('class predict')
-        metrics = self.l_combobox_metrics.getText()
+        metrics = self.l_combobox_metrics.get_text()
         metrics = list(metrics.split(', '))
-        predict_label = self.l_combobox_prediction.getText()
+        predict_label = self.l_combobox_prediction.get_text()
         print(metrics)
         # print(cv_type)
         # print(predict_label)
@@ -146,14 +149,13 @@ class Tab_classification(QWidget):
 
     def update_outputcombobox(self, col_labels):
         self.l_combobox_prediction.clear()
-        self.l_combobox_prediction.addItems(col_labels)
+        self.l_combobox_prediction.add_items(col_labels)
 
     def get_parameters(self):
         print('get parameters ' + self.name)
-        metrics = self.l_combobox_metrics.getText()
+        metrics = self.l_combobox_metrics.get_text()
         metrics = list(metrics.split(', '))
-        predict_label = self.l_combobox_prediction.getText()
-
+        predict_label = self.l_combobox_prediction.get_text()
         parameters = predict_label
         return parameters
 
@@ -166,8 +168,10 @@ class Tab_Regression(Tab_classification):
     def create_widgets(self):
         print('add widgets tab regression')
         self.name = 'Regression'
-        self.w = Tab_Decision_Tree_Reg()
-        self.w2 = Tab_Random_Forest_Reg()
+        self.w = Tab_Decision_Tree_Reg('Decision Tree')
+        self.w2 = Tab_Random_Forest_Reg('Random Forest')
+        self.w3 = Tab_Linear_Reg('Linear Models')
+        # self.w3 = Tab_Random_Forest_Reg('Random Forest')
 
         self.radiobutton = QRadioButton("")
         self.radiobutton.widget = self.w
@@ -180,14 +184,37 @@ class Tab_Regression(Tab_classification):
         self.radiobutton2.type = 'Decision Tree'
         self.radiobutton2.toggled.connect(self.radio_button_clicked)
 
-        self.widgets_list = [self.w, self.w2]
-        self.radio_buttons_list = [self.radiobutton, self.radiobutton2]
+        self.radiobutton3 = QRadioButton("")
+        self.radiobutton3.widget = self.w3
+        self.radiobutton3.type = 'Linear'
+        self.radiobutton3.toggled.connect(self.radio_button_clicked)
+
+
+        self.widgets_list = [self.w, self.w2, self.w3]
+        self.radio_buttons_list = [self.radiobutton, self.radiobutton2, self.radiobutton3]
         self.widgets_types_list = [w.type for w in self.radio_buttons_list]
         self.radiobutton.setChecked(True)
 
+
+    def create_layout(self):
+        self.lay2 = QVBoxLayout(self)
+
+        self.formLayout = QFormLayout()
+
+        self.groupBox.setLayout(self.formLayout)
+
+        self.create_widgets()
+
+        self.formLayout.addRow(self.radiobutton, self.w)
+        self.formLayout.addRow(self.radiobutton2, self.w2)
+        self.formLayout.addRow(self.radiobutton3, self.w3)
+        self.scroll.setWidget(self.groupBox)
+
+        self.lay2.addWidget(self.scroll)
+
     def create_bottom_layout(self):
         self.l_combobox_metrics = Label_and_combobox_checkable('Metrics')
-        self.l_combobox_metrics.addItems(reg_metrics_list)
+        self.l_combobox_metrics.add_items(reg_metrics_list)
         self.bottom_layout.addWidget(self.l_combobox_metrics)
         self.l_combobox_prediction = Label_and_combobox('Prediction output')
         self.bottom_layout.addWidget(self.l_combobox_prediction)
@@ -195,15 +222,15 @@ class Tab_Regression(Tab_classification):
 
     def predict(self, current_widget, tab, cv_type, number):
         print('regression predict')
-        metrics = self.l_combobox_metrics.getText()
+        metrics = self.l_combobox_metrics.get_text()
         metrics = list(metrics.split(', '))
-        predict_label = self.l_combobox_prediction.getText()
+        predict_label = self.l_combobox_prediction.get_text()
         print(metrics)
         # print(cv_type)
         # print(predict_label)
         # def predict(self, table, Y_index, cv_type, number, metrics):
 
-        current_widget.predict(tab,  predict_label, cv_type, number, metrics)
+        current_widget.predict(tab, predict_label, cv_type, number, metrics)
 
 
 class MLWidget(QWidget):
@@ -254,8 +281,8 @@ class MLWidget(QWidget):
         # self.layout_MLWidget_lower.addWidget(self.label222)
 
         cv_types_list = ['Cross Validation', 'K-Fold']
-        self.l_combobox_cv_type = Label_and_combobox('Cross Validation type')
-        self.l_combobox_cv_type.addItems(cv_types_list)
+        self.l_combobox_cv_type = Label_and_combobox('Cross Validation type', lay_dir='Vertical')
+        self.l_combobox_cv_type.add_items(cv_types_list)
 
         self.sp = Label_and_spinbox('number', 'Vertical')
 
@@ -296,7 +323,7 @@ class MLWidget(QWidget):
         print('get parameters')
 
         # parameters from layout_MLWidget_lower
-        cv_type = self.l_combobox_cv_type.getText()
+        cv_type = self.l_combobox_cv_type.get_text()
         number = self.sp.get_value()
 
         # Tab and Widget, . Classification, Recision Tree
@@ -376,11 +403,12 @@ class MLWidget(QWidget):
             current_tab_index, current_tab = self.which_tab_is_opened()
             current_widget_index, current_widget = self.which_widget_is_opened()
 
-            cv_type = self.l_combobox_cv_type.getText()
+            cv_type = self.l_combobox_cv_type.get_text()
             number = self.sp.get_value()
 
             # jeśli trzeba coś dodać w predict dla danego tabu to 1 wybór
             current_tab.predict(current_widget, self.dataframe, cv_type, number)
+            print(' po predykcji current tabu')
             # current_tab.current_widget.predict(tab, out)
 
             # check if its needed to update Right Table with results

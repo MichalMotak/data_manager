@@ -1,14 +1,18 @@
-from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QTableWidget, QApplication, QMainWindow, QTableWidgetItem, QPushButton, QWidget
+import PyQt5
+# from PyQt5 import QtWidgets
+# from PyQt5.QtWidgets import QTableWidget, QApplication, QMainWindow, QTableWidgetItem, QPushButton, QWidget
 from PyQt5.QtGui import *
-from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
 
+import csv
 import numpy as np
 import pandas as pd
 
-class Right_Table_Widget(QWidget):
+from MyTable_class import MyTable
 
+
+class Right_Table_Widget(QWidget):
     signal_for_ml_widget = pyqtSignal(str)
 
     def __init__(self):
@@ -18,11 +22,17 @@ class Right_Table_Widget(QWidget):
 
         self.main_layout = QVBoxLayout(self)
 
-        self.table = Right_Table(10,10)
+        # self.table = Right_Table(10,10)
+        self.table = MyTable(self, 10,10)
+
+        self.table.setContextMenuPolicy(Qt.CustomContextMenu)  # +++
+        self.table.customContextMenuRequested.connect(self.generateMenu)  # +++
+        self.table.viewport().installEventFilter(self)
+
 
         self.label = QLabel()
         self.label.setAlignment(Qt.AlignCenter)
-        self.label.setText(' labelllllllllllllllllllll ')
+        self.label.setText(' Results ')
 
 
         self.b_predict = QPushButton(self)
@@ -33,17 +43,23 @@ class Right_Table_Widget(QWidget):
         self.b_clear.setText('clear table')
         self.b_clear.clicked.connect(self.reset)
 
-        self.main_layout.addWidget(self.table)
+        self.b_save= QPushButton(self)
+        self.b_save.setText('save results')
+        self.b_save.clicked.connect(self.save_file_act)
+
+
         self.main_layout.addWidget(self.label)
+        self.main_layout.addWidget(self.table)
         self.main_layout.addWidget(self.b_predict)
         self.main_layout.addWidget(self.b_clear)
+        self.main_layout.addWidget(self.b_save)
 
 
         self.complete_data = []
         self.labels_a = []
         self.labels_b = []
         self.labels_c = []
-        self.iter = 0
+        self.first_time_value = True
 
         # Create initial dataframe
         # x = 4
@@ -57,8 +73,129 @@ class Right_Table_Widget(QWidget):
 
         # Sygnały
         # self.procStart.connect(self.ml_widget.on_procStart)
-        self.show()
+        # self.show()
 
+    def eventFilter(self, source, event):
+        if (event.type() == QEvent.MouseButtonPress
+                and event.buttons() == Qt.RightButton
+                and source is self.table.viewport()):
+
+            item = self.table.itemAt(event.pos())
+
+            print('Global Pos:', event.globalPos())
+            if item is not None:
+                print('Table Item:', item.row(), item.column())
+                self.menu = QMenu(self)
+                # self.menu.addAction(item.text())         #(QAction('test'))
+                self.ag = QActionGroup(self, exclusive=True)
+                self.act0 = QAction('default', self.menu, checkable=True)
+                self.act0.setChecked(True)  # default
+                z = self.ag.addAction(self.act0)
+
+
+                self.submenu_add_data = QMenu('Add', self)
+                self.act3 = QAction('Add column on the right', self.menu, checkable=True)
+                self.act4 = QAction('Add row on the bottom', self.menu, checkable=True)
+                self.act3.triggered.connect(lambda: self.add_column_right(item))
+                self.act4.triggered.connect(lambda: self.add_row_bottom(item))
+                self.submenu_add_data.addAction(self.act3)
+                self.submenu_add_data.addAction(self.act4)
+
+                self.submenu_clear_data = QMenu('Clear data', self)
+                self.act5 = QAction('Clear column')
+                self.act6 = QAction('Clear row')
+                self.act5.triggered.connect(lambda: self.clear_column(item))
+                self.act6.triggered.connect(lambda: self.clear_row(item))
+                self.submenu_clear_data.addAction(self.act5)
+                self.submenu_clear_data.addAction(self.act6)
+
+                self.submenu_del_data = QMenu('Delete data', self)
+                self.act7 = QAction('Delete column')
+                self.act8 = QAction('Delete row')
+                self.act7.triggered.connect(lambda: self.delete_column(item))
+                self.act8.triggered.connect(lambda: self.delete_row(item))
+                self.submenu_del_data.addAction(self.act7)
+                self.submenu_del_data.addAction(self.act8)
+
+                self.act9 = QAction('Clear cell')
+                self.act9.triggered.connect(lambda: self.clear_sel_data())
+                self.submenu_clear_data.addAction(self.act9)
+
+                self.submenu_sort_data = QMenu('Sort data', self)
+                self.act11 = QAction('Sort ascending data')
+                self.act11.triggered.connect(lambda: self.sort_column(item, 'ascending'))
+                self.submenu_sort_data.addAction(self.act11)
+
+                self.act12 = QAction('Sort descending data')
+                self.act12.triggered.connect(lambda: self.sort_column(item, 'descending'))
+                self.submenu_sort_data.addAction(self.act12)
+
+                self.menu.addAction(z)
+                self.menu.addMenu(self.submenu_add_plot)
+                self.menu.addMenu(self.submenu_sort_data)
+                self.menu.addMenu(self.submenu_clear_data)
+                self.menu.addMenu(self.submenu_del_data)
+
+                # menu.exec_(event.globalPos())
+        return super(Right_Table_Widget, self).eventFilter(source, event)
+
+    def generateMenu(self, pos):
+        print("pos======", pos)
+        try:
+            self.menu.exec_(self.table.mapToGlobal(pos))  # +++
+
+        except AttributeError:
+            print('load data')
+    def add_column_right(self, item):
+        print('add column right')
+        col = item.column()
+        header_name = self.le_add_col.text()
+        print(col, header_name)
+        self.table.add_col_right(col, header_name)
+
+    def add_row_bottom(self, item):
+        print('add row bottom')
+        col = item.row()
+        self.table.add_row_bottom(col)
+
+
+    def clear_column(self, item):
+        print('clear column')
+        col = item.column()
+        self.table.clear_column(col)
+
+
+    def clear_row(self, item):
+        print('clear row')
+        row = item.row()
+        self.table.clear_row(row)
+
+
+    def delete_column(self, item):
+        col = item.column()
+        self.table.removeColumn(col)
+
+    def delete_row(self, item):
+        row = item.row()
+        self.table.removeRow(row)
+
+    def clear_sel_data(self):
+
+        self.table.clear_selected_data()
+
+
+    def sort_column(self, item, type):
+
+        # only one column,
+
+        print(type)
+        col = item.column()
+        if type == 'ascending':
+            print('asc')
+            self.table.sort_columns([col], type)
+        elif type == 'descending':
+            print('desc')
+            self.table.sort_columns([col], type)
     # ======================= SIGNALS ==============================
 
     @pyqtSlot()
@@ -101,9 +238,13 @@ class Right_Table_Widget(QWidget):
         for l in self.labels_b:
             for l2 in l:
                 b.append(l2)
-        b_set = np.array(b)
-        b_set = np.unique(b_set)
-        b_out = b_set.tolist()
+        # b_set = np.array(b)
+        # b_set = np.unique(b_set)
+        # b_out = b_set.tolist()
+        b_out = []
+        for i in b:
+            if i not in b_out:
+                b_out.append(i)
 
         print(b_out)
 
@@ -111,9 +252,13 @@ class Right_Table_Widget(QWidget):
         for l in self.labels_c:
             for l2 in l:
                 c.append(l2)
-        c_set = np.array(c)
-        c_set = np.unique(c_set)
-        c_out = c_set.tolist()
+        # c_set = np.array(c)
+        # c_set = np.unique(c_set)
+        # c_out = c_set.tolist()
+        c_out = []
+        for i in c:
+            if i not in c_out:
+                c_out.append(i)
 
         print(c_out)
         print(len(a_out))
@@ -159,7 +304,7 @@ class Right_Table_Widget(QWidget):
 
         self.dataframe = pd.DataFrame(data=np.array(par).reshape(1,-1), columns = parameters_labels)
         # self.set_column_labels(parameters_labels)
-        self.update_with_values(self.dataframe.values, parameters_labels)
+        self.table.update_from_df(self.dataframe)
 
     def next_time(self, par, parameters_labels, len):
         a = len[0]  # 5
@@ -244,10 +389,11 @@ class Right_Table_Widget(QWidget):
         print(df_cc.shape)
 
         r = pd.concat([df_aa, df_bb, df_cc], axis=1)
+        r = r.astype(str)
         print('r')
         print(r)
         self.dataframe = r
-        self.update_with_values(self.dataframe.values, list(self.dataframe.columns))
+        self.table.update_from_df(self.dataframe)
 
         self.update_lens(parameters_labels, len)
 
@@ -257,12 +403,14 @@ class Right_Table_Widget(QWidget):
         print(self.dataframe)
         # self.complete_data.append(len)
         # Jeśli pierwsze dodanie
-        if self.iter == 0:
+        if self.first_time_value is True:
+            print('f')
             self.first_time(par, parameters_labels, len)
-            self.iter += 1
+            self.first_time_value = False
         # kolejne dodanie
         else:
             self.next_time(par, parameters_labels, len)
+        self.table.set_column_labels(self.dataframe.columns)
 
         # ############################################
         # a = len[0]  # 5
@@ -384,47 +532,40 @@ class Right_Table_Widget(QWidget):
 
 
 
-    def set_column_labels(self, list):
-        print('sel column labels')
-        print(list)
-        self.col_labels = list
-        print(self.col_labels)
-        self.table.setHorizontalHeaderLabels(list)
-        # self.table.setHorizontalHeader().setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeToContents)
-        self.table.show()
-        # self.resizeColumnsToContents()
-
-    def update_with_values(self, data, new_col_labels=[]):
-        print('update wi')
-        self.data = data
-        print(self.data.shape)
-
-        # new_col_labeles = [str(x) for x in range(data.shape[1])]
-
-        self.table.setRowCount(0)
-        self.table.setColumnCount(self.data.shape[1])
-        # self.set_column_labels(self.col_labels)
-        self.set_column_labels(new_col_labels)
-
-        for row_data in self.data:
-            row = self.table.rowCount()
-            self.table.insertRow(row)
-            # if len(row_data) > 100:
-            #     self.setColumnCount(len(row_data))
-            for column, stuff in enumerate(row_data):
-                item = QTableWidgetItem(str(stuff))
-                item.setTextAlignment(Qt.AlignHCenter)
-                self.table.setItem(row, column, item)
-
     def reset(self):
+        print('reset table ')
         self.dataframe = pd.DataFrame()
-        self.update_with_values(self.dataframe.values)
+        self.table.update_from_df(self.dataframe)
+        self.first_time_value = True
+        # self.table.reset()
+
+    def save_file_act(self):
+        '''
+        taking data from self.table and saving to csv file
+        '''
+        print('save file action')
+        path = QFileDialog.getSaveFileName(self, 'Save CSV', "Text files(.csv)")
+        print(path)
+        print(self.table.col_labels)
+        if path[0] != '':
+            with open(path[0], 'w') as file:
+                writer = csv.writer(file, dialect ='excel')
+                writer.writerow(self.table.col_labels)
+                for row in range(self.table.rowCount()):
+                    row_data = []
+                    for col in range(self.table.columnCount()):
+                        item = self.table.item(row, col)
+                        if item is not None:
+                            row_data.append(item.text())
+                        else:
+                            row_data.append('')
+                    writer.writerow(row_data)
 
 
-class Right_Table(QTableWidget):
-    def __init__(self, r ,c ):
-        super().__init__(r,c)
-        self.rows = r
-        self.columns = c
-
-
+# class Right_Table(QTableWidget):
+#     def __init__(self, r ,c ):
+#         super().__init__(r,c)
+#         self.rows = r
+#         self.columns = c
+#
+#

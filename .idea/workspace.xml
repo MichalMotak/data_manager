@@ -2,17 +2,25 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="8dbe5dbd-2e96-43fe-a958-7a2a2f7c1985" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/Right_table_class.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MLWidget_class.py" beforeDir="false" afterPath="$PROJECT_DIR$/MLWidget_class.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MainWindow_class.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainWindow_class.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MyTable_class.py" beforeDir="false" afterPath="$PROJECT_DIR$/MyTable_class.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Right_table_class.py" beforeDir="false" afterPath="$PROJECT_DIR$/Right_table_class.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Tab_Classification_classes.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tab_Classification_classes.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Tab_Regression_classes.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tab_Regression_classes.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Upgraded_widgets.py" beforeDir="false" afterPath="$PROJECT_DIR$/Upgraded_widgets.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/metrics.py" beforeDir="false" afterPath="$PROJECT_DIR$/metrics.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/todo.txt" beforeDir="false" afterPath="$PROJECT_DIR$/todo.txt" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FavoritesManager">
+    <favorites_list name="PyQt5 data manager_github" />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -165,6 +173,9 @@
       </list>
     </recent_temporary>
   </component>
+  <component name="StructureViewFactory">
+    <option name="ACTIVE_ACTIONS" value=",ALPHA_COMPARATOR" />
+  </component>
   <component name="SvnConfiguration">
     <configuration />
   </component>
@@ -198,11 +209,6 @@
           <url>file://$PROJECT_DIR$/PlotCanvas_class.py</url>
           <line>5</line>
           <option name="timeStamp" value="1" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/MyTable_class.py</url>
-          <line>167</line>
-          <option name="timeStamp" value="2" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

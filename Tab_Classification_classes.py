@@ -3,7 +3,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from Upgraded_widgets import *
-from metrics import *
+from globals_ import *
 
 
 import numpy as np
@@ -15,7 +15,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
 
 from sklearn.metrics import auc, accuracy_score, roc_auc_score, roc_curve, precision_score, recall_score, f1_score, confusion_matrix, classification_report, plot_confusion_matrix, ConfusionMatrixDisplay
-from sklearn.model_selection import train_test_split, cross_val_score, cross_val_predict, cross_validate
+from sklearn.model_selection import train_test_split, cross_val_score, cross_val_predict, cross_validate, KFold
 
 
 
@@ -68,80 +68,19 @@ class Parent_ML_Widget(QWidget):
     def get_last_results(self):
         return self.results_dict
 
-
-class Decision_Tree_Clas_Widget(Parent_ML_Widget):
-    def __init__(self, name):
-        super().__init__(name)
-        self.name = name
-
-    def create_layout(self):
-        self.lay2 = QVBoxLayout(self)
-
-        self.label_name = QLabel(self.name)
-        self.label_name.setAlignment(Qt.AlignCenter)
-        self.label_name.setStyleSheet(" QLabel")
-
-        self.l_sp = Label_and_spinbox('max depth')
-        self.slider = Improved_Slider(0, 100, 'Train_test_split')
-        self.slider_min_samples_split = Improved_Slider(0, 50, 'min_samples_split')
+    # def predict_cross_validation(self, clf):
 
 
-        self.lay2.addWidget(self.label_name)
-        self.lay2.addWidget(self.slider)
-        self.lay2.addWidget(self.l_sp)
-        self.lay2.addWidget(self.slider_min_samples_split)
-
-    def predict(self, table, Y_index, cv_type, number, metrics):
+    # def predict_Kfold(self):
 
 
-        print(self.name + ' predict')
-
-        dataframe = table
-        X_data = dataframe.drop(Y_index, 1)
-        Y_data = dataframe[Y_index]
-        train_test_split_value = int(self.slider.get_current_value())/100.0
-        print(train_test_split_value)
-
-        max_depth_arg, min_samples_split_arg = self.get_parameters(as_list=False)
-
-        X_train, X_test, y_train, y_test = train_test_split(X_data, Y_data, test_size=train_test_split_value, random_state=1)
-
-        # max_depth_arg = self.l_sp.get_value()
-        # min_samples_split_arg = int(self.slider_min_samples_split.get_current_value())
-
-        # print(f"train test split {train_test_split_value}, \n"
-        #       f"min samples split {min_samples_split_arg}, \n "
-        #       f"max depth arg {max_depth_arg}")
 
 
-        clf = DecisionTreeClassifier(max_depth=max_depth_arg, min_samples_split= min_samples_split_arg)
 
-        if cv_type == 'Cross Validation':
-            scores = cross_validate(clf, X_data, Y_data, cv=number, scoring=metrics, return_train_score=True)
-            self.results(scores, metrics)
-        else:
-            clf = clf.fit(X_train, y_train)
-            y_train_pred = clf.predict(X_train)
 
-            print("Accuracy (train): %0.3f" % accuracy_score(y_train, y_train_pred))
 
-            y_pred = clf.predict(X_test)
-            print("Accuracy (test): %0.3f" % accuracy_score(y_test, y_pred))
 
-            labels = np.unique(Y_data)
-            print('\n Classification report: \n', classification_report(y_test, y_pred, labels=labels))
 
-    def get_parameters(self, as_list=False, return_labels=False):
-        print('get parameters from ')
-        # print(self.get_parameters.__name__)
-        max_depth_arg = self.l_sp.get_value()
-        min_samples_split_arg = int(self.slider_min_samples_split.get_current_value())
-
-        if as_list and return_labels:
-            return [max_depth_arg, min_samples_split_arg], [self.l_sp.name, self.slider_min_samples_split.name]
-
-        elif not as_list:
-            return max_depth_arg, min_samples_split_arg
 
 
 
@@ -199,17 +138,14 @@ class Random_Forest_Clas_Widget(Parent_ML_Widget):
 
         if cv_type == 'Cross Validation':
             print(cv_type, number, metrics)
-            # print(type(metrics))
             scores = cross_validate(clf_org, X_data, Y_data, cv=number, scoring=metrics, return_train_score=True)
-            # print(scores)
-
             self.results(scores, metrics)
-            # scores_test = scores['test_score']
-            # scores_train = scores['train_score']
-            #
-            # print('Accuracy test (mean): %0.3f' % scores_test.mean())
-            # print('Accuracy train (mean): %0.3f' % scores_train.mean())
 
+        elif cv_type == 'K-Fold':
+            print(cv_type)
+            cv = KFold(number=number)
+            scores = cross_validate(clf_org, X_data, Y_data, cv=cv, scoring=metrics, return_train_score=True)
+            self.results(scores, metrics)
         else:
 
             # jednokrotna predykcja
@@ -247,6 +183,88 @@ class Random_Forest_Clas_Widget(Parent_ML_Widget):
         elif not as_list:
             return n_estim
 #
+
+class Decision_Tree_Clas_Widget(Parent_ML_Widget):
+    def __init__(self, name):
+        super().__init__(name)
+        self.name = name
+
+    def create_layout(self):
+        self.lay2 = QVBoxLayout(self)
+
+        self.label_name = QLabel(self.name)
+        self.label_name.setAlignment(Qt.AlignCenter)
+        self.label_name.setStyleSheet(" QLabel")
+
+        self.l_sp = Label_and_spinbox('max depth')
+        self.slider = Improved_Slider(0, 100, 'Train_test_split')
+        self.slider_min_samples_split = Improved_Slider(0, 50, 'min_samples_split')
+
+
+        self.lay2.addWidget(self.label_name)
+        self.lay2.addWidget(self.slider)
+        self.lay2.addWidget(self.l_sp)
+        self.lay2.addWidget(self.slider_min_samples_split)
+
+    def predict(self, table, Y_index, cv_type, number, metrics):
+
+
+        print(self.name + ' predict')
+
+        dataframe = table
+        X_data = dataframe.drop(Y_index, 1)
+        Y_data = dataframe[Y_index]
+        train_test_split_value = int(self.slider.get_current_value())/100.0
+        print(train_test_split_value)
+
+        max_depth_arg, min_samples_split_arg = self.get_parameters(as_list=False)
+
+        X_train, X_test, y_train, y_test = train_test_split(X_data, Y_data, test_size=train_test_split_value, random_state=1)
+
+        # max_depth_arg = self.l_sp.get_value()
+        # min_samples_split_arg = int(self.slider_min_samples_split.get_current_value())
+
+        # print(f"train test split {train_test_split_value}, \n"
+        #       f"min samples split {min_samples_split_arg}, \n "
+        #       f"max depth arg {max_depth_arg}")
+
+
+        clf = DecisionTreeClassifier(max_depth=max_depth_arg, min_samples_split= min_samples_split_arg)
+
+        if cv_type == 'Cross Validation':
+            scores = cross_validate(clf, X_data, Y_data, cv=number, scoring=metrics, return_train_score=True)
+            self.results(scores, metrics)
+
+        elif cv_type == 'K-Fold':
+            cv = KFold(number=number)
+            scores = cross_validate(clf, X_data, Y_data, cv=cv, scoring=metrics, return_train_score=True)
+            self.results(scores, metrics)
+
+        else:
+            clf = clf.fit(X_train, y_train)
+            y_train_pred = clf.predict(X_train)
+
+            print("Accuracy (train): %0.3f" % accuracy_score(y_train, y_train_pred))
+
+            y_pred = clf.predict(X_test)
+            print("Accuracy (test): %0.3f" % accuracy_score(y_test, y_pred))
+
+            labels = np.unique(Y_data)
+            print('\n Classification report: \n', classification_report(y_test, y_pred, labels=labels))
+
+    def get_parameters(self, as_list=False, return_labels=False):
+        print('get parameters from ')
+        # print(self.get_parameters.__name__)
+        max_depth_arg = self.l_sp.get_value()
+        min_samples_split_arg = int(self.slider_min_samples_split.get_current_value())
+
+        if as_list and return_labels:
+            return [max_depth_arg, min_samples_split_arg], [self.l_sp.name, self.slider_min_samples_split.name]
+
+        elif not as_list:
+            return max_depth_arg, min_samples_split_arg
+
+
 # # Decision_Tree_Classifier
 # class Tab_Decision_Tree_Clas(QWidget):
 #     def __init__(self):

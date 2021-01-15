@@ -8,12 +8,12 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
-from Subwindow_class import Subwindow_Database
+from Database_class import Subwindow_Database
 import csv
 from MyTable_class import MyTable
-from PlotCanvas_class import PlotCanvas
 from MLWidget_class import MLWidget
-from Right_table_class import Right_Table, Right_Table_Widget
+from Right_table_class import Right_Table_Widget
+from PlotWidget_class import PlotWidget
 
 
 
@@ -35,15 +35,13 @@ class MainWindow(QMainWindow):
         self.setWindowTitle('File manager')
         self.move_to_center()
 
-
-
         self.table = MyTable(self, 10, 5)
 
         # layout = QGridLayout(self)
         self._main = QtWidgets.QWidget()
         self.setCentralWidget(self._main)
         # self.setCentralWidget(self.table)
-        self.canv = PlotCanvas(self.table, 5, 3)
+        # self.canv = PlotCanvas(self.table, 5, 3)
 
 
         self.menubar = self.menuBar()
@@ -166,6 +164,11 @@ class MainWindow(QMainWindow):
         self.frame_center.setMinimumWidth(self.width / 6)
 
         self.center_lay = QVBoxLayout(self)
+        self.plot_widget = PlotWidget(self.table)
+
+        self.center_lay.addWidget(self.plot_widget)
+
+
 
 
         self.frame_center.setLayout(self.center_lay)
@@ -200,8 +203,6 @@ class MainWindow(QMainWindow):
 
 
         # ============== RIGHT TABLE WIDGET  ================================
-
-
         self.frame_right_table = QFrame(self)
         self.frame_right_table.setStyleSheet("QFrame {background-color: rgb(250, 255, 255);"
                                       "border-width: 1;"
@@ -232,7 +233,6 @@ class MainWindow(QMainWindow):
         self.frame_right_table.setLayout(self.layout_right_table)
 
         # ============== FINAL SPLITTER ================================
-
         self.splitter = QSplitter(Qt.Horizontal)
         self.splitter.addWidget(self.frame_left)
         self.splitter.addWidget(self.frame_center)
@@ -246,69 +246,15 @@ class MainWindow(QMainWindow):
 
         # =============== Frame and layout under canvas ======================================
 
-        self.under_canv_layout = QGridLayout()
 
-        self.frame_under_canv = QFrame(self)
-        self.frame_under_canv.setLayout(self.under_canv_layout)
-
-        self.label_pt = QLabel(self)
-        self.label_pt.setText('Plot type')
-        # self.label1.setFixedSize(80, 30)
-        self.label_x = QLabel(self)
-        self.label_x.setText('X axis')
-        self.label_y = QLabel(self)
-        self.label_y.setText('Y axis')
-        self.label_h = QLabel(self)
-        self.label_h.setText('Hue')
-
-
-        self.cb_plot_type = QComboBox(self)
-        self.cb_plot_type.setMinimumSize(100, 40)
-        self.cb_plot_type.addItem('Line plot')
-        self.cb_plot_type.addItem('Bar plot')
-        self.cb_plot_type.addItem('Scatter plot')
-
-        self.le_x_axis = QLineEdit(self)
-        self.le_x_axis.setMinimumSize(80, 40)
-
-        self.le_y_axis = QLineEdit(self)
-        self.le_y_axis.setMinimumSize(80, 40)
-
-        self.le_hue = QLineEdit(self)
-        self.le_hue.setMinimumSize(80, 40)
-
-        self.b_plot = QPushButton(self)
-        self.b_plot.setText('Plot')
-        self.b_plot.setMinimumSize(80, 30)
-        self.b_plot.clicked.connect(self.plot)
-
-        self.b_clear_plot = QPushButton(self)
-        self.b_clear_plot.setText('Clear Plot')
-        self.b_clear_plot.setMinimumSize(100, 30)
-        self.b_clear_plot.clicked.connect(self.clear_plot)
-
-        self.checkbox =QCheckBox("col_names/indexes ", self)
-        self.checkbox.stateChanged.connect(lambda:self.checkbox_changed(self.checkbox))
-
-        self.under_canv_layout.addWidget(self.label_pt, 0, 1)
-        self.under_canv_layout.addWidget(self.label_x, 0, 2)
-        self.under_canv_layout.addWidget(self.label_y, 0, 3)
-        self.under_canv_layout.addWidget(self.label_h, 0, 4)
-        self.under_canv_layout.addWidget(self.b_plot, 0, 5)
-        self.under_canv_layout.addWidget(self.b_clear_plot, 0, 6)
-        self.under_canv_layout.addWidget(self.cb_plot_type, 1, 1)
-        self.under_canv_layout.addWidget(self.le_x_axis, 1, 2)
-        self.under_canv_layout.addWidget(self.le_y_axis, 1, 3)
-        self.under_canv_layout.addWidget(self.le_hue, 1, 4)
-        self.under_canv_layout.addWidget(self.checkbox, 1,5)
 
 
         # ================= Center splitter between canv and frame under canv =======================
 
-        self.splitter_center = QSplitter(Qt.Vertical)
-        self.splitter_center.addWidget(self.canv)
-        self.splitter_center.addWidget(self.frame_under_canv)
-        self.center_lay.addWidget(self.splitter_center)
+        # self.splitter_center = QSplitter(Qt.Vertical)
+        # self.splitter_center.addWidget(self.canv)
+        # self.splitter_center.addWidget(self.frame_under_canv)
+        # self.center_lay.addWidget(self.splitter_center)
 
 
         self.right_table.signal_for_ml_widget.connect(self.ml_widget.get_signal_for_right_table)
@@ -385,6 +331,7 @@ class MainWindow(QMainWindow):
     # Menu for right mouse click on cells in table, with functions
 
     def eventFilter(self, source, event):
+        print('event')
         if(event.type() == QEvent.MouseButtonPress
             and event.buttons() == Qt.RightButton
             and source is self.table.viewport()):
@@ -466,7 +413,10 @@ class MainWindow(QMainWindow):
 
     def generateMenu(self, pos):
         print("pos======", pos)
-        self.menu.exec_(self.table.mapToGlobal(pos))  # +++
+        try:
+            self.menu.exec_(self.table.mapToGlobal(pos))  # +++
+        except AttributeError:
+            print('load data')
 
     def add_column_right(self, item):
         print('add column right')
@@ -492,14 +442,13 @@ class MainWindow(QMainWindow):
         row = item.row()
         self.table.clear_row(row)
 
-
     def delete_column(self, item):
         col = item.column()
-        self.table.removeColumn(col)
+        self.table.delete_column(col)
 
     def delete_row(self, item):
         row = item.row()
-        self.table.removeRow(row)
+        self.table.delete_row(row)
 
     def clear_sel_data(self):
         # cols = self.table.selectionModel().selectedColumns()
@@ -512,45 +461,21 @@ class MainWindow(QMainWindow):
         self.table.clear_selected_data()
 
     def add_x_axis(self, item):
-        print('zmiana')
+        print('add x axis')
         col = item.column()
-        print(col)
-        l = self.table.col_labels.tolist()[col]
-        print(l)
-        text = self.le_x_axis.text()
-        if text:
-            text = text +  ',' +l
-        else:
-            text = text + l
-        print(text)
-        self.le_x_axis.setText(text)
+        self.plot_widget.add_axis(col, 'x')
 
 
     def add_y_axis(self, item):
-        print('zmiana')
+        print('add y axis')
         col = item.column()
-        print(col)
-        l = self.table.col_labels.tolist()[col]
-        print(l)
-        text = self.le_y_axis.text()
-        if text:
-            text = text +  ',' + l
-        else:
-            text = text + l
-        print(text)
-        self.le_y_axis.setText(text)
+        self.plot_widget.add_axis(col, 'y')
 
     def add_hue(self, item):
         print('add hue')
         col = item.column()
-        l = self.table.col_labels.tolist()[col]
-        text = self.le_hue.text()
-        if text:
-            text = text +  ',' +l
-        else:
-            text = text + l
-        print(text)
-        self.le_hue.setText(text)
+        self.plot_widget.add_hue(col)
+
 
     def sort_column(self, item, type):
 
@@ -736,16 +661,17 @@ class MainWindow(QMainWindow):
     def load_file_act(self):
         print('load file action')
         path = QFileDialog.getOpenFileName(self, 'Open CSV', "Text files(.csv)") #"Text files(.csv)"
-        self.file_path = path[0]
-        print(self.file_path)
-        self.table.load_file(self.file_path)
-        print('ddd', self.table.col_labels)
 
-        # self.combo_box_Y.clear()
-        # self.combo_box_Y.addItems(self.table.col_labels.tolist())
-        print(self.table.dataframe)
-        self.ml_widget.set_dataframe(self.table.dataframe)
-        self.ml_widget.set_col_labels(self.table.col_labels)
+        self.file_path = path[0]
+        if self.file_path != '':
+            print(self.file_path)
+            self.table.load_file(self.file_path)
+
+            self.ml_widget.set_dataframe(self.table.dataframe)
+            self.ml_widget.set_col_labels(self.table.col_labels)
+            self.plot_widget.clear_axes()
+        else:
+            print('nie działa')
 
 
     def save_file_act(self):
@@ -754,9 +680,9 @@ class MainWindow(QMainWindow):
         '''
         print('save file action')
         path = QFileDialog.getSaveFileName(self, 'Save CSV', "Text files(.csv)")
-        print(path)
-        print(self.table.col_labels)
         if path[0] != '':
+            print(self.table.col_labels)
+            print(path[0])
             with open(path[0], 'w') as file:
                 writer = csv.writer(file, dialect ='excel')
                 writer.writerow(self.table.col_labels)
