@@ -7,7 +7,6 @@ from PyQt5.QtCore import *
 
 
 class Database():
-
     def __init__(self, parent, host, user, passwd, database):
         super().__init__()
         self.host = host
@@ -40,10 +39,15 @@ class Database():
 
     def get_db_column_names(self):
         print('get db column names')
-        print(self.mycursor)
-        return self.mycursor.column_names
+        col_labels = list(self.db_dataframe.columns)
+        return col_labels
+        # print(self.mycursor)
+        # return self.mycursor.column_names
+
 
     def set_col_labels(self):
+        print('database set col labels')
+        # col = list(self.get_db_column_names())
         col = self.get_db_column_names()
         print(col)
         self.table.set_column_labels(col)
@@ -56,10 +60,10 @@ class Database():
 
         if self.command[:6] == 'SELECT':
             print('select command')
-            xx = pd.read_sql(self.command, self.db)
+            self.db_dataframe = pd.read_sql(self.command, self.db)
             self.handle_commands_list()
-            print(xx.head(5))
-            self.table.update_from_df(xx)
+            print(self.db_dataframe.head(5))
+            self.table.update_from_df(self.db_dataframe)
         else:
             print('d')
             self.mycursor.execute(self.command)
@@ -88,7 +92,7 @@ class Database():
 
 
 
-class Subwindow_Database(QMainWindow):
+class SubwindowDatabase(QMainWindow):
     def __init__(self, parent):
         print('subwindow init')
         QWidget.__init__(self)
@@ -96,8 +100,9 @@ class Subwindow_Database(QMainWindow):
         self.width, self.height = 500, 200
 
         self.title = "SQL Manager"
-        self.mw = parent
+        self.table = parent
         self.UI()
+        self.show()
 
     def UI(self):
         print('iniui child')
@@ -247,7 +252,7 @@ class Subwindow_Database(QMainWindow):
         self.setCentralWidget(self.widget)
 
         self.setFixedSize(self.size())
-        self.show()
+
 
 
 
@@ -275,6 +280,6 @@ class Subwindow_Database(QMainWindow):
         database = self.line4.text()
         print(host,user,passwd,database)
 
-        self.database = Database(self.mw.table, host=host, user=user,
+        self.database = Database(self.table, host=host, user=user,
                                  passwd=passwd, database=database)
 

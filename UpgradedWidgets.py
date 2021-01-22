@@ -4,9 +4,9 @@ from PyQt5.QtWidgets import *
 
 
 
-class Improved_Slider(QWidget):
+class ImprovedSlider(QWidget):
     def __init__(self, lower_range, upper_range, name):
-        super(Improved_Slider, self).__init__()
+        super(ImprovedSlider, self).__init__()
 
         self.main_layout = QVBoxLayout(self)
         self.lower_range = lower_range
@@ -206,10 +206,11 @@ class CheckableComboBox(QComboBox):
                 res.append(self.model().item(i).data())
         return res
 
-class Label_and_Lineedit(QWidget):
+class LabelAndLineedit(QWidget):
     def __init__(self, name, lay_dir = 'Horizontal', stretches = [5,5],  minimal_size = None):
-        super(Label_and_Lineedit, self).__init__()
+        super(LabelAndLineedit, self).__init__()
 
+        self.name = name
         if lay_dir == 'Horizontal':
             self.main_layout = QHBoxLayout()
         elif lay_dir == 'Vertical':
@@ -261,9 +262,9 @@ class Label_and_Lineedit(QWidget):
 
     
 
-class Label_and_spinbox(QWidget):
-    def __init__(self, name, lay_dir = 'Horizontal'):
-        super(Label_and_spinbox, self).__init__()
+class LabelAndSpinbox(QWidget):
+    def __init__(self, name, lay_dir = 'Horizontal', stretches = None, minimal_size = None, double_spinbox = False):
+        super(LabelAndSpinbox, self).__init__()
 
         if lay_dir == 'Horizontal':
             self.main_layout = QHBoxLayout()
@@ -277,11 +278,24 @@ class Label_and_spinbox(QWidget):
         self.label.setAlignment(Qt.AlignCenter)
         self.label.setText(self.name)
 
-        self.sp = QSpinBox()
+        if double_spinbox:
+            self.sp = QDoubleSpinBox()
+        else:
+            self.sp = QSpinBox()
         self.sp.setAlignment(Qt.AlignCenter)
 
-        self.main_layout.addWidget(self.label)
-        self.main_layout.addWidget(self.sp)
+        if minimal_size is not None:
+            self.label.setMinimumHeight(minimal_size[0])
+            self.label.setMinimumWidth(minimal_size[1])
+            self.sp.setMinimumHeight(minimal_size[0])
+            self.sp.setMinimumWidth(minimal_size[1])
+
+        if stretches is not None:
+            self.main_layout.addWidget(self.label, stretches[0])
+            self.main_layout.addWidget(self.sp, stretches[1])
+        else:
+            self.main_layout.addWidget(self.label)
+            self.main_layout.addWidget(self.sp)
 
 
 
@@ -297,11 +311,19 @@ class Label_and_spinbox(QWidget):
         self.sp.setSingleStep(step)
 
     def set_value(self, value):
-        self.sp.value = value
+        self.sp.setValue(value)
+        self.sp.update()
 
-class Label_and_combobox_checkable(QWidget):
+    @pyqtSlot(int)
+    def get_signal_for_plot_widget(self, value):
+        print("From plot widget: ", value)
+        self.set_value(value)
+        self.sp.update()
+        self.raise_()
+
+class LabelAndComboboxCheckable(QWidget):
     def __init__(self, name):
-        super(Label_and_combobox_checkable, self).__init__()
+        super(LabelAndComboboxCheckable, self).__init__()
 
         self.main_layout = QVBoxLayout()
         self.main_layout.setContentsMargins(0, 0, 0, 0)
@@ -316,6 +338,8 @@ class Label_and_combobox_checkable(QWidget):
         self.main_layout.addWidget(self.label)
         self.main_layout.addWidget(self.combobox)
 
+
+
         self.setLayout(self.main_layout)
 
     def add_items(self, items):
@@ -324,9 +348,9 @@ class Label_and_combobox_checkable(QWidget):
     def get_text(self):
         return self.combobox.currentText()
 
-class Label_and_combobox(QWidget):
+class LabelAndCombobox(QWidget):
     def __init__(self, name, lay_dir = 'Horizontal', stretches = None,  minimal_size = None):
-        super(Label_and_combobox, self).__init__()
+        super(LabelAndCombobox, self).__init__()
         if lay_dir == 'Horizontal':
             self.main_layout = QHBoxLayout()
         elif lay_dir == 'Vertical':
@@ -364,3 +388,47 @@ class Label_and_combobox(QWidget):
 
     def clear(self):
         self.combobox.clear()
+
+    def set_current_index(self, index):
+        self.combobox.setCurrentIndex(index)
+
+
+class LabelAndRadioButton(QWidget):
+    def __init__(self, name, lay_dir = 'Horizontal', stretches = None,  minimal_size = None):
+        super(LabelAndRadioButton, self).__init__()
+        if lay_dir == 'Horizontal':
+            self.main_layout = QHBoxLayout()
+        elif lay_dir == 'Vertical':
+            self.main_layout = QVBoxLayout()
+
+        self.main_layout.setContentsMargins(0, 0, 0, 0)
+        self.name = name
+
+        self.label = QLabel()
+        self.label.setAlignment(Qt.AlignCenter)
+        self.label.setText(name)
+
+        self.radiobutton = QRadioButton()
+    
+        if minimal_size is not None:
+            self.label.setMinimumHeight(minimal_size[0])
+            self.label.setMinimumWidth(minimal_size[1])
+            self.radiobutton.setMinimumHeight(minimal_size[0])
+            self.radiobutton.setMinimumWidth(minimal_size[1])
+
+        if stretches is not None:
+            self.main_layout.addWidget(self.label, stretches[0])
+            self.main_layout.addWidget(self.radiobutton, stretches[1])
+        else:
+            self.main_layout.addWidget(self.label)
+            self.main_layout.addWidget(self.radiobutton)
+
+        self.setLayout(self.main_layout)
+
+    def get_state(self):
+        return self.radiobutton.isChecked()
+
+    def set_state(self, checked):
+        self.radiobutton.setChecked(checked)
+
+

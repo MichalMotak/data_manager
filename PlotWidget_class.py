@@ -1,4 +1,7 @@
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+
+import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 import seaborn as sns
 import pandas as pd
@@ -7,12 +10,13 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
-from Upgraded_widgets import *
+from UpgradedWidgets import *
+from CustomDialogWidgets import *
+from globals_ import matplotlib_colors_list
 
-
-class Parent_Plot_Tab(QWidget):
+class ParentPlotTab(QWidget):
     def __init__(self, name):
-        super(Parent_Plot_Tab, self).__init__()
+        super(ParentPlotTab, self).__init__()
         self.name = name
 
         # self.frame = QFrame()
@@ -67,36 +71,177 @@ class Parent_Plot_Tab(QWidget):
     #     print(r)
 
         
-class Tab_Plot(Parent_Plot_Tab):
+class TabPlotRelatonships(ParentPlotTab):
+
+
     def __init__(self, name):
-        super(Tab_Plot, self).__init__(name)
+        super(TabPlotRelatonships, self).__init__(name)
         self.name = name
 
     def create_layout(self):
         self.main_layout = QGridLayout(self)
         self.main_layout.setContentsMargins(5,5,5,5)
 
-        self.label_x = QLabel(self)
-        self.label_x.setText('info')
-        self.label_x.setAlignment(Qt.AlignCenter)
+        # self.label_x = QLabel(self)
+        # self.label_x.setText('info')
+        # self.label_x.setAlignment(Qt.AlignCenter)
+        # self.label_x.setMinimumHeight(10)
+        # self.label_x.setMinimumWidth(50)
 
-
-        self.l_combobox_kind = Label_and_combobox('plot kind', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[30,50])
+        self.l_combobox_kind = LabelAndCombobox('plot kind', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[10,50])
         self.l_combobox_kind.add_items(['scatter', 'line'])
 
-        self.l_le_hue = Label_and_Lineedit('Hue', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[30,50])
-        
+        self.l_radiobutton_markers = LabelAndRadioButton('Markers', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[10,50])
+
         # self.b = QPushButton('plot')
         # self.b.clicked.connect(self.plot)
+        self.l_combobox_err_style = LabelAndCombobox('err_style (line)', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[10,50])
+        self.l_combobox_err_style.add_items(['band', 'bars'])
 
-        self.main_layout.addWidget(self.label_x, 0,0)
-        self.main_layout.addWidget(self.l_combobox_kind,1,0)
+        self.l_sp_alpha = LabelAndSpinbox('alpha (scatter)', stretches=[7,3], lay_dir = 'Horizontal', minimal_size=[30,50], double_spinbox=True)
+        self.l_sp_alpha.set_value(1.0)
+        self.l_sp_alpha.set_step(0.05)
+        self.l_sp_alpha.set_range(0.05,1.0)
+
+
+        # self.main_layout.addWidget(self.label_x, 0,0)
+        self.main_layout.addWidget(self.l_combobox_kind, 0,0)
+        self.main_layout.addWidget(self.l_radiobutton_markers, 0,1)
+        self.main_layout.addWidget(self.l_combobox_err_style, 1,0)
+        self.main_layout.addWidget(self.l_sp_alpha, 1,1)
+
         # self.main_layout.addWidget(self.l_le_hue, 1,1)
 
 
         # self.main_layout.addWidget(self.b)
 
         self.setLayout(self.main_layout)
+
+    def get_parameters(self, plot_kind):
+
+        alpha = self.l_sp_alpha.get_value()
+        err_style = self.l_combobox_err_style.get_text()
+        markers = self.l_radiobutton_markers.get_state()
+
+        if plot_kind == 'line':
+            pars = {"err_style": err_style, "markers" : markers}
+            return pars
+
+        elif plot_kind == 'scatter':
+            pars = {"alpha": alpha, "markers" : markers}
+            return pars
+
+
+    def plot(self, table, x_, y_, hue_, ax_):
+        print(self.name + ' plot')
+
+        kind = self.l_combobox_kind.get_text()
+        pars = self.get_parameters(kind)
+
+        print(kind, hue_)
+
+        if hue_ =='':
+            hue_ = None
+
+        if kind == 'line':
+            plot = sns.lineplot(x=x_, y=y_, hue = hue_, style = hue_, **pars, data=table.dataframe, ax = ax_)
+
+        elif kind == 'scatter':
+            plot = sns.scatterplot(x=x_, y=y_, hue = hue_, style = hue_, **pars, data=table.dataframe, ax = ax_)
+
+        print(plot)
+        print(type(plot))
+
+        return plot
+
+
+class TabPlotDistribution(ParentPlotTab):
+
+
+    def __init__(self, name):
+        super(TabPlotDistribution, self).__init__(name)
+        self.name = name
+
+    def create_layout(self):
+        self.main_layout = QGridLayout(self)
+        self.main_layout.setContentsMargins(5,5,5,5)
+
+
+class TabPlotCategoricalScatterplots(ParentPlotTab):
+    # Strip Swarm plot
+
+    def __init__(self, name):
+        super().__init__(name)
+        self.name = name
+
+    def create_layout(self):
+        self.main_layout = QGridLayout(self)
+        self.main_layout.setContentsMargins(5,5,5,5)
+
+        # self.label_pt = QLabel(self)
+        # self.label_pt.setText('Plot type')
+        self.l_combobox_kind = LabelAndCombobox('plot kind', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[30,50])
+        l = ["strip", "swarm"]
+        self.l_combobox_kind.add_items(l)
+
+        # self.l_combobox_col = Label_and_combobox('col argument', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[10,50])
+        self.l_sp_size = LabelAndSpinbox('markers size', stretches=[7,3], lay_dir = 'Horizontal', minimal_size=[30,50])
+        self.l_sp_size.set_value(5)
+
+        self.l_le_edgecolor = LabelAndLineedit('edgecolor', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[30,50])
+        self.l_le_edgecolor.set_lineedit_text('gray')
+
+        self.l_sp_linewidth = LabelAndSpinbox('linewidth', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[30,50], double_spinbox=True)
+        self.l_sp_linewidth.set_value(0)
+        self.l_sp_linewidth.set_step(0.1)
+
+        self.l_sp_jitter = LabelAndSpinbox('jitter (stripplot)', stretches=[7,3], lay_dir = 'Horizontal', minimal_size=[30,50], double_spinbox=True)
+        self.l_sp_jitter.set_value(0.1)
+        self.l_sp_jitter.set_step(0.05)
+
+        self.l_radiobutton_dodge = LabelAndRadioButton('dodge', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[30,50])
+
+
+        # self.main_layout.addWidget(self.label_pt, 0,0,1,2)
+        # self.main_layout.addWidget(self.l_combobox_kind, 1,0)
+        # self.main_layout.addWidget(self.l_sp_size, 1,1)
+        # self.main_layout.addWidget(self.l_le_edgecolor, 2,0)
+        # self.main_layout.addWidget(self.l_sp_linewidth, 2,1)
+        # self.main_layout.addWidget(self.label_pt, 0,0,1,4)
+
+        self.main_layout.addWidget(self.l_combobox_kind, 0,0)
+        self.main_layout.addWidget(self.l_sp_size, 0,1)
+        self.main_layout.addWidget(self.l_le_edgecolor, 0,2)
+        self.main_layout.addWidget(self.l_sp_linewidth, 1,0)
+        self.main_layout.addWidget(self.l_sp_jitter, 1,1)
+        self.main_layout.addWidget(self.l_radiobutton_dodge, 1,2)
+
+        # self.main_layout.addWidget(self.l_combobox_col)
+
+        self.setLayout(self.main_layout)
+
+    def get_parameters(self, plot_kind):
+        markers_size = self.l_sp_size.get_value()
+        edgecolor = self.l_le_edgecolor.get_text()
+        linewidth = self.l_sp_linewidth.get_value()
+        dodge = self.l_radiobutton_dodge.get_state()
+
+        if edgecolor not in matplotlib_colors_list:
+            d = CustomMessageBoxWarning('wrong color')
+            edgecolor = 'gray'
+
+        if plot_kind == 'strip':
+            jitter = self.l_sp_jitter.get_value()
+            pars = {'edgecolor': edgecolor, 'linewidth' : linewidth,
+            'dodge': dodge, 'jitter' : jitter}
+
+            return pars
+        elif plot_kind == 'swarm':
+            pars = {'edgecolor': edgecolor, 'linewidth' : linewidth,
+            'dodge': dodge}
+
+            return pars
+
 
     def plot(self, table, x_, y_, hue_, ax_):
         print(self.name + ' plot')
@@ -106,18 +251,267 @@ class Tab_Plot(Parent_Plot_Tab):
 
         if hue_ =='':
             hue_ = None
+        
 
-        if kind == 'line':
-            plot = sns.lineplot(x=x_, y=y_, hue = hue_, data=table.dataframe, ax = ax_)
-        elif kind == 'scatter':
-            plot = sns.scatterplot(x=x_, y=y_, hue = hue_, data=table.dataframe, ax = ax_)
+        pars = self.get_parameters(kind)
+
+        if kind == 'strip':
+            plot = sns.stripplot(x=x_, y=y_, hue = hue_,  **pars,
+                data=table.dataframe, ax = ax_)
+
+        elif kind == 'swarm':
+            plot = sns.swarmplot(x=x_, y=y_, hue = hue_,  **pars,
+                data=table.dataframe, ax = ax_)
+
         print(plot)
         print(type(plot))
+
 
         return plot
 
 
-class Tab_Plot2(Parent_Plot_Tab):
+
+
+class TabPlotCategoricalDistribution(ParentPlotTab):
+    # Strip Swarm plot
+
+    def __init__(self, name):
+        super().__init__(name)
+        self.name = name
+
+    def create_layout(self):
+        self.main_layout = QGridLayout(self)
+        self.main_layout.setContentsMargins(5,5,5,5)
+
+        # self.label_pt = QLabel(self)
+        # self.label_pt.setText('Plot type')
+        self.l_combobox_kind = LabelAndCombobox('plot kind', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[20,50])
+        l = ["box", "violin", "boxen"]
+        self.l_combobox_kind.add_items(l)
+
+        # boxplot
+        self.l_sp_whis = LabelAndSpinbox('whis', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[20,50], double_spinbox=True)
+        self.l_sp_whis.set_value(1.5)
+        self.l_sp_whis.set_step(0.10)
+        
+        self.l_sp_width = LabelAndSpinbox('width', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[20,50], double_spinbox=True)
+        self.l_sp_width.set_value(0.8)
+        self.l_sp_width.set_step(0.05)
+
+        self.l_sp_fliersize = LabelAndSpinbox('fliersize', stretches=[7,3], lay_dir = 'Horizontal', minimal_size=[20,50], double_spinbox=True)
+        self.l_sp_fliersize.set_value(5)
+        self.l_sp_fliersize.set_step(0.5)
+
+
+        # violinplot
+        self.l_combobox_inner = LabelAndCombobox('inner', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[20,50])
+        l = ["box", "quartile", "point", "stick"]
+        self.l_combobox_inner.add_items(l)
+
+        self.l_rb_split = LabelAndRadioButton('split', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[20,50])
+
+        self.l_sp_cut = LabelAndSpinbox('cut', stretches=[7,3], lay_dir = 'Horizontal', minimal_size=[20,50])
+        self.l_sp_cut.set_value(2)
+        self.l_sp_cut.set_step(1)
+
+        # boxenplot
+
+
+        # wszystkie
+        self.l_rb_dodge = LabelAndRadioButton('dodge', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[20,50])
+
+        self.l_sp_linewidth = LabelAndSpinbox('linewidth', stretches=[6,4], lay_dir = 'Horizontal', minimal_size=[20,50], double_spinbox=True)
+        self.l_sp_linewidth.set_value(1)
+        self.l_sp_linewidth.set_step(0.2)
+
+        self.l_sp_saturation = LabelAndSpinbox('saturation', stretches=[6,4], lay_dir = 'Horizontal', minimal_size=[20,50], double_spinbox=True)
+        self.l_sp_saturation.set_value(1)
+        self.l_sp_saturation.set_step(0.05)
+        self.l_sp_saturation.set_range(0, 1.0)
+
+
+        self.main_layout.addWidget(self.l_combobox_kind, 0,0)
+        self.main_layout.addWidget(self.l_rb_dodge, 0,1)
+        self.main_layout.addWidget(self.l_sp_linewidth, 0,2)
+        self.main_layout.addWidget(self.l_sp_saturation, 0,3)
+
+        self.main_layout.addWidget(self.l_sp_whis, 1,0)
+        self.main_layout.addWidget(self.l_sp_width, 1,1)
+        self.main_layout.addWidget(self.l_sp_fliersize, 1,2)
+
+        self.main_layout.addWidget(self.l_combobox_inner, 2,0)
+        self.main_layout.addWidget(self.l_rb_split, 2,1)
+        self.main_layout.addWidget(self.l_sp_cut, 2,2)
+
+        # self.main_layout.addWidget(self.l_combobox_col)
+
+        self.setLayout(self.main_layout)
+
+    def get_parameters(self, plot_kind):
+
+        dodge = self.l_rb_dodge.get_state()
+        linewidth = self.l_sp_linewidth.get_value()
+        saturation = self.l_sp_saturation.get_value()
+
+        # whis = self.l_sp_whis.get_value()
+        # width = self.l_sp_width.get_value()
+        # fliersize = self.l_sp_fliersize.get_value()
+
+        inner = self.l_combobox_inner.get_text()
+        split = self.l_rb_split.get_state()
+        cut = self.l_sp_cut.get_value()
+
+        if plot_kind == 'box':
+            whis = self.l_sp_whis.get_value()
+            width = self.l_sp_width.get_value()
+            fliersize = self.l_sp_fliersize.get_value()
+
+            pars = {'dodge': dodge, 'linewidth' :linewidth, 'saturation':saturation,
+             'whis': whis, 'width' : width, 'fliersize' : fliersize}
+            return pars
+
+        elif plot_kind == 'violin':
+            inner = self.l_combobox_inner.get_text()
+            split = self.l_rb_split.get_state()
+            cut = self.l_sp_cut.get_value()
+            pars = {'dodge': dodge, 'linewidth' :linewidth, 'saturation':saturation,
+             'inner': inner, 'split' : split, 'cut' : cut}
+            return pars
+
+        elif plot_kind == 'boxen':
+            pars = {'dodge': dodge, 'linewidth' :linewidth, 'saturation':saturation}
+            return pars
+
+
+    def plot(self, table, x_, y_, hue_, ax_):
+        print(self.name + ' plot')
+
+        plot_kind = self.l_combobox_kind.get_text()
+        print(plot_kind, hue_)
+
+        if hue_ =='':
+            hue_ = None
+        
+        parameters = self.get_parameters(plot_kind)
+        print('parameters ', parameters)
+
+
+        if plot_kind == 'box':
+            plot = sns.boxplot(x=x_, y=y_, hue = hue_, **parameters, data=table.dataframe, ax = ax_)
+
+        elif plot_kind == 'violin':
+            plot = sns.violinplot(x=x_, y=y_, hue = hue_, **parameters, data=table.dataframe, ax = ax_)
+
+        elif plot_kind == 'boxen':
+            plot = sns.boxenplot(x=x_, y=y_, hue = hue_, **parameters, data=table.dataframe, ax = ax_)
+
+        print(plot)
+        print(type(plot))
+
+
+        return plot
+
+
+class TabPlotCategoricalEstimate(ParentPlotTab):
+    def __init__(self, name):
+        super().__init__(name)
+        self.name = name
+
+    def create_layout(self):
+        self.main_layout = QGridLayout(self)
+        self.main_layout.setContentsMargins(5,5,5,5)
+
+        # self.label_pt = QLabel(self)
+        # self.label_pt.setText('Plot type')
+
+        self.l_combobox_kind = LabelAndCombobox('plot kind', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[10,50])
+        l = ["point", "bar", "count"]
+        self.l_combobox_kind.add_items(l)
+
+        self.l_sp_capsize = LabelAndSpinbox('capsize', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[10,50], double_spinbox=True)
+        self.l_sp_capsize.set_value(1.0)
+        self.l_sp_capsize.set_step(0.05)
+        self.l_sp_capsize.set_range(0.05,5)
+
+
+        self.l_sp_errwidth = LabelAndSpinbox('error width', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[10,50], double_spinbox=True)
+        self.l_sp_errwidth.set_value(1.0)
+        self.l_sp_errwidth.set_step(0.1)
+        self.l_sp_errwidth.set_range(0.1, 10)
+
+        self.l_sp_saturation = LabelAndSpinbox('saturation (bar/count)', stretches=[7,3], lay_dir = 'Horizontal', minimal_size=[10,50], double_spinbox=True)
+        self.l_sp_saturation.set_value(1.0)
+        self.l_sp_saturation.set_step(0.05)
+        self.l_sp_saturation.set_range(0.05, 1.0)
+
+        # self.slider = Improved_Slider(0, 100, 'Train_test_split')
+
+
+
+        # self.main_layout.addWidget(self.label_pt)
+        self.main_layout.addWidget(self.l_combobox_kind, 0,0)
+        self.main_layout.addWidget(self.l_sp_capsize, 0,1)
+        self.main_layout.addWidget(self.l_sp_errwidth, 1,0)
+        self.main_layout.addWidget(self.l_sp_saturation, 1,1)
+
+
+
+        self.setLayout(self.main_layout)
+
+
+    def get_parameters(self, plot_kind):
+        capsize = self.l_sp_capsize.get_value()
+        errwidth = self.l_sp_errwidth.get_value()
+        saturation = self.l_sp_saturation.get_value()
+
+
+        if plot_kind == 'point':
+            pars = {"capsize": capsize, "errwidth" : errwidth}
+            return pars
+
+        elif plot_kind == 'bar':
+            pars = {"capsize": capsize, "errwidth" : errwidth, "saturation" : saturation}
+            return pars
+
+        elif plot_kind == 'count':
+            pars = {"saturation" : saturation}
+            return pars
+
+    def plot(self, table, x_, y_, hue_, ax_):
+        print(self.name + ' plot')
+
+        kind = self.l_combobox_kind.get_text()
+        print(kind, hue_)
+
+
+
+        if hue_ =='':
+            hue_ = None
+
+        pars = self.get_parameters(kind)
+
+        if kind == 'point':
+            plot = sns.pointplot(x=x_, y=y_, hue = hue_, **pars,
+            data=table.dataframe, ax = ax_)
+
+        elif kind == 'bar':
+            plot = sns.barplot(x=x_, y=y_, hue = hue_, **pars, data=table.dataframe, ax = ax_)
+
+        elif kind == 'count':
+            plot = sns.countplot(x=x_, hue = hue_, **pars,
+            data=table.dataframe, ax = ax_)
+
+        print(plot)
+        print(type(plot))
+
+
+        return plot
+
+
+
+
+# wszystkie caterogical
+class TabPlot2(ParentPlotTab):
     def __init__(self, name):
         super().__init__(name)
         self.name = name
@@ -128,11 +522,11 @@ class Tab_Plot2(Parent_Plot_Tab):
 
         self.label_pt = QLabel(self)
         self.label_pt.setText('Plot type')
-        self.l_combobox_kind = Label_and_combobox('plot kind', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[30,50])
+        self.l_combobox_kind = LabelAndCombobox('plot kind', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[10,50])
         l = ["strip", "swarm", "box", "violin", "boxen", "point", "bar", "count"]
         self.l_combobox_kind.add_items(l)
 
-        self.l_combobox_col = Label_and_combobox('col argument', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[30,50])
+        self.l_combobox_col = LabelAndCombobox('col argument', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[10,50])
 
 
         self.main_layout.addWidget(self.label_pt)
@@ -156,7 +550,9 @@ class Tab_Plot2(Parent_Plot_Tab):
             hue_ = None
 
         if kind == 'strip':
-            plot = sns.stripplot(x=x_, y=y_, hue = hue_, data=table.dataframe, ax = ax_)
+            # plot = sns.stripplot(x=x_, y=y_, hue = hue_, data=table.dataframe, ax = ax_)
+            # plot = sns.catplot(x=x_, y=y_, hue = hue_, kind = 'strip',data=table.dataframe)
+            sns.histplot(x=x_, data=table.dataframe)
         elif kind == 'swarm':
             plot = sns.swarmplot(x=x_, y=y_, hue = hue_, data=table.dataframe, ax = ax_)
         elif kind == 'box':
@@ -179,8 +575,6 @@ class Tab_Plot2(Parent_Plot_Tab):
         return plot
 
 
-
-
 class PlotWidget(QWidget):
     def __init__(self, table):
         super(PlotWidget, self).__init__(table)
@@ -189,59 +583,49 @@ class PlotWidget(QWidget):
         self.table = table
 
         self.canv = PlotCanvas(table, 5, 3)
+        self.navbar = NavigationToolbar(self.canv, self) 
+
 
         self.xx = QPushButton('plot')
 
         self.under_canv_layout = QGridLayout()
 
         self.tabs = QTabWidget(self)
-        self.tab1 = Tab_Plot("relationships")
-        self.tab2 = Tab_Plot2("distributions")
-        self.tab3 = Tab_Plot2("p2")
-        self.tab4 = Tab_Plot2("p2")
-        self.tab5 = Tab_Plot2("p2")
-        # self.tab6 = Tab_Plot2("p2")
-        # self.tab7 = Tab_Plot2("p2")
-        # self.tab8 = Tab_Plot2("p2")
-        # self.tab9 = Tab_Plot2("p2")
-        # self.tab10 = Tab_Plot2("p2")
-        # self.tabs.addTab(self.xx, 'xx')
-        # self.tabs.addTab(self.xx, 'xx12')
+        self.tab1 = TabPlotRelatonships("Relationships")
+        self.tab2 = TabPlotDistribution("Distribution")
+
+        self.tab3 = TabPlotCategoricalScatterplots('Categorical_Scatterplots')
+        self.tab4 = TabPlotCategoricalDistribution("Categorical_Distribution")
+        self.tab5 = TabPlotCategoricalEstimate("Categorical_Estimate")
+
         self.tabs.addTab(self.tab1, self.tab1.name)
-        self.tabs.addTab(self.tab2, "relationships")
-        self.tabs.addTab(self.tab3, "distributions")
-        self.tabs.addTab(self.tab4, "relationships")
-        self.tabs.addTab(self.tab5, "relationships")
-        # self.tabs.addTab(self.tab6, "relationships")
-        # self.tabs.addTab(self.tab7, "relationships")
-        # self.tabs.addTab(self.tab8, "relationships")
-        # self.tabs.addTab(self.tab9, "relationships")
-        # self.tabs.addTab(self.tab10, "relationships")
+        self.tabs.addTab(self.tab2, self.tab2.name)
+        self.tabs.addTab(self.tab3, self.tab3.name)
+        self.tabs.addTab(self.tab4, self.tab4.name)
+        self.tabs.addTab(self.tab5, self.tab5.name)
 
 
-        self.list_of_tabs = [self.tab1, self.tab2]
+        self.list_of_tabs = [self.tab1, self.tab2, self.tab3, self.tab4, self.tab5]
 
-        self.l_sp_number_of_plots = Label_and_spinbox('Number of plots', lay_dir = 'Horizontal')
+        self.l_sp_number_of_plots = LabelAndSpinbox('Number of plots',stretches=[6,4], lay_dir = 'Horizontal', minimal_size=[25,50])
         self.l_sp_number_of_plots.set_range(0,6)
         self.l_sp_number_of_plots.sp.valueChanged.connect(self.l_sp_number_of_plots_changed)
 
-        self.l_sp_current_of_plots = Label_and_spinbox('current plot', lay_dir = 'Horizontal')
+        self.l_sp_current_of_plots = LabelAndSpinbox('current plot',stretches=[5,5], lay_dir = 'Horizontal', minimal_size=[25,50])
         self.l_sp_current_of_plots.set_range(0,6)
-        # self.l_sp_current_of_plots.sp.valueChanged.connect(self.l_sp_number_of_plots_changed)
 
-        # self.b = QPushButton('clear plot')
-        # self.b_clear_plot.clicked.connect(self.clear_plot)
-
-
-        self.l_le_x_axis = Label_and_Lineedit('X Label', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[30,50])
-        self.l_le_y_axis = Label_and_Lineedit('Y Label', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[30,50])
-        self.l_le_hue = Label_and_Lineedit('Hue', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[30,50])
+        self.l_le_x_axis = LabelAndLineedit('X Label', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[25,50])
+        self.l_le_y_axis = LabelAndLineedit('Y Label', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[25,50])
+        self.l_le_hue = LabelAndLineedit('Hue', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[25,50])
 
         self.b_plot = QPushButton('plot')
         self.b_plot.clicked.connect(self.plot)
 
-        self.b_clear_plot = QPushButton('clear plot')
-        self.b_clear_plot.clicked.connect(self.clear_plot)
+        self.b_clear_all_plots = QPushButton('delete all plots')
+        self.b_clear_all_plots.clicked.connect(self.clear_all_plots)
+
+        self.b_clear_plot = QPushButton('clear current plot')
+        self.b_clear_plot.clicked.connect(self.clear_current_plot)
 
         self.b_switch_axes = QPushButton('switch axes')
         self.b_switch_axes.clicked.connect(self.switch_axes)
@@ -249,8 +633,9 @@ class PlotWidget(QWidget):
 
         self.checkbox = QCheckBox("col_names/indexes ", self)
         # self.checkbox.stateChanged.connect(lambda:self.checkbox_changed(self.checkbox))
-        self.checkbox_reset_plots = QCheckBox("reset plots ", self)
+        self.checkbox_reset_plots = QCheckBox("reset plots", self)
         self.checkbox_reset_plots.setChecked(True)
+        self.checkbox_reset_plots.setToolTip('activated plot will be overwritten')
 
         self.under_canv_layout.addWidget(self.tabs, 0, 0, 1, 4)
         
@@ -265,21 +650,28 @@ class PlotWidget(QWidget):
         # self.under_canv_layout.setColumnStretch(2,1)
 
         # self.lay = QHBoxLayout()
-        self.under_canv_layout.addWidget(self.l_sp_number_of_plots, 1,0,1,2)
-        self.under_canv_layout.addWidget(self.l_sp_current_of_plots, 1,2,1,2)
+        self.under_canv_layout.addWidget(self.l_sp_number_of_plots, 1,0)
+        self.under_canv_layout.addWidget(self.l_sp_current_of_plots, 1,1)
+        self.under_canv_layout.addWidget(self.checkbox_reset_plots, 1,3)
 
 
         self.under_canv_layout.addWidget(self.l_le_x_axis, 2,0)
         self.under_canv_layout.addWidget(self.l_le_y_axis, 2,1)
         self.under_canv_layout.addWidget(self.l_le_hue, 2,2)
-        self.under_canv_layout.addWidget(self.checkbox, 2,3)
+        # self.under_canv_layout.addWidget(self.checkbox, 2,3)
+        self.under_canv_layout.addWidget(self.b_switch_axes, 2,3)
 
 
         # self.under_canv_layout.setVerticalSpacing(0)
         self.under_canv_layout.addWidget(self.b_plot, 3,0)
-        self.under_canv_layout.addWidget(self.b_clear_plot, 3,1)
-        self.under_canv_layout.addWidget(self.b_switch_axes, 3,2)
-        self.under_canv_layout.addWidget(self.checkbox_reset_plots, 3,3)
+        self.under_canv_layout.addWidget(self.b_clear_all_plots, 3,1)
+        # self.under_canv_layout.addWidget(self.b_switch_axes, 3,2)
+        self.under_canv_layout.addWidget(self.b_clear_plot, 3,2)
+        self.under_canv_layout.addWidget(self.checkbox, 3,3)
+
+
+
+        # self.under_canv_layout.addWidget(self.checkbox_reset_plots, 3,3)
 
 
         # self.b_plot.setMinimumHeight(100)
@@ -294,18 +686,35 @@ class PlotWidget(QWidget):
 
 
         self.splitter_center = QSplitter(Qt.Vertical)
-        self.splitter_center.addWidget(self.canv)
-        # self.splitter_center.addL(self.under_canv_layout)
 
+        self.f = QFrame()
+        self.lay = QVBoxLayout()
+        self.lay.addWidget(self.navbar)
+        self.lay.addWidget(self.canv)
+        self.f.setLayout(self.lay)
+        # self.splitter_center.addWidget(self.navbar)
+        # self.splitter_center.addWidget(self.canv)
+        # self.splitter_center.addL(self.under_canv_layout)
+        self.splitter_center.addWidget(self.f)
 
         self.splitter_center.addWidget(self.frame_under_canv)
         # self.splitter_center.setStretchFactor(900,300)
         self.splitter_center.setStretchFactor(0, 12)
-        self.splitter_center.setStretchFactor(1, 3)
+        self.splitter_center.setStretchFactor(1, 1)
 
+
+
+        index = self.splitter_center.indexOf(self.frame_under_canv)
+        self.splitter_center.setCollapsible(index, False)
+
+
+        self.canv.signal_for_upgrade_widget_spinbox.connect(self.l_sp_number_of_plots.get_signal_for_plot_widget)
+        # self.l_sp_number_of_plots.set_value(10)
 
         self.main_layout.addWidget(self.splitter_center)
 
+    def update_table(self, table):
+        self.table = table
 
     def l_sp_number_of_plots_changed(self):
         print('l_sp_number_of_plots_changed')
@@ -339,7 +748,7 @@ class PlotWidget(QWidget):
         self.l_le_hue.update_text(col_name)
 
     def switch_axes(self):
-        print('sa')
+        print('switch axes')
         x_text = self.l_le_x_axis.get_text()
         y_text = self.l_le_y_axis.get_text()
         self.l_le_x_axis.set_lineedit_text(y_text)
@@ -352,64 +761,84 @@ class PlotWidget(QWidget):
         current_tab_obj = self.list_of_tabs[current_tab_index]
         return current_tab_index, current_tab_obj
 
-    def clear_plot(self):
+    def clear_all_plots(self):
         print('clear all plots')
         # self.canv.ax.clear()
         self.canv.clear_all_plots()
+
+    def clear_current_plot(self):
+        index = self.l_sp_current_of_plots.get_value()
+        self.canv.clear_current_plot(index)
+
+    def reset_current_plot_value(self):
+        self.l_sp_number_of_plots.set_value(0)
 
     def plot(self):
         print('Plot Widget plot')
         _, current_tab = self.which_tab_is_opened()
         print(current_tab)
+        print(self.table.col_labels)
 
         x, y = self.get_x_y_axis()
+        if x not in self.table.col_labels:
+            d = CustomMessageBoxWarning('Wrong X label')
+            return 0
+        elif y not in self.table.col_labels:
+            d = CustomMessageBoxWarning('Wrong Y label')
+            return 0
+        
         hue = self.get_hue()
 
         # if self.checkbox_reset_plots.isChecked():
         #     self.clear_plot()
         # plot = current_tab.plot(self.table, x,y,hue, self.canv.ax)
         ax_ind = self.l_sp_current_of_plots.get_value()
-        plot = current_tab.plot(self.table, x,y,hue, self.canv.fig.axes[ax_ind-1])
-        # self.canv.ax_list.append(self.canv.fig.axes[ax_ind-1])
+        reset_plots = self.checkbox_reset_plots.isChecked()
+        print('reset ', reset_plots)
 
-        self.canv.fig.tight_layout()
-        self.canv.draw()
+        if ax_ind <= self.l_sp_number_of_plots.get_value():
 
+            try:
+                if reset_plots:
+                    self.canv.clear_current_plot(ax_ind)
+                plot = current_tab.plot(self.table, x,y,hue, self.canv.fig.axes[ax_ind-1])
+                print('plot type ', type(plot))
+                # print(type(plot[0]))
+                # print(plot[0])
+                # print(self.canv.fig.axes)
+                # ax2 = self.canv.fig.add_axes()
+                # self.canv.fig.axes[0] = plot[0]
+                # self.canv.fig.axes.append(plot[0])
+                # print(self.canv.fig.axes)
+                self.canv.fig.tight_layout()
+                self.canv.draw()
+                # self.canv.fig.canvas.draw_idle()
+            except IndexError:
+                pass
+                # d = Custom_Message_Box_Warning('plots not found')
+        else:
+            d = CustomMessageBoxWarning(f'plot number {ax_ind} is\'nt activated')
 
     
 class PlotCanvas(FigureCanvas):
+    signal_for_upgrade_widget_spinbox = pyqtSignal(int)
 
     def __init__(self, table, width=40, height=20):
         # super().__init__(table)
 
-        self.fig = Figure(figsize=(width, height), dpi=100, facecolor='lightgrey')
-
+        self.fig = Figure(figsize=(width, height), dpi=100, facecolor='none')
+        plt.style.use('dark_background')
+        # self.fig.set_facecolor("none")
         # self.ax = self.fig.add_subplot(111) # poczatkowe ustawienia
         # self.ax.grid()
-        self.fig.subplots_adjust(left = 0.09, right = 0.85)  # umiejscowienie fig w FigureCanvas, robimy miejsce dla legendy
-        # self.fig.subplots_adjust(left=0.125, bottom=0.1, right=0.9, top=0.9, wspace=0.3, hspace=0.3)
-        # self.fig.tight_layout()
+        # self.fig.subplots_adjust(left = 0.09, right = 0.85)  # umiejscowienie fig w FigureCanvas, robimy miejsce dla legendy
 
-
-        # self.ax = self.fig.add_subplot(111) # poczatkowe ustawienia
-        # # self.ax.grid()
-        # # self.ax.axis('off')
-        # self.ax_list.append(self.ax)
-        # print(self.ax.lines)
         self.ax_list = []
-
-        # self.ax2 = self.fig.add_subplot(222)
-        # self.ax2.grid()
-
-        # self.ax3= self.fig.add_subplot(223)
-        # self.ax3.grid()
-
-        # self.ax4 = self.fig.add_subplot(224)
-        # self.ax4.grid()
 
         FigureCanvas.__init__(self, self.fig)
         self.setParent(table)
         self.table = table
+
 
     def change(self):
         print('change')
@@ -420,8 +849,6 @@ class PlotCanvas(FigureCanvas):
         print('update_num_of_subplots')
         print('number:', number)
 
-        # if len(self.fig.axes) > 0:
-        #     self.clear_plots()
         print('fig axes')
         print(self.fig.axes)
         print(len(self.fig.axes))
@@ -460,49 +887,17 @@ class PlotCanvas(FigureCanvas):
                 else:
                     ax = self.fig.add_subplot(2,2,n)
 
+        elif number in range(5,7):
+            print('number: ', number)
+            for n in range(1,number+1):
+                print(n)
+                if n in range(1,len_ax_list+1):
+                    print('jest plot : ', n)
+                    ax = self.ax_list[n-1]
+                    ax.change_geometry(2,3,n)
+                else:
+                    ax = self.fig.add_subplot(2,3,n)
 
-        # elif number in range(5,7):
-        #     # self.ax_list = []
-        #     print(number)
-        #     for n in range(1,number+1):
-        #         if n in range(1,len_ax_list+1):
-        #             print('jest plot : ', n)
-        #             ax = self.ax_list[n-1]
-        #             ax.change_geometry(2,3,n)
-        #         else:
-        #             ax = self.fig.add_subplot(2,3,n)
-
-
-        # elif number == 2:
-        #     # self.ax_list = []
-        #     print(number)
-        #     for n in range(1,number+1):  # 1,2
-        #         ax = self.fig.add_subplot(1,2,n)
-        #         # ax.grid()
-
-
-
-        # elif number in range(3,5):
-        #     # self.ax_list = []
-        #     for n in range(1,number+1):  #1,2,3
-        #         ax = self.fig.add_subplot(2,2,n)
-        #         # ax.grid()
-
-
-        # elif number in range(5,7):
-        #     # self.ax_list = []
-        #     print('num ', number)
-        #     for n in range(1,number+1):
-        #         ax = self.fig.add_subplot(2,3,n)
-
-        # self.ax_list = self.fig.axes
-
-        # line = ax.lines # get the first line, there might be more
-        # print('lines, ', line)
-        # print('DATA')
-        # print(line.get_xydata())
-
-        # usun co za dużo xd
         if number < len(self.ax_list):
             roznica =  len(self.ax_list) - number
             print('roznica', roznica)
@@ -511,9 +906,7 @@ class PlotCanvas(FigureCanvas):
             print(ax_to_del)
             for ax in ax_to_del:
                 self.fig.delaxes(ax)
-            # for en,ax in enumerate(self.fig.axes, start = 1):
-            #     ax.change_geometry(2,2,en)
-        
+
             print('po usunieciu')
             print(self.fig.axes)
             print(len(self.fig.axes))
@@ -531,9 +924,16 @@ class PlotCanvas(FigureCanvas):
         self.ax_list = self.fig.axes
 
         # FigureCanvas.__init__(self, self.fig)
+        self.grid_for_all_plots()
         self.fig.tight_layout()
         self.draw()
         print('d')
+
+
+    def grid_for_all_plots(self):
+        print('grid')
+        for ax in self.fig.axes:
+            ax.grid(True, which = 'both')
 
     def clear_all_plots(self):
         print('clear plots')
@@ -543,9 +943,31 @@ class PlotCanvas(FigureCanvas):
             self.fig.delaxes(ax)
         # self.l_sp_number_of_plots.set_value(0) # zmien wartość na 0 
 
+        self.emit_signal_reset_current_plot_value(0)
+
         self.draw()
 
         print('clear plots end')
+    
+    def clear_current_plot(self, index):
+        print('ccp')
+        print(index)
+        # if len(self.fig.self.axes) != 0:
+        try:
+            ax_to_clear = self.fig.axes[index-1]
+            ax_to_clear.clear()
+            ax_to_clear.grid(True)
+            self.draw()
+
+        except IndexError:
+            d = CustomMessageBoxWarning(text='plots not found')
+
+
+    @pyqtSlot()
+    def emit_signal_reset_current_plot_value(self, value):
+        print('emit ', value)
+        self.signal_for_upgrade_widget_spinbox.emit(value)
+        print('emmited')
 
 
     def plot_indexes(self, t, x, y, h):

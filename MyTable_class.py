@@ -44,11 +44,18 @@ class MyTable(QTableWidget):
         Args:
             list ([type]): list of new header labels
         """
-        print('sel column labels')
+        print('set column labels')
         print(list_)
         self.col_labels = list_
         self.setHorizontalHeaderLabels(list_)
         self.show()
+
+    def set_row_labeles(self, list_):
+        print('set row labels')
+        print(list_)
+        self.col_labels = list_
+        self.setVerticalHeaderLabels(list_)
+        self.show()  
 
     def update_from_df(self, dataframe):
         print('update from df')

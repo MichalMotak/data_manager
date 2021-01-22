@@ -3,29 +3,44 @@ from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtWidgets import QDesktopWidget,\
     QSplitter, QGridLayout, QAction, QApplication, QMainWindow, \
     QPushButton,QMessageBox, QCheckBox, QFileDialog, QLabel,QSizePolicy, QLineEdit, QComboBox
+
 import pandas as pd
+import csv
+
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
-from Database_class import Subwindow_Database
-import csv
-from MyTable_class import MyTable
-from MLWidget_class import MLWidget
-from Right_table_class import Right_Table_Widget
-from PlotWidget_class import PlotWidget
+# from Database_class import SubwindowDatabase
+# import csv
+# from MyTable_class import MyTable
+# from MLWidget_class import MLWidget
+# from RightTable_class import RightTableWidget
+# from PlotWidget_class import PlotWidget
 
+import Database_class
+import MyTable_class
+import MLWidget_class
+import RightTable_class
+import PlotWidget_class
+import CustomDialogWidgets
+import PreprocessingWidget_class
+
+# from CustomDialogWidgets import CustomMessageBoxInformation, CustomMessageBoxWarning
+
+import qdarkstyle
 
 
 
 class MainWindow(QMainWindow):
-
 
     def __init__(self):
         super(MainWindow, self).__init__()
 
         self.left, self.top  = 100, 100
         self.height, self.width,  = 800, 1600
+
+        # self.setStyleSheet(qdarkstyle.load_stylesheet())
 
         self.UI()
         self.show()
@@ -35,7 +50,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle('File manager')
         self.move_to_center()
 
-        self.table = MyTable(self, 10, 5)
+        self.table = MyTable_class.MyTable(self, 10, 5)
 
         # layout = QGridLayout(self)
         self._main = QtWidgets.QWidget()
@@ -96,59 +111,103 @@ class MainWindow(QMainWindow):
 
 
         self.frame_left = QFrame(self)
-        self.frame_left.setStyleSheet("QFrame {background-color: rgb(250, 255, 255);"
+        self.frame_left.setStyleSheet("QFrame {"
                                       "border-width: 1;"
                                       "border-radius: 3;"
                                       "border-style: solid;"
-                                      "border-color: rgb(50,50,50)}"
+                                      "border-color: rgb(0,0,0)}"
                                       )
 
         # ======================= Left upper frame
 
         self.frame_button_lay = QFrame(self)
         # self.frame_button_lay.setStyleSheet("QFrame {} ")
-        self.frame_button_lay.setStyleSheet("QFrame {background-color: rgb(250, 255, 255);"
-                                      "border-width: 1;"
-                                      "border-radius: 3;"
-                                      "border-style: solid;"
-                                      "border-color: rgb(50,50,50)}"
-                                      )
+        # self.frame_button_lay.setStyleSheet("QFrame {background-color: rgb(250, 255, 255);"
+        #                               "border-width: 1;"
+        #                               "border-radius: 3;"
+        #                               "border-style: solid;"
+        #                               "border-color: rgb(50,50,50)}"
+        #                               )
+        self.frame_button_lay.setStyleSheet("QFrame {"
+                                "border-width: 1;"
+                                "border-radius: 3;"
+                                "border-style: solid;"
+                                "border-color: rgb(0,0,0)}"
+                                )
+
 
         self.button_lay = QVBoxLayout(self)
         self.pushButton = QPushButton(self)
         self.pushButton.setGeometry(QRect(350, 100, 80, 20))
         self.pushButton.setText('add column')
         self.pushButton.clicked.connect(self.button)
-        self.button_lay.addWidget(self.pushButton)
+
 
         self.pushButton2 = QPushButton(self)
         self.pushButton2.setGeometry(QRect(350, 100, 80, 20))
         self.pushButton2.setText('Clear table')
-        self.pushButton2.clicked.connect(self.clear_table)
+        # self.pushButton2.clicked.connect(self.clear_table)
 
+        self.b_describe = QPushButton(self)
+        self.b_describe.clicked.connect(self.show_describe)
+        self.b_describe.setText('Describe dataframe')
+
+
+
+        self.button_lay.addWidget(self.pushButton)
         self.button_lay.addWidget(self.pushButton2)
+        self.button_lay.addWidget(self.b_describe)
 
-        self.le_add_col = QLineEdit(self)
-        self.button_lay.addWidget(self.le_add_col)
-
-        self.line = QLineEdit(self)
-        self.line.setGeometry(QRect(350, 100, 80, 20))
-        self.button_lay.addWidget(self.line)
 
         self.frame_button_lay.setLayout(self.button_lay)
+
+
+        # ======================= Preprocessing Widget
+        
+
+        self.preproc_widget = PreprocessingWidget_class.PreprocessingWidget()
+
+
+
+
+        self.table_describe = MyTable_class.MyTable(self, 5,3)
+        self.table_describe.hide()
+        # self.hor_lay_left.setStretchFactor(self.table_describe, 3)
+        # self.hor_lay_left.setSpacing(3)
+        # self.hor_lay_left.addWidget(self.table_describe)
+
+
+
+        self.splitter_left = QSplitter(Qt.Vertical)
+
+        # self.splitter_center.addWidget(self.navbar)
+        # self.splitter_center.addWidget(self.canv)
+        # self.splitter_center.addL(self.under_canv_layout)
+        self.splitter_left.addWidget(self.table)
+        self.splitter_left.addWidget(self.table_describe)
+        self.splitter_left.addWidget(self.preproc_widget)
+
+        index = self.splitter_left.indexOf(self.table_describe)
+        self.splitter_left.setCollapsible(index, False)
+
+        # self.splitter_center.setStretchFactor(900,300)
+        self.splitter_left.setStretchFactor(0, 10)
+        self.splitter_left.setStretchFactor(1, 1)
+
 
 
         # =================== Layout of frame and table on the left
 
         self.hor_lay_left = QVBoxLayout()
         self.hor_lay_left.addWidget(self.frame_button_lay)
-        self.hor_lay_left.addWidget(self.table)
+        self.hor_lay_left.addWidget(self.splitter_left)
+
+        # self.hor_lay_left.addWidget(self.frame_button_lay)
+        # self.hor_lay_left.addWidget(self.table)
+
 
         self.frame_left.setLayout(self.hor_lay_left)
 
-        # table_width = self.frame_left.frameGeometry().width()
-        # table_height = self.frame_left.frameGeometry().height()
-        # print('d', table_width, table_height)
         self.frame_left.setMinimumWidth(self.width/6)
 
 
@@ -156,15 +215,22 @@ class MainWindow(QMainWindow):
         # ================== Center Frame and Layout
 
         self.frame_center = QFrame(self)
-        self.frame_center.setStyleSheet("QFrame {background-color: rgb(255, 255, 255);"
+        # self.frame_center.setStyleSheet("QFrame {background-color: rgb(255, 255, 255);"
+        #                         "border-width: 1;"
+        #                         "border-radius: 3;"
+        #                         "border-style: solid;"
+        #                         "border-color: rgb(50,50,50)}")
+
+        self.frame_center.setStyleSheet("QFrame {"
                                 "border-width: 1;"
                                 "border-radius: 3;"
                                 "border-style: solid;"
-                                "border-color: rgb(50,50,50)}")
+                                "border-color: rgb(0,0,0)}"
+                                )
         self.frame_center.setMinimumWidth(self.width / 6)
 
         self.center_lay = QVBoxLayout(self)
-        self.plot_widget = PlotWidget(self.table)
+        self.plot_widget = PlotWidget_class.PlotWidget(self.table)
 
         self.center_lay.addWidget(self.plot_widget)
 
@@ -172,29 +238,27 @@ class MainWindow(QMainWindow):
 
 
         self.frame_center.setLayout(self.center_lay)
-        # self.frame_center.setSizePolicy(QSizePolicy.Ignored,QSizePolicy.Maximum)
-        # table_width = self.frame_center.frameGeometry().width()
-        # table_height = self.frame_center.frameGeometry().height()
-        # print('d', table_width, table_height)
-        # self.frame_center.setMinimumWidth(table_width)
-        # self.frame_center.setMinimumHeight(table_height)
-        #
-
 
 
         self.frame_MLWidget = QFrame(self)
         self.layout_MLWidget = QGridLayout()
 
-        self.ml_widget = MLWidget()
+        self.ml_widget = MLWidget_class.MLWidget()
 
         self.layout_MLWidget.addWidget(self.ml_widget)
 
-        self.frame_MLWidget.setStyleSheet("QFrame {background-color: rgb(250, 255, 255);"
-                                      "border-width: 1;"
-                                      "border-radius: 3;"
-                                      "border-style: solid;"
-                                      "border-color: rgb(50,50,50)}"
-                                      )
+        # self.frame_MLWidget.setStyleSheet("QFrame {background-color: rgb(250, 255, 255);"
+        #                               "border-width: 1;"
+        #                               "border-radius: 3;"
+        #                               "border-style: solid;"
+        #                               "border-color: rgb(50,50,50)}"
+        #                               )
+        self.frame_MLWidget.setStyleSheet("QFrame {"
+                                "border-width: 1;"
+                                "border-radius: 3;"
+                                "border-style: solid;"
+                                "border-color: rgb(0,0,0)}"
+                                )
 
         self.frame_MLWidget.setLayout(self.layout_MLWidget)
         self.frame_MLWidget.setMinimumWidth(self.width / 6)
@@ -204,30 +268,24 @@ class MainWindow(QMainWindow):
 
         # ============== RIGHT TABLE WIDGET  ================================
         self.frame_right_table = QFrame(self)
-        self.frame_right_table.setStyleSheet("QFrame {background-color: rgb(250, 255, 255);"
-                                      "border-width: 1;"
-                                      "border-radius: 3;"
-                                      "border-style: solid;"
-                                      "border-color: rgb(50,50,50)}"
-                                      )
+        # self.frame_right_table.setStyleSheet("QFrame {background-color: rgb(250, 255, 255);"
+        #                               "border-width: 1;"
+        #                               "border-radius: 3;"
+        #                               "border-style: solid;"
+        #                               "border-color: rgb(50,50,50)}"
+        #                               )
+        self.frame_right_table.setStyleSheet("QFrame {"
+                                "border-width: 1;"
+                                "border-radius: 3;"
+                                "border-style: solid;"
+                                "border-color: rgb(0,0,0)}"
+                                )
 
         self.layout_right_table = QGridLayout()
 
-        # self.label = QLabel()
-        # self.label.setAlignment(Qt.AlignCenter)
-        # self.label.setText(' labelllllllllllllllllllll ')
-        #
-        #
-        self.right_table = Right_Table_Widget()
-        # self.b_right_table = QPushButton(self)
-        # self.b_right_table.setText('predict')
-        # self.b_right_table.clicked.connect(self.predict)
-
+        self.right_table = RightTable_class.RightTableWidget()
 
         self.layout_right_table.addWidget(self.right_table)
-        # self.layout_right_table.addWidget(self.label)
-        # self.layout_right_table.addWidget(self.b_right_table)
-
 
 
         self.frame_right_table.setLayout(self.layout_right_table)
@@ -251,10 +309,6 @@ class MainWindow(QMainWindow):
 
         # ================= Center splitter between canv and frame under canv =======================
 
-        # self.splitter_center = QSplitter(Qt.Vertical)
-        # self.splitter_center.addWidget(self.canv)
-        # self.splitter_center.addWidget(self.frame_under_canv)
-        # self.center_lay.addWidget(self.splitter_center)
 
 
         self.right_table.signal_for_ml_widget.connect(self.ml_widget.get_signal_for_right_table)
@@ -264,7 +318,7 @@ class MainWindow(QMainWindow):
         self.table.customContextMenuRequested.connect(self.generateMenu)  # +++
         self.table.viewport().installEventFilter(self)
 
-        self.show()
+        # self.show()
 
     def predict(self):
         print('predict')
@@ -275,66 +329,61 @@ class MainWindow(QMainWindow):
         self.ml_widget.predict(self.table, combobox_output)
 
     def manage_layout_checked_action(self):
+        """
+        This function manages trigger action from self.manage_layout_menu
+        """
+        print('manage_layout_checked_action')
 
-        # dokończyć implementacje layout managment - znikanie widgetów itd.
-
-        # x = self.sender().text()
+        # sender PyQt5.QtWidgets.QAction, element of self.manage_layout_menu submenu
         sender = self.sender()
-        print(sender)
-        x = sender.text()
-        print(x)
+        # sender Text, Plot, Table etc.
+        sender_text = sender.text()
+        # True/False - sender checked or unchecked
         is_checked = sender.isChecked()
-        print(is_checked)
 
-        # print(self.main_layout.count())
-        # for i in range(self.main_layout.count()):
-        #     print(self.main_layout.itemAt(i))
-        #
-        # spliter = self.main_layout.itemAt(0)
-        # num_of_splitter_widgets = spliter.widget().count()
-        # print(num_of_splitter_widgets)
-        # print(spliter)
-        # # print(spliter.widget())
-        # # print(spliter.widget().widget(0))
-        #
-        # spliter_widgets_list = [spliter.widget().widget(i) for i in range(num_of_splitter_widgets)]
-        # print(spliter_widgets_list)
-        #
-        # spliter.removeWidget(spliter_widgets_list[0])
-        # spliter_widgets_list[0].setParent(None)
-        # spliter_widgets_list[0].deleteLater()
-
-        if x == 'Plot':
+        def fun(obj):
+            """ Helping function showing or hiding given object
+            Args:
+                obj (PyQt5.QtWidgets.QFrame): object 
+            """
             if is_checked:
-                self.frame_center.show()
+                obj.show()
             else:
-                self.frame_center.hide()
+                obj.hide()
 
-        elif x == 'Table':
-            if is_checked:
-                self.frame_left.show()
-            else:
-                self.frame_left.hide()
+        if sender_text == 'Plot':
+            fun(self.frame_center)
 
-        elif x == 'ML Widget':
-            if is_checked:
-                self.frame_MLWidget.show()
-            else:
-                self.frame_MLWidget.hide()
+        elif sender_text == 'Table':
+            fun(self.frame_left)
 
-        elif x == 'Right Table':
-            if is_checked:
-                self.frame_right_table.show()
-            else:
-                self.frame_right_table.hide()
+        elif sender_text == 'ML Widget':
+            fun(self.frame_MLWidget)
+
+        elif sender_text == 'Right Table':
+            fun(self.frame_right_table)
 
     # Menu for right mouse click on cells in table, with functions
 
     def eventFilter(self, source, event):
-        print('event')
-        if(event.type() == QEvent.MouseButtonPress
+        """ This function handles events 
+
+        Args:
+            source (PyQt5.QtWidgets.QWidget): [source]
+            event (PyQt5.QtGui.QEvent): [description]
+
+        Returns:
+            [type]: [description]
+        """
+        # print('event')
+        # print(source, event)
+        # print(type(source), type(event))
+
+        # if event.type  == MouseButtonPress and button is Right Mouse Click on self.table 
+        if(event.type() == QEvent.MouseButtonPress 
             and event.buttons() == Qt.RightButton
             and source is self.table.viewport()):
+
 
             item = self.table.itemAt(event.pos())
 
@@ -406,8 +455,6 @@ class MainWindow(QMainWindow):
                 self.menu.addMenu(self.submenu_del_data)
 
 
-
-
                 #menu.exec_(event.globalPos())
         return super(MainWindow, self).eventFilter(source, event)
 
@@ -416,7 +463,9 @@ class MainWindow(QMainWindow):
         try:
             self.menu.exec_(self.table.mapToGlobal(pos))  # +++
         except AttributeError:
-            print('load data')
+            d = CustomDialogWidgets.CustomMessageBoxWarning('Load data to table')
+
+    # Functions managing QActions on self.table QTableWidget
 
     def add_column_right(self, item):
         print('add column right')
@@ -430,12 +479,10 @@ class MainWindow(QMainWindow):
         col = item.row()
         self.table.add_row_bottom(col)
 
-
     def clear_column(self, item):
         print('clear column')
         col = item.column()
         self.table.clear_column(col)
-
 
     def clear_row(self, item):
         print('clear row')
@@ -483,12 +530,7 @@ class MainWindow(QMainWindow):
 
         print(type)
         col = item.column()
-        if type == 'ascending':
-            print('asc')
-            self.table.sort_columns([col], type)
-        elif type == 'descending':
-            print('desc')
-            self.table.sort_columns([col], type)
+        self.table.sort_columns([col], type)
 
 
     # ===============================================================================
@@ -500,163 +542,152 @@ class MainWindow(QMainWindow):
         qtRectangle.moveCenter(center_point)
         self.move(qtRectangle.topLeft())
 
-    def col_or_indexes(self, x,y):
+    # def col_or_indexes(self, x,y):
 
-        # check if lineEdits contain indexes or column names
-        # returns 'col_names', 'indexes' or None
+    #     # check if lineEdits contain indexes or column names
+    #     # returns 'col_names', 'indexes' or None
 
-        print('check')
-        xs = x.split(',')
-        xs = [i for i in xs]
-        ys = y.split(',')
-        ys = [i for i in ys]
-        print(xs, ys)
+    #     print('check')
+    #     xs = x.split(',')
+    #     xs = [i for i in xs]
+    #     ys = y.split(',')
+    #     ys = [i for i in ys]
+    #     print(xs, ys)
 
-        xs2 = set(xs)
-        ys2 = set(ys)
-        c = self.table.col_labels.tolist()
-        ints = [str(i) for i in range(len(c))]
-        print(ints)
+    #     xs2 = set(xs)
+    #     ys2 = set(ys)
+    #     c = self.table.col_labels.tolist()
+    #     ints = [str(i) for i in range(len(c))]
+    #     print(ints)
 
-        if (xs2.issubset(set(c)) and ys2.issubset(set(c))):
-            return ('col_names')
-        elif (xs2.issubset(set(ints)) and ys2.issubset(set(ints))):
-            return ('indexes')
+    #     if (xs2.issubset(set(c)) and ys2.issubset(set(c))):
+    #         return ('col_names')
+    #     elif (xs2.issubset(set(ints)) and ys2.issubset(set(ints))):
+    #         return ('indexes')
+    #     else:
+    #         return None
+
+    # def plot(self):
+    #     print('plot')
+    #     t = self.cb_plot_type.currentText()
+    #     x = self.le_x_axis.text()
+    #     y = self.le_y_axis.text()
+    #     h = self.le_hue.text()
+
+    #     val = self.col_or_indexes(x,y)
+
+    #     if val == 'col_names':
+    #         print(x)
+    #         self.canv.plot_col_names(t, x, y, h)
+    #     elif val == 'indexes':
+    #         print(x)
+    #         self.canv.plot_indexes(t, x, y, h)
+    #     else:
+    #         print('LineEdits dont match')
+    #         return None
+
+    # def checkbox_changed(self, b):
+
+    #     # This function changed columns names to indexes and vice-versa
+    #     x = self.le_x_axis.text()
+    #     y = self.le_y_axis.text()
+    #     val = self.col_or_indexes(x,y)
+    #     print(val, b.isChecked())
+
+    #     if val == 'indexes' and b.isChecked():
+    #         print('show column names')
+    #         print(self.table.col_labels)
+    #         xs = x.split(',')
+    #         xs = [int(i) for i in xs]
+    #         ys = y.split(',')
+    #         ys = [int(i) for i in ys]
+    #         print(xs,ys)
+
+    #         # set_x = map(self.table.col_labels.__getitem__, xs)
+    #         set_x = [self.table.col_labels[i] for i in xs]
+    #         set_y = [self.table.col_labels[i] for i in ys]
+    #         set_x = ','.join(map(str,set_x))
+    #         set_y = ','.join(map(str,set_y))
+    #         print(set_x)
+    #         print(set_y)
+
+    #         self.le_x_axis.setText(set_x)
+    #         self.le_y_axis.setText(set_y)
+
+    #     elif val == 'col_names' and b.isChecked() == False:
+    #         print('show numbers')
+    #         print(type(self.table.col_labels))
+    #         xs = x.split(',')
+    #         # xs = [int(i) for i in xs]
+    #         ys = y.split(',')
+    #         # ys = [int(i) for i in ys]
+    #         print(xs, ys)
+    #         # print(self.table.col_labels.tolist().index('diagnosis'))
+    #         set_x = [self.table.col_labels.tolist().index(i) for i in xs]
+    #         set_y = [self.table.col_labels.tolist().index(i) for i in ys]
+    #         print(set_x,set_y)
+    #         set_x_n = ','.join(map(str, set_x))
+    #         set_y_n = ','.join(map(str, set_y))
+    #         # print(set_x_n)
+    #         # print(set_y_n)
+    #         #
+    #         self.le_x_axis.setText(set_x_n)
+    #         self.le_y_axis.setText(set_y_n)
+
+    #     elif val == 'col_names' and b.isChecked() == True:
+    #         None
+
+    #     else:
+    #         print('message box')
+    #         msg = QMessageBox()
+    #         msg.setWindowTitle('Warning Message')
+    #         msg.setText('X axis and Y axis dont match')
+    #         msg.setIcon(QMessageBox.Warning)
+    #         x = msg.exec_()
+    #         return None
+
+
+    def show_describe(self):
+        print('show_describe')
+
+        # self.table_describe = MyTable_class.MyTable(self, 5,3)
+        # # self.hor_lay_left.setStretchFactor(self.table_describe, 3)
+        # self.hor_lay_left.setSpacing(3)
+
+        # self.hor_lay_left.addWidget(self.table_describe)
+
+        # self.table_describe.hide()
+        if not self.table_describe.isVisible(): # jeśli ukryty
+            self.table_describe.show()
+
+            try:
+                x = self.table.dataframe
+                d = x.describe(include='all')
+                print(d)
+                print(x.dtypes)
+                self.table_describe.update_from_df(d)
+
+                row_labels = list(d.index)
+                self.table_describe.set_row_labeles(row_labels)
+            except AttributeError:
+                d = CustomDialogWidgets.CustomMessageBoxWarning('Data not found')
+
         else:
-            return None
-
-    def plot(self):
-        print('plot')
-        t = self.cb_plot_type.currentText()
-        x = self.le_x_axis.text()
-        y = self.le_y_axis.text()
-        h = self.le_hue.text()
-
-        val = self.col_or_indexes(x,y)
-
-        if val == 'col_names':
-            print(x)
-            self.canv.plot_col_names(t, x, y, h)
-        elif val == 'indexes':
-            print(x)
-            self.canv.plot_indexes(t, x, y, h)
-        else:
-            print('LineEdits dont match')
-            return None
-
-    def checkbox_changed(self, b):
-
-        # This function changed columns names to indexes and vice-versa
-        x = self.le_x_axis.text()
-        y = self.le_y_axis.text()
-        val = self.col_or_indexes(x,y)
-        print(val, b.isChecked())
-
-        if val == 'indexes' and b.isChecked():
-            print('show column names')
-            print(self.table.col_labels)
-            xs = x.split(',')
-            xs = [int(i) for i in xs]
-            ys = y.split(',')
-            ys = [int(i) for i in ys]
-            print(xs,ys)
-
-            # set_x = map(self.table.col_labels.__getitem__, xs)
-            set_x = [self.table.col_labels[i] for i in xs]
-            set_y = [self.table.col_labels[i] for i in ys]
-            set_x = ','.join(map(str,set_x))
-            set_y = ','.join(map(str,set_y))
-            print(set_x)
-            print(set_y)
-
-            self.le_x_axis.setText(set_x)
-            self.le_y_axis.setText(set_y)
-
-        elif val == 'col_names' and b.isChecked() == False:
-            print('show numbers')
-            print(type(self.table.col_labels))
-            xs = x.split(',')
-            # xs = [int(i) for i in xs]
-            ys = y.split(',')
-            # ys = [int(i) for i in ys]
-            print(xs, ys)
-            # print(self.table.col_labels.tolist().index('diagnosis'))
-            set_x = [self.table.col_labels.tolist().index(i) for i in xs]
-            set_y = [self.table.col_labels.tolist().index(i) for i in ys]
-            print(set_x,set_y)
-            set_x_n = ','.join(map(str, set_x))
-            set_y_n = ','.join(map(str, set_y))
-            # print(set_x_n)
-            # print(set_y_n)
-            #
-            self.le_x_axis.setText(set_x_n)
-            self.le_y_axis.setText(set_y_n)
-
-        elif val == 'col_names' and b.isChecked() == True:
-            None
-
-        else:
-            print('message box')
-            msg = QMessageBox()
-            msg.setWindowTitle('Warning Message')
-            msg.setText('X axis and Y axis dont match')
-            msg.setIcon(QMessageBox.Warning)
-            x = msg.exec_()
-            return None
+            self.table_describe.hide()
 
     def button(self):
-        print('button')
-        # self.tableview = QTableView()
-        # self.tableview.setModel(self.table)
-        # print(self.table.selectedRanges())
+        self.bbb = Database_class.SubwindowDatabase(self)
+        self.hor_lay_left.addWidget(self.bbb)
 
-        # self.bbb = QPushButton(self)
-        # self.bbb.setText('bbb')
-        # self.bbb = Subwindow_Database(self)
-
-        # self.hor_lay_left.addWidget(self.bbb)
-
-
-        self.center_lay.removeWidget(self.canv)
-        self.canv.deleteLater()
-        self.canv.setParent(None)
-
-
-    def clear_plot(self):
-        self.canv.ax.clear()
-
-
-    def clear_table(self):
-        print('clear table')
-        # self.table.reset()
-
-
-
-
-
-
-
-        # z youtube
-
-        # SERVER_NAME = 'MySQL80'
-        # DATABASE_NAME = 'sql_store'
-        # USERNAME = ''
-        # PASSWORD = ''
-        #
-        # connString = f'DRIVER={{SQL Server}};' \
-        #              f'SERVER={SERVER_NAME};' \
-        #              f'DATABASE={DATABASE_NAME}'
-        # db = QSqlDatabase.addDatabase('QMYSQL')
-        # db.setDatabaseName(connString)
-        # print(db.open())
-        # print(db.driverName())
 
     def create_subwindow_subw(self):
         print('sub')
-        subwindow = Subwindow_Database(self)
-        # subwindow.show()
+        self.subwindow_db = Database_class.SubwindowDatabase(self.table)
+        # self.hor_lay_left.addWidget(self.subwindow_db)
 
 
+
+    # Functions on self.File_menu actions - load and save file
 
     def load_file_act(self):
         print('load file action')
@@ -678,6 +709,7 @@ class MainWindow(QMainWindow):
         '''
         taking data from self.table and saving to csv file
         '''
+
         print('save file action')
         path = QFileDialog.getSaveFileName(self, 'Save CSV', "Text files(.csv)")
         if path[0] != '':

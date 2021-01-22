@@ -12,15 +12,16 @@ import pandas as pd
 from MyTable_class import MyTable
 
 
-class Right_Table_Widget(QWidget):
+class RightTableWidget(QWidget):
     signal_for_ml_widget = pyqtSignal(str)
 
     def __init__(self):
         print('subwindow init')
-        super(Right_Table_Widget, self).__init__()
+        super(RightTableWidget, self).__init__()
 
 
-        self.main_layout = QVBoxLayout(self)
+        # self.main_layout = QVBoxLayout(self)
+        self.main_layout = QGridLayout(self)
 
         # self.table = Right_Table(10,10)
         self.table = MyTable(self, 10,10)
@@ -36,7 +37,7 @@ class Right_Table_Widget(QWidget):
 
 
         self.b_predict = QPushButton(self)
-        self.b_predict.setText('predict')
+        self.b_predict.setText('test button')
         self.b_predict.clicked.connect(self.predict)
 
         self.b_clear= QPushButton(self)
@@ -48,11 +49,17 @@ class Right_Table_Widget(QWidget):
         self.b_save.clicked.connect(self.save_file_act)
 
 
-        self.main_layout.addWidget(self.label)
-        self.main_layout.addWidget(self.table)
-        self.main_layout.addWidget(self.b_predict)
-        self.main_layout.addWidget(self.b_clear)
-        self.main_layout.addWidget(self.b_save)
+        # self.main_layout.addWidget(self.label)
+        # self.main_layout.addWidget(self.table)
+        # self.main_layout.addWidget(self.b_predict)
+        # self.main_layout.addWidget(self.b_clear)
+        # self.main_layout.addWidget(self.b_save)
+
+        self.main_layout.addWidget(self.label, 0,0,1,3)
+        self.main_layout.addWidget(self.table, 1,0,1,3)
+        self.main_layout.addWidget(self.b_predict, 2,0)
+        self.main_layout.addWidget(self.b_clear, 3,0)
+        self.main_layout.addWidget(self.b_save, 4,0)
 
 
         self.complete_data = []
@@ -137,7 +144,7 @@ class Right_Table_Widget(QWidget):
                 self.menu.addMenu(self.submenu_del_data)
 
                 # menu.exec_(event.globalPos())
-        return super(Right_Table_Widget, self).eventFilter(source, event)
+        return super(RightTableWidget, self).eventFilter(source, event)
 
     def generateMenu(self, pos):
         print("pos======", pos)
@@ -545,9 +552,9 @@ class Right_Table_Widget(QWidget):
         '''
         print('save file action')
         path = QFileDialog.getSaveFileName(self, 'Save CSV', "Text files(.csv)")
-        print(path)
-        print(self.table.col_labels)
         if path[0] != '':
+            print(path)
+            print(self.table.col_labels)
             with open(path[0], 'w') as file:
                 writer = csv.writer(file, dialect ='excel')
                 writer.writerow(self.table.col_labels)

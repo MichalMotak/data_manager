@@ -58,14 +58,13 @@ Caterogical data  https://seaborn.pydata.org/tutorial/categorical.html
     
     u wszystkich - dodge, color, palette
 
-    # wspólne size, edgecolor, linewidth
+
+
+    # wspólne size, edgecolor, linewidth  WSPÓLNIE Categorical scatterplots
     stripplot (X lub X,Y)
-        linewidth
-        size
         jitter
     swarmplot (X lub X,Y)
-        linewidth
-        size
+
 
     # wspólne linewidth, saturation
     boxplot (X lub X,Y)
@@ -78,8 +77,9 @@ Caterogical data  https://seaborn.pydata.org/tutorial/categorical.html
         cut
         scale - area count width
         gridsize
-        inner - box quartile point stick
-        split
+        + inner - box quartile point stick
+        + split - True, False
+        
         
     boxenplot (X lub X,Y)
         k_depth - tukey, proportion, trsutworthy, fully
@@ -90,34 +90,34 @@ Caterogical data  https://seaborn.pydata.org/tutorial/categorical.html
         scale
 
 
+    WSPÓLNIE Categorical estimate plots
     pointplot (X,Y)
-        estimator
+        //estimator
         ci
-        units
-        seed
+        //units
+        //seed
         capsize
         errwidth
-        n_boot
+        //n_boot
     barplot (X,Y)
-        estimator
+        //estimator
         ci
-        units
-        seed
+        //units
+        //seed
         capsize 
         errwidth
-        n_boot
+        //n_boot
             saturation
-
 
     countplot (X lub Y)
         saturation
-        linewidth
 
 
 
 Visualizing distributions of data https://seaborn.pydata.org/tutorial/distributions.html
-    distplot, jointplot, pairplot
+    distplot, jointplot, pairplot - FaceGrid level
 
+    
     distplot: https://seaborn.pydata.org/generated/seaborn.displot.html#seaborn.displot
         X lub X,Y
         kind - hist, kde, ecdf,
@@ -133,8 +133,41 @@ Visualizing distributions of data https://seaborn.pydata.org/tutorial/distributi
 
     pairplot 
 
+    histplot, kdeplot, ecdfplot, rugplot
+    
+    histplot ( X lub Y)
+        bins - 
+        multiple - layer, dodge, stack, fill
+        element - bars step poly
+        log_scale - True, False
+        fill - tru, false
+
+    kdeplot
+
 Visualizing statistical relationships https://seaborn.pydata.org/tutorial/relational.html
     scatterplot, lineplot
+
+    scatterplot (X i Y)
+        sizes
+        size - key in data
+        style - key in data
+        markers
+        ci
+        alpha 
+
+    lineplot (X i Y)
+        size - key in data
+        style - key in data
+        sizes
+        err_style - band, bars
+        ci
+        markers
+        dashes - skomplikowane 
+
+
+
+
+    lineplot
 
 
 #===================================
@@ -150,20 +183,32 @@ Visualizing statistical relationships https://seaborn.pydata.org/tutorial/relati
 
     ***** Tab 1 ****
     Klasyfikacja
-    Decision Tree Clas
-    Random Forest Clas
+        Decision Tree Clas
+        Random Forest Clas
+
+        SVM (SVC, Linear SVC, NuSVC)
+            Kernel:
+                - Linear( Linear SVC)
+                C, penalty, loss, dual, tol
+                - poly (SVC)
+                C, degree, gamma, tol
+                - rbf
+                C, gamma, tol
+                - sigmoid
+                C, gamma, tol
+        dla dużych zbiorow SGDClassifier, 
 
 
     ***** Tab 2 ****
     Regresja
-    Decision Tree Reg
-    Random Forest Reg
+        Decision Tree Reg
+        Random Forest Reg
 
-    ==== Linear Regression
-    Linear Regression
-    Ridge - alpha
-    Lasso
-    Elastic-Net
+        ==== Linear Regression
+        Linear Regression
+        Ridge - alpha
+        Lasso
+        Elastic-Net
 
 
 
@@ -194,5 +239,11 @@ Visualizing statistical relationships https://seaborn.pydata.org/tutorial/relati
 
 
 # =========== Nowe ==============
-# Widget do zapisu wyników predykcji
 # może jakieś dashboardy z wybranymi wykresami, wynikami?
+# toolpitsy https://pythonprogramminglanguage.com/pyqt5-tooltip/ pomagające zrozumieć dane przyciski itd.
+
+# Widget preprocessingu, - StandardScaler(), MinMaxScaler()
+# Pipeline do kilku preprocessingów
+
+# SimpleImputer - zastępowanie brakujących wartości 
+# pd.get_dummies() - ręczne wybranie z comboboxa column, możliwość update'u tabeli  

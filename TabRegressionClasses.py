@@ -1,7 +1,7 @@
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
-from Upgraded_widgets import *
+from UpgradedWidgets import *
 from globals_ import *
 
 
@@ -17,13 +17,13 @@ from sklearn.metrics import auc, accuracy_score, roc_auc_score, roc_curve, preci
 from sklearn.model_selection import train_test_split, cross_val_score, cross_val_predict, cross_validate, KFold
 from sklearn.linear_model import LinearRegression, Ridge, Lasso, ElasticNet
 
-from Tab_Classification_classes import Parent_ML_Widget
+from TabClassificationClasses import ParentMLWidget
 
 
 # Tab_Linear_Reg
-class Tab_Linear_Reg(Parent_ML_Widget):
+class TabLinearReg(ParentMLWidget):
     def __init__(self, name):
-        super(Tab_Linear_Reg, self).__init__(name)
+        super(TabLinearReg, self).__init__(name)
 
     def create_layout(self):
         self.lay2 = QVBoxLayout(self)
@@ -31,7 +31,7 @@ class Tab_Linear_Reg(Parent_ML_Widget):
         self.label_name.setAlignment(Qt.AlignCenter)
         self.label_name.setStyleSheet(" QLabel")
 
-        self.l_combobox_linear_model = Label_and_combobox('Linear Model')
+        self.l_combobox_linear_model = LabelAndCombobox('Linear Model')
         self.l_combobox_linear_model.add_items(linear_reg_models)
 
 
@@ -39,10 +39,10 @@ class Tab_Linear_Reg(Parent_ML_Widget):
         # self.l_sp_alpha.set_range(0,1.0)
         # self.l_sp_alpha.set_step(0.01)
         # lay_dir
-        self.slider_alpha = Improved_Slider(0,100, 'Alpha (Ridge, Lasso, ElasticNet)')
+        self.slider_alpha = ImprovedSlider(0,100, 'Alpha (Ridge, Lasso, ElasticNet)')
         self.slider_alpha.set_float()
 
-        self.slider_l1_ratio = Improved_Slider(0, 100, 'l1_ratio (ElasticNet)')
+        self.slider_l1_ratio = ImprovedSlider(0, 100, 'l1_ratio (ElasticNet)')
         self.slider_l1_ratio.set_float()
 
         self.lay2.addWidget(self.label_name)
@@ -140,9 +140,9 @@ class Tab_Linear_Reg(Parent_ML_Widget):
             # print(cv1)
 
 # Decision_Tree_Classifier
-class Tab_Decision_Tree_Reg(Parent_ML_Widget):
+class TabDecisionTreeReg(ParentMLWidget):
     def __init__(self, name):
-        super(Tab_Decision_Tree_Reg, self).__init__(name)
+        super(TabDecisionTreeReg, self).__init__(name)
 
     def create_layout(self):
         self.lay2 = QVBoxLayout(self)
@@ -153,14 +153,14 @@ class Tab_Decision_Tree_Reg(Parent_ML_Widget):
         # self.pushButton2 = QPushButton(self)
         # self.pushButton2.setText('tab1')
 
-        self.l_combobox_criterion = Label_and_combobox('criterion')
+        self.l_combobox_criterion = LabelAndCombobox('criterion')
         self.l_combobox_criterion.add_items(decision_tree_reg_criterion_list)
 
 
-        self.slider = Improved_Slider(0, 100, 'Train_test_split')
-        self.slider_min_samples_split = Improved_Slider(0, 50, 'min_samples_split')
+        self.slider = ImprovedSlider(0, 100, 'Train_test_split')
+        self.slider_min_samples_split = ImprovedSlider(0, 50, 'min_samples_split')
 
-        self.l_sp_max_depth = Label_and_spinbox('max depth')
+        self.l_sp_max_depth = LabelAndSpinbox('max depth')
 
         self.lay2.addWidget(self.label_name)
         self.lay2.addWidget(self.slider)
@@ -235,9 +235,9 @@ class Tab_Decision_Tree_Reg(Parent_ML_Widget):
 
 
 # Decision_Tree_Classifier
-class Tab_Random_Forest_Reg(Parent_ML_Widget):
+class TabRandomForestReg(ParentMLWidget):
     def __init__(self, name):
-        super(Tab_Random_Forest_Reg, self).__init__(name)
+        super(TabRandomForestReg, self).__init__(name)
 
     def create_layout(self):
 
@@ -252,7 +252,7 @@ class Tab_Random_Forest_Reg(Parent_ML_Widget):
         # self.lineedit = QLineEdit(self)
         #
 
-        self.slider = Improved_Slider(0, 100, 'Train_test_split')
+        self.slider = ImprovedSlider(0, 100, 'Train_test_split')
 
         self.lay2.addWidget(self.label_name)
         self.lay2.addWidget(self.slider)
@@ -262,8 +262,8 @@ class Tab_Random_Forest_Reg(Parent_ML_Widget):
         # self.w = Label_and_Lineedit()
         # self.lay2.addWidget(self.w)
 
-        self.l_sp = Label_and_spinbox('Number of estimators')
-        self.l_sp_max_depth = Label_and_spinbox('max depth')
+        self.l_sp = LabelAndSpinbox('Number of estimators')
+        self.l_sp_max_depth = LabelAndSpinbox('max depth')
 
         self.lay2.addWidget(self.l_sp)
         self.lay2.addWidget(self.l_sp_max_depth)
