@@ -1,6 +1,1 @@
-.venv
-.idea
-.__pycache__
-.vscode/*
-!.vscode/launch.json
-.idea
+/idea/*
