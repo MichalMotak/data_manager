@@ -1,16 +1,16 @@
 import sys
-from MainWindow_class import MainWindow
+import MainWindow_class
 from PyQt5 import QtWidgets
 import qdarkstyle
+# import seaborn as sns
 
 
-import seaborn as sns
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     # app.setStyleSheet(qdarkstyle.load_stylesheet())
     app.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
-    mw = MainWindow()
+    mw = MainWindow_class.MainWindow()
     sys.exit(app.exec_())
 
 

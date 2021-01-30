@@ -86,7 +86,7 @@ class TabLinearReg(ParentMLWidget):
         print(reg)
         return reg
 
-    def predict(self, table, Y_index, cv_type, number, metrics):
+    def predict(self, table, Y_index, cv_type, number, metrics, pipe):
 
         print(self.name + ' zzzz predict')
 
@@ -102,23 +102,28 @@ class TabLinearReg(ParentMLWidget):
         print('zz')
         print(Y_index)
 
-        type = self.l_combobox_linear_model.getText()
-        reg_org = self.get_model(type)
-        print(reg_org)
+        type_ = self.l_combobox_linear_model.get_text()
+        print(type_)
+        reg = self.get_model(type_)
+        print(reg)
+
+        print('pipe ', pipe)
+        pipe.steps.append(("class", reg))
+        print('create with pipe ', pipe)
 
         if cv_type == 'Cross Validation':
             print(cv_type, number, metrics)
-            scores = cross_validate(reg_org, X_data, Y_data, cv=number, scoring=metrics, return_train_score=True)
+            scores = cross_validate(pipe, X_data, Y_data, cv=number, scoring=metrics, return_train_score=True)
             self.results(scores, metrics)
 
         elif cv_type == 'K-Fold':
             print(cv_type, number, metrics)
             cv = KFold(number=number)
-            scores = cross_validate(reg_org, X_data, Y_data, cv=cv, scoring=metrics, return_train_score=True)
+            scores = cross_validate(pipe, X_data, Y_data, cv=cv, scoring=metrics, return_train_score=True)
             self.results(scores, metrics)
 
         else:
-            clf = reg_org.fit(X_train, y_train)
+            clf = reg.fit(X_train, y_train)
 
             y_pred = clf.predict(X_test)
             y_train_pred = clf.predict(X_train)
@@ -181,7 +186,7 @@ class TabDecisionTreeReg(ParentMLWidget):
         elif not as_list:
             return max_depth_arg, min_samples_split_arg, criterion
 
-    def predict(self, table, Y_index, cv_type, number, metrics):
+    def predict(self, table, Y_index, cv_type, number, metrics, pipe):
 
         print(self.name + ' predict')
 
@@ -197,22 +202,27 @@ class TabDecisionTreeReg(ParentMLWidget):
         max_depth_arg, min_samples_split_arg, criterion = self.get_parameters(as_list=False)
 
         print(Y_index, train_test_split_value, min_samples_split_arg, criterion)
-        reg_org = DecisionTreeRegressor(criterion = criterion, max_depth=max_depth_arg, min_samples_split= min_samples_split_arg)
+        reg = DecisionTreeRegressor(criterion = criterion, max_depth=max_depth_arg, min_samples_split= min_samples_split_arg)
+
+
+        print('pipe ', pipe)
+        pipe.steps.append(("class", reg))
+        print('create with pipe ', pipe)
 
         if cv_type == 'Cross Validation':
             print(cv_type, criterion, number, metrics)
             print(type(metrics))
-            scores = cross_validate(reg_org, X_data, Y_data, cv=number, scoring=metrics, return_train_score=True)
+            scores = cross_validate(pipe, X_data, Y_data, cv=number, scoring=metrics, return_train_score=True)
             self.results(scores, metrics)
 
         elif cv_type == 'K-Fold':
             print(cv_type)
             cv = KFold(number=number)
-            scores = cross_validate(reg_org, X_data, Y_data, cv=cv, scoring=metrics, return_train_score=True)
+            scores = cross_validate(pipe, X_data, Y_data, cv=cv, scoring=metrics, return_train_score=True)
             self.results(scores, metrics)
 
         else:
-            clf = reg_org.fit(X_train, y_train)
+            clf = reg.fit(X_train, y_train)
 
             y_pred = clf.predict(X_test)
             y_train_pred = clf.predict(X_train)
@@ -283,7 +293,7 @@ class TabRandomForestReg(ParentMLWidget):
         elif not as_list:
             return num_of_estimators,max_depth, min_samples_split_arg
 
-    def predict(self, table, Y_index, cv_type, number, metrics):
+    def predict(self, table, Y_index, cv_type, number, metrics, pipe):
 
         print(self.name + ' predict')
         print(Y_index)
@@ -299,28 +309,33 @@ class TabRandomForestReg(ParentMLWidget):
         print('zzz')
         print('xd ', n_estim, max_depth, min_samples_split_arg)
 
-        reg_org = RandomForestRegressor(n_estimators=n_estim,
+        reg = RandomForestRegressor(n_estimators=n_estim,
                                          min_samples_split = min_samples_split_arg,
                                          max_depth = max_depth,
                                          bootstrap=True,
                                          max_features='sqrt')
 
+
+        print('pipe ', pipe)
+        pipe.steps.append(("class", reg))
+        print('create with pipe ', pipe)
+
         print(cv_type)
         if cv_type == 'Cross Validation':
             print(cv_type, number, metrics)
             print(type(metrics))
-            scores = cross_validate(reg_org, X_data, Y_data, cv=number, scoring=metrics, return_train_score=True)
+            scores = cross_validate(pipe, X_data, Y_data, cv=number, scoring=metrics, return_train_score=True)
             print(scores)
             self.results(scores, metrics)
 
         elif cv_type == 'K-Fold':
             print(cv_type)
             cv = KFold(number=number)
-            scores = cross_validate(reg_org, X_data, Y_data, cv=cv, scoring=metrics, return_train_score=True)
+            scores = cross_validate(pipe, X_data, Y_data, cv=cv, scoring=metrics, return_train_score=True)
             self.results(scores, metrics)
 
         else:
-            clf = reg_org.fit(X_train, y_train)
+            clf = reg.fit(X_train, y_train)
 
             y_pred = clf.predict(X_test)
             y_train_pred = clf.predict(X_train)

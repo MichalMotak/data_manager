@@ -206,6 +206,9 @@ class CheckableComboBox(QComboBox):
                 res.append(self.model().item(i).data())
         return res
 
+    def clear_items(self):
+        self.clear()
+
 class LabelAndLineedit(QWidget):
     def __init__(self, name, lay_dir = 'Horizontal', stretches = [5,5],  minimal_size = None):
         super(LabelAndLineedit, self).__init__()
@@ -347,6 +350,9 @@ class LabelAndComboboxCheckable(QWidget):
     #
     def get_text(self):
         return self.combobox.currentText()
+
+    def clear_items(self):
+        self.combobox.clear_items()
 
 class LabelAndCombobox(QWidget):
     def __init__(self, name, lay_dir = 'Horizontal', stretches = None,  minimal_size = None):

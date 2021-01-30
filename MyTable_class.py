@@ -1,25 +1,28 @@
 from PyQt5.QtWidgets import QTableWidget, QApplication, QMainWindow, QTableWidgetItem, QPushButton
-from PyQt5 import QtCore
+from PyQt5.QtCore import *
 import pandas as pd
 import os
 import os.path
+import numpy as np
 
 
 class MyTable(QTableWidget):
-    resized = QtCore.pyqtSignal()
-    def __init__(self, mainw, r ,c ):
+    resized = pyqtSignal()
+    signal_for_preprocessing_widget = pyqtSignal(pd.core.frame.DataFrame)
+    signal_for_ml_widget = pyqtSignal(pd.core.frame.DataFrame)
+
+    def __init__(self, r ,c ):
         super().__init__(r,c)
         self.rows = r
         self.columns = c
         # print('mywindow', mainw.data.shape)
         # self.data = mainw.data
-        print(mainw)
         # self.signals()
         # mainw.pushButton.hide()
         # self.setGeometry(QtCore.QRect(0,0, 80, 20))
 
         self.table_test = 'table_test'
-        self.horizontalHeader().setDefaultAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.Alignment(QtCore.Qt.TextWordWrap))
+        self.horizontalHeader().setDefaultAlignment(Qt.AlignHCenter | Qt.Alignment(Qt.TextWordWrap))
         self.resized.connect(self.resized_fun)
         # self.show()
 
@@ -62,7 +65,6 @@ class MyTable(QTableWidget):
         self.dataframe = dataframe
         self.col_labels = self.dataframe.columns
 
-
         self.data = self.dataframe.values
         print(self.data.shape)
 
@@ -78,6 +80,9 @@ class MyTable(QTableWidget):
             for column, stuff in enumerate(row_data):
                 item = QTableWidgetItem(str(stuff))
                 self.setItem(row, column, item)
+
+        self.emit_signal_for_preprocessing_widget()
+        self.emit_signal_for_ml_widget()
 
 
     def add_row_bottom(self, row):
@@ -122,9 +127,15 @@ class MyTable(QTableWidget):
         rows = self.rowCount()
         print(rows)
 
+        # Clear in Table
         for row in range(rows):
             item = self.takeItem(row, col)
             item.setText('')
+
+        # Clear Dataframe
+        # df = 
+        
+        
 
     def clear_row(self, row):
         print(row)
@@ -133,23 +144,37 @@ class MyTable(QTableWidget):
         for col in range(columns):
             item = self.takeItem(row, col)
             item.setText('')
+        
 
     def delete_row(self, row):
+        print('delete row')
         print(row)
-        self.removeRow(row)
+        # self.removeRow(row)
+        df = self.dataframe.drop([row])
+        print(df)
+        self.update_from_df(df)
 
     def delete_column(self, column):
+        print('delete column')
         print(column)
         print(self.col_labels)
-        self.removeColumn(column)
-        print(self.col_labels)
-        current_labels = self.col_labels.tolist()
-        print(current_labels)
-        current_labels.pop(column)
-        print(current_labels)
-        self.set_column_labels(current_labels)
+        # self.removeColumn(column)
+
+        # print(self.col_labels)
+        # current_labels = self.col_labels.tolist()
+        # print(current_labels)
+        # current_labels.pop(column)
+        # print(current_labels)
+        # self.set_column_labels(current_labels)
         # print(self.col_labels)
 
+        # Delete column from Dataframe
+        print('delete column from df')
+        col_name = self.col_labels[column]
+        print(col_name)
+        df = self.dataframe.drop(col_name, 1)
+        print(df)
+        self.update_from_df(df)
 
     def sort_columns(self, columns_l, type):
 
@@ -168,17 +193,15 @@ class MyTable(QTableWidget):
         print('d')
         self.update_from_df(df)
 
-
-
     def reset(self):
-        self.setRowCount(0)
-        self.setColumnCount(0)
+        print('reset table ')
+        df = pd.DataFrame()
+        self.update_from_df(df)
+
         self.setRowCount(self.rows)
         self.setColumnCount(self.columns)
 
-        # self.update()
-
-
+        self.update()
 
 
     def load_file(self, file_path):
@@ -199,3 +222,20 @@ class MyTable(QTableWidget):
         self.update_from_df(self.dataframe)
 
 
+    @pyqtSlot()
+    def emit_signal_for_preprocessing_widget(self):
+        print('emit_signal_for_table ', self.dataframe)
+        self.signal_for_preprocessing_widget.emit(self.dataframe)
+
+
+    @pyqtSlot(pd.core.frame.DataFrame)
+    def get_signal_from_preprocessing_widget(self, df):
+        print("signal_for_table ")
+        print(df.shape)
+        self.update_from_df(df)
+        self.raise_()
+
+    @pyqtSlot()
+    def emit_signal_for_ml_widget(self):
+        print('emit_signal_for_table ', self.dataframe)
+        self.signal_for_ml_widget.emit(self.dataframe)

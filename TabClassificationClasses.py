@@ -117,10 +117,10 @@ class RandomForestClassWidget(ParentMLWidget):
         self.l_sp = LabelAndSpinbox('Number of estimators')
         self.lay2.addWidget(self.l_sp)
 
-    def predict(self, table, Y_index, cv_type, number, metrics):
+    def predict(self, table, Y_index, cv_type, number, metrics, pipe):
 
         print(self.name + ' predict')
-
+        print('pipe ' , pipe)
         print(Y_index)
         dataframe = table
 
@@ -132,24 +132,28 @@ class RandomForestClassWidget(ParentMLWidget):
 
         n_estim = self.get_parameters(as_list=False)
 
-        clf_org = RandomForestClassifier(n_estimators=n_estim,
+        clf = RandomForestClassifier(n_estimators=n_estim,
                                      bootstrap=True,
                                      max_features='sqrt')
 
+        print('pipe ', pipe)
+        pipe.steps.append(("class", clf))
+        print('create with pipe ', pipe)
+
         if cv_type == 'Cross Validation':
             print(cv_type, number, metrics)
-            scores = cross_validate(clf_org, X_data, Y_data, cv=number, scoring=metrics, return_train_score=True)
+            scores = cross_validate(pipe, X_data, Y_data, cv=number, scoring=metrics, return_train_score=True)
             self.results(scores, metrics)
 
         elif cv_type == 'K-Fold':
             print(cv_type)
             cv = KFold(number=number)
-            scores = cross_validate(clf_org, X_data, Y_data, cv=cv, scoring=metrics, return_train_score=True)
+            scores = cross_validate(pipe, X_data, Y_data, cv=cv, scoring=metrics, return_train_score=True)
             self.results(scores, metrics)
         else:
 
             # jednokrotna predykcja
-            clf = clf_org.fit(X_train, y_train)
+            clf = clf.fit(X_train, y_train)
 
             y_pred = clf.predict(X_test)
             y_train_pred = clf.predict(X_train)
@@ -206,7 +210,7 @@ class DecisionTreeClassWidget(ParentMLWidget):
         self.lay2.addWidget(self.l_sp)
         self.lay2.addWidget(self.slider_min_samples_split)
 
-    def predict(self, table, Y_index, cv_type, number, metrics):
+    def predict(self, table, Y_index, cv_type, number, metrics, pipe):
 
 
         print(self.name + ' predict')
@@ -231,13 +235,18 @@ class DecisionTreeClassWidget(ParentMLWidget):
 
         clf = DecisionTreeClassifier(max_depth=max_depth_arg, min_samples_split= min_samples_split_arg)
 
+
+        print('pipe ', pipe)
+        pipe.steps.append(("class", clf))
+        print('create with pipe ', pipe)
+
         if cv_type == 'Cross Validation':
-            scores = cross_validate(clf, X_data, Y_data, cv=number, scoring=metrics, return_train_score=True)
+            scores = cross_validate(pipe, X_data, Y_data, cv=number, scoring=metrics, return_train_score=True)
             self.results(scores, metrics)
 
         elif cv_type == 'K-Fold':
             cv = KFold(number=number)
-            scores = cross_validate(clf, X_data, Y_data, cv=cv, scoring=metrics, return_train_score=True)
+            scores = cross_validate(pipe, X_data, Y_data, cv=cv, scoring=metrics, return_train_score=True)
             self.results(scores, metrics)
 
         else:
@@ -423,7 +432,7 @@ class SupportVectorMachineClassWidget(ParentMLWidget):
             return parameters_dict
 
 
-    def predict(self, table, Y_index, cv_type, number, metrics):
+    def predict(self, table, Y_index, cv_type, number, metrics, pipe):
 
 
         print(self.name + ' predict')
@@ -454,25 +463,29 @@ class SupportVectorMachineClassWidget(ParentMLWidget):
             clf = SVC(**pars)
         print(clf)
 
+        print('pipe ', pipe)
+        pipe.steps.append(("class", clf))
+        print('create with pipe ', pipe)
+
         if cv_type == 'Cross Validation':
-            scores = cross_validate(clf, X_data, Y_data, cv=number, scoring=metrics, return_train_score=True)
+            scores = cross_validate(pipe, X_data, Y_data, cv=number, scoring=metrics, return_train_score=True)
             self.results(scores, metrics)
 
         elif cv_type == 'K-Fold':
             cv = KFold(number=number)
-            scores = cross_validate(clf, X_data, Y_data, cv=cv, scoring=metrics, return_train_score=True)
+            scores = cross_validate(pipe, X_data, Y_data, cv=cv, scoring=metrics, return_train_score=True)
             self.results(scores, metrics)
 
-        else:
-            clf = clf.fit(X_train, y_train)
-            y_train_pred = clf.predict(X_train)
+        # else:
+        #     clf = clf.fit(X_train, y_train)
+        #     y_train_pred = clf.predict(X_train)
 
-            print("Accuracy (train): %0.3f" % accuracy_score(y_train, y_train_pred))
+        #     print("Accuracy (train): %0.3f" % accuracy_score(y_train, y_train_pred))
 
-            y_pred = clf.predict(X_test)
-            print("Accuracy (test): %0.3f" % accuracy_score(y_test, y_pred))
+        #     y_pred = clf.predict(X_test)
+        #     print("Accuracy (test): %0.3f" % accuracy_score(y_test, y_pred))
 
-            labels = np.unique(Y_data)
-            print('\n Classification report: \n', classification_report(y_test, y_pred, labels=labels))
+        #     labels = np.unique(Y_data)
+        #     print('\n Classification report: \n', classification_report(y_test, y_pred, labels=labels))
 
 

@@ -11,12 +11,6 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
-# from Database_class import SubwindowDatabase
-# import csv
-# from MyTable_class import MyTable
-# from MLWidget_class import MLWidget
-# from RightTable_class import RightTableWidget
-# from PlotWidget_class import PlotWidget
 
 import Database_class
 import MyTable_class
@@ -31,14 +25,13 @@ import PreprocessingWidget_class
 import qdarkstyle
 
 
-
 class MainWindow(QMainWindow):
 
     def __init__(self):
         super(MainWindow, self).__init__()
 
         self.left, self.top  = 100, 100
-        self.height, self.width,  = 800, 1600
+        self.height, self.width,  = 1000, 1600
 
         # self.setStyleSheet(qdarkstyle.load_stylesheet())
 
@@ -50,7 +43,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle('File manager')
         self.move_to_center()
 
-        self.table = MyTable_class.MyTable(self, 10, 5)
+        self.table = MyTable_class.MyTable(20, 5)
 
         # layout = QGridLayout(self)
         self._main = QtWidgets.QWidget()
@@ -70,6 +63,7 @@ class MainWindow(QMainWindow):
 
         self.load_file_action.triggered.connect(lambda:self.load_file_act())
         self.save_file_action.triggered.connect(lambda: self.save_file_act())
+
 
 
         # Menu Manage Layout
@@ -96,7 +90,27 @@ class MainWindow(QMainWindow):
         self.manage_layout_action_right_table.setChecked(True)
         self.manage_layout_action_right_table.triggered.connect(self.manage_layout_checked_action)
 
-        self.main_layout = QtWidgets.QHBoxLayout(self._main)
+        self.manage_layout_action_preprocessing_widget = QAction('Preprocessing Widget', checkable=True)
+        self.manage_layout_menu.addAction(self.manage_layout_action_preprocessing_widget)
+        self.manage_layout_action_preprocessing_widget.setChecked(True)
+        self.manage_layout_action_preprocessing_widget.triggered.connect(self.manage_layout_checked_action)
+
+
+        # Plot Menu 
+
+        self.plot_menu = self.menubar.addMenu('&Plot')
+
+        self.clear_table_action = QAction('clear table')
+        self.plot_menu.addAction(self.clear_table_action)
+        self.describe_dataframe_action = QAction('Describe dataframe')
+        self.plot_menu.addAction(self.describe_dataframe_action)
+
+        self.clear_table_action.triggered.connect(lambda:self.clear_table())
+        self.describe_dataframe_action.triggered.connect(lambda: self.show_describe())
+
+        # ===========================================
+
+        self.main_layout = QtWidgets.QVBoxLayout(self._main)
 
         # self.frame_up = QFrame(self)
 
@@ -120,57 +134,60 @@ class MainWindow(QMainWindow):
 
         # ======================= Left upper frame
 
-        self.frame_button_lay = QFrame(self)
-        # self.frame_button_lay.setStyleSheet("QFrame {} ")
-        # self.frame_button_lay.setStyleSheet("QFrame {background-color: rgb(250, 255, 255);"
-        #                               "border-width: 1;"
-        #                               "border-radius: 3;"
-        #                               "border-style: solid;"
-        #                               "border-color: rgb(50,50,50)}"
-        #                               )
-        self.frame_button_lay.setStyleSheet("QFrame {"
-                                "border-width: 1;"
-                                "border-radius: 3;"
-                                "border-style: solid;"
-                                "border-color: rgb(0,0,0)}"
-                                )
+        # self.frame_button_lay = QFrame(self)
+        # # self.frame_button_lay.setStyleSheet("QFrame {} ")
+        # # self.frame_button_lay.setStyleSheet("QFrame {background-color: rgb(250, 255, 255);"
+        # #                               "border-width: 1;"
+        # #                               "border-radius: 3;"
+        # #                               "border-style: solid;"
+        # #                               "border-color: rgb(50,50,50)}"
+        # #                               )
+        # self.frame_button_lay.setStyleSheet("QFrame {"
+        #                         "border-width: 1;"
+        #                         "border-radius: 3;"
+        #                         "border-style: solid;"
+        #                         "border-color: rgb(0,0,0)}"
+        #                         )
 
 
-        self.button_lay = QVBoxLayout(self)
-        self.pushButton = QPushButton(self)
-        self.pushButton.setGeometry(QRect(350, 100, 80, 20))
-        self.pushButton.setText('add column')
-        self.pushButton.clicked.connect(self.button)
+        # self.button_lay = QVBoxLayout(self)
+        # self.pushButton = QPushButton(self)
+        # self.pushButton.setGeometry(QRect(350, 100, 80, 20))
+        # self.pushButton.setText('add column')
+        # self.pushButton.clicked.connect(self.button)
 
 
-        self.pushButton2 = QPushButton(self)
-        self.pushButton2.setGeometry(QRect(350, 100, 80, 20))
-        self.pushButton2.setText('Clear table')
-        # self.pushButton2.clicked.connect(self.clear_table)
+        # self.pushButton2 = QPushButton(self)
+        # self.pushButton2.setGeometry(QRect(350, 100, 80, 20))
+        # self.pushButton2.setText('Clear table')
+        # # self.pushButton2.clicked.connect(self.clear_table)
 
-        self.b_describe = QPushButton(self)
-        self.b_describe.clicked.connect(self.show_describe)
-        self.b_describe.setText('Describe dataframe')
-
-
-
-        self.button_lay.addWidget(self.pushButton)
-        self.button_lay.addWidget(self.pushButton2)
-        self.button_lay.addWidget(self.b_describe)
+        # self.b_describe = QPushButton(self)
+        # # self.b_describe.clicked.connect(self.show_describe)
+        # self.b_describe.setText('Describe dataframe')
 
 
-        self.frame_button_lay.setLayout(self.button_lay)
+
+        # self.button_lay.addWidget(self.pushButton)
+        # self.button_lay.addWidget(self.pushButton2)
+        # self.button_lay.addWidget(self.b_describe)
+
+
+        # self.frame_button_lay.setLayout(self.button_lay)
 
 
         # ======================= Preprocessing Widget
         
 
+        self.frame_preproc_widget = QFrame()
+        self.preproc_widget_lay = QVBoxLayout()
         self.preproc_widget = PreprocessingWidget_class.PreprocessingWidget()
+        self.preproc_widget_lay.addWidget(self.preproc_widget)
+        self.frame_preproc_widget.setLayout(self.preproc_widget_lay)
 
 
 
-
-        self.table_describe = MyTable_class.MyTable(self, 5,3)
+        self.table_describe = MyTable_class.MyTable(5,3)
         self.table_describe.hide()
         # self.hor_lay_left.setStretchFactor(self.table_describe, 3)
         # self.hor_lay_left.setSpacing(3)
@@ -185,7 +202,7 @@ class MainWindow(QMainWindow):
         # self.splitter_center.addL(self.under_canv_layout)
         self.splitter_left.addWidget(self.table)
         self.splitter_left.addWidget(self.table_describe)
-        self.splitter_left.addWidget(self.preproc_widget)
+        self.splitter_left.addWidget(self.frame_preproc_widget)
 
         index = self.splitter_left.indexOf(self.table_describe)
         self.splitter_left.setCollapsible(index, False)
@@ -199,7 +216,7 @@ class MainWindow(QMainWindow):
         # =================== Layout of frame and table on the left
 
         self.hor_lay_left = QVBoxLayout()
-        self.hor_lay_left.addWidget(self.frame_button_lay)
+        # self.hor_lay_left.addWidget(self.frame_button_lay)
         self.hor_lay_left.addWidget(self.splitter_left)
 
         # self.hor_lay_left.addWidget(self.frame_button_lay)
@@ -227,6 +244,7 @@ class MainWindow(QMainWindow):
                                 "border-style: solid;"
                                 "border-color: rgb(0,0,0)}"
                                 )
+
         self.frame_center.setMinimumWidth(self.width / 6)
 
         self.center_lay = QVBoxLayout(self)
@@ -291,16 +309,33 @@ class MainWindow(QMainWindow):
         self.frame_right_table.setLayout(self.layout_right_table)
 
         # ============== FINAL SPLITTER ================================
+        # self.splitter = QSplitter(Qt.Horizontal)
+        # self.splitter.addWidget(self.frame_left)
+        # self.splitter.addWidget(self.frame_center)
+        # self.splitter.addWidget(self.frame_MLWidget)
+        # # self.splitter.addWidget(self.frame_right_table)
+
+        # self.splitter.setStretchFactor(10, 10)
+
+        # self.main_layout.addWidget(self.splitter)
+        # self.main_layout.addWidget(self.frame_right_table)
+
+
         self.splitter = QSplitter(Qt.Horizontal)
         self.splitter.addWidget(self.frame_left)
         self.splitter.addWidget(self.frame_center)
         self.splitter.addWidget(self.frame_MLWidget)
-        self.splitter.addWidget(self.frame_right_table)
 
-        self.splitter.setStretchFactor(10, 10)
+        
+        self.splitter2 = QSplitter(Qt.Vertical)
+        self.splitter2.addWidget(self.splitter)
+        self.splitter2.addWidget(self.frame_right_table)
 
-        self.main_layout.addWidget(self.splitter)
+        self.splitter2.setStretchFactor(0, 10)
+        self.splitter2.setStretchFactor(1, 3)
 
+
+        self.main_layout.addWidget(self.splitter2)
 
         # =============== Frame and layout under canvas ======================================
 
@@ -311,8 +346,18 @@ class MainWindow(QMainWindow):
 
 
 
-        self.right_table.signal_for_ml_widget.connect(self.ml_widget.get_signal_for_right_table)
-        self.ml_widget.signal_for_right_table.connect(self.right_table.get_signal_for_ml_widget)
+        self.right_table.signal_for_ml_widget.connect(self.ml_widget.get_signal_from_right_table)
+        self.ml_widget.signal_for_right_table.connect(self.right_table.get_signal_from_ml_widget)
+
+
+        self.table.signal_for_preprocessing_widget.connect(self.preproc_widget.get_signal_from_table)
+        self.preproc_widget.signal_for_table.connect(self.table.get_signal_from_preprocessing_widget)
+
+        self.table.signal_for_ml_widget.connect(self.ml_widget.get_signal_from_table)
+
+        self.preproc_widget.signal_for_ml_widget.connect(self.ml_widget.get_signal_from_preprocessing_widget)
+        self.ml_widget.signal_for_preprocessing_widget.connect(self.preproc_widget.get_signal_from_preprocessing_widget)
+
 
         self.table.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)  # +++
         self.table.customContextMenuRequested.connect(self.generateMenu)  # +++
@@ -363,6 +408,9 @@ class MainWindow(QMainWindow):
         elif sender_text == 'Right Table':
             fun(self.frame_right_table)
 
+        elif sender_text == 'Preprocessing Widget':
+            fun(self.frame_preproc_widget)
+
     # Menu for right mouse click on cells in table, with functions
 
     def eventFilter(self, source, event):
@@ -408,7 +456,7 @@ class MainWindow(QMainWindow):
                 self.submenu_add_plot.addAction(self.act2)
                 self.submenu_add_plot.addAction(self.act10)
 
-                self.submenu_add_data = QMenu('Add', self)
+                self.submenu_add_data = QMenu('Add data', self)
                 self.act3 = QAction('Add column on the right', self.menu, checkable = True)
                 self.act4 = QAction('Add row on the bottom', self.menu, checkable=True)
                 self.act3.triggered.connect(lambda: self.add_column_right(item))
@@ -450,6 +498,7 @@ class MainWindow(QMainWindow):
 
                 self.menu.addAction(z)
                 self.menu.addMenu(self.submenu_add_plot)
+                # self.menu.addMenu(self.submenu_add_data)
                 self.menu.addMenu(self.submenu_sort_data)
                 self.menu.addMenu(self.submenu_clear_data)
                 self.menu.addMenu(self.submenu_del_data)
@@ -542,110 +591,10 @@ class MainWindow(QMainWindow):
         qtRectangle.moveCenter(center_point)
         self.move(qtRectangle.topLeft())
 
-    # def col_or_indexes(self, x,y):
 
-    #     # check if lineEdits contain indexes or column names
-    #     # returns 'col_names', 'indexes' or None
-
-    #     print('check')
-    #     xs = x.split(',')
-    #     xs = [i for i in xs]
-    #     ys = y.split(',')
-    #     ys = [i for i in ys]
-    #     print(xs, ys)
-
-    #     xs2 = set(xs)
-    #     ys2 = set(ys)
-    #     c = self.table.col_labels.tolist()
-    #     ints = [str(i) for i in range(len(c))]
-    #     print(ints)
-
-    #     if (xs2.issubset(set(c)) and ys2.issubset(set(c))):
-    #         return ('col_names')
-    #     elif (xs2.issubset(set(ints)) and ys2.issubset(set(ints))):
-    #         return ('indexes')
-    #     else:
-    #         return None
-
-    # def plot(self):
-    #     print('plot')
-    #     t = self.cb_plot_type.currentText()
-    #     x = self.le_x_axis.text()
-    #     y = self.le_y_axis.text()
-    #     h = self.le_hue.text()
-
-    #     val = self.col_or_indexes(x,y)
-
-    #     if val == 'col_names':
-    #         print(x)
-    #         self.canv.plot_col_names(t, x, y, h)
-    #     elif val == 'indexes':
-    #         print(x)
-    #         self.canv.plot_indexes(t, x, y, h)
-    #     else:
-    #         print('LineEdits dont match')
-    #         return None
-
-    # def checkbox_changed(self, b):
-
-    #     # This function changed columns names to indexes and vice-versa
-    #     x = self.le_x_axis.text()
-    #     y = self.le_y_axis.text()
-    #     val = self.col_or_indexes(x,y)
-    #     print(val, b.isChecked())
-
-    #     if val == 'indexes' and b.isChecked():
-    #         print('show column names')
-    #         print(self.table.col_labels)
-    #         xs = x.split(',')
-    #         xs = [int(i) for i in xs]
-    #         ys = y.split(',')
-    #         ys = [int(i) for i in ys]
-    #         print(xs,ys)
-
-    #         # set_x = map(self.table.col_labels.__getitem__, xs)
-    #         set_x = [self.table.col_labels[i] for i in xs]
-    #         set_y = [self.table.col_labels[i] for i in ys]
-    #         set_x = ','.join(map(str,set_x))
-    #         set_y = ','.join(map(str,set_y))
-    #         print(set_x)
-    #         print(set_y)
-
-    #         self.le_x_axis.setText(set_x)
-    #         self.le_y_axis.setText(set_y)
-
-    #     elif val == 'col_names' and b.isChecked() == False:
-    #         print('show numbers')
-    #         print(type(self.table.col_labels))
-    #         xs = x.split(',')
-    #         # xs = [int(i) for i in xs]
-    #         ys = y.split(',')
-    #         # ys = [int(i) for i in ys]
-    #         print(xs, ys)
-    #         # print(self.table.col_labels.tolist().index('diagnosis'))
-    #         set_x = [self.table.col_labels.tolist().index(i) for i in xs]
-    #         set_y = [self.table.col_labels.tolist().index(i) for i in ys]
-    #         print(set_x,set_y)
-    #         set_x_n = ','.join(map(str, set_x))
-    #         set_y_n = ','.join(map(str, set_y))
-    #         # print(set_x_n)
-    #         # print(set_y_n)
-    #         #
-    #         self.le_x_axis.setText(set_x_n)
-    #         self.le_y_axis.setText(set_y_n)
-
-    #     elif val == 'col_names' and b.isChecked() == True:
-    #         None
-
-    #     else:
-    #         print('message box')
-    #         msg = QMessageBox()
-    #         msg.setWindowTitle('Warning Message')
-    #         msg.setText('X axis and Y axis dont match')
-    #         msg.setIcon(QMessageBox.Warning)
-    #         x = msg.exec_()
-    #         return None
-
+    def clear_table(self):
+        print('clear table')
+        self.table.reset()
 
     def show_describe(self):
         print('show_describe')
@@ -699,7 +648,12 @@ class MainWindow(QMainWindow):
             self.table.load_file(self.file_path)
 
             self.ml_widget.set_dataframe(self.table.dataframe)
-            self.ml_widget.set_col_labels(self.table.col_labels)
+            # self.ml_widget.set_col_labels(self.table.col_labels)
+
+            self.preproc_widget.set_dataframe(self.table.dataframe)
+            # self.preproc_widget.set_col_labels(self.table.col_labels)
+
+
             self.plot_widget.clear_axes()
         else:
             print('nie działa')

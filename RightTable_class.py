@@ -24,7 +24,7 @@ class RightTableWidget(QWidget):
         self.main_layout = QGridLayout(self)
 
         # self.table = Right_Table(10,10)
-        self.table = MyTable(self, 10,10)
+        self.table = MyTable(1, 15)
 
         self.table.setContextMenuPolicy(Qt.CustomContextMenu)  # +++
         self.table.customContextMenuRequested.connect(self.generateMenu)  # +++
@@ -39,15 +39,17 @@ class RightTableWidget(QWidget):
         self.b_predict = QPushButton(self)
         self.b_predict.setText('test button')
         self.b_predict.clicked.connect(self.predict)
+        self.b_predict.setMinimumHeight(30)
 
         self.b_clear= QPushButton(self)
         self.b_clear.setText('clear table')
         self.b_clear.clicked.connect(self.reset)
+        self.b_clear.setMinimumHeight(30)
 
         self.b_save= QPushButton(self)
         self.b_save.setText('save results')
         self.b_save.clicked.connect(self.save_file_act)
-
+        self.b_save.setMinimumHeight(30)
 
         # self.main_layout.addWidget(self.label)
         # self.main_layout.addWidget(self.table)
@@ -55,11 +57,26 @@ class RightTableWidget(QWidget):
         # self.main_layout.addWidget(self.b_clear)
         # self.main_layout.addWidget(self.b_save)
 
-        self.main_layout.addWidget(self.label, 0,0,1,3)
-        self.main_layout.addWidget(self.table, 1,0,1,3)
-        self.main_layout.addWidget(self.b_predict, 2,0)
-        self.main_layout.addWidget(self.b_clear, 3,0)
-        self.main_layout.addWidget(self.b_save, 4,0)
+        self.lay_right = QGridLayout(self)
+        self.lay_right.addWidget(self.b_predict, 0,0)
+        self.lay_right.addWidget(self.b_clear, 1,0)
+        self.lay_right.addWidget(self.b_save, 2,0)
+
+
+
+        # self.main_layout.addWidget(self.label, 0,0)
+        # self.main_layout.addWidget(self.table, 1,0)
+        # self.main_layout.addLayout(self.lay_right, 0,1,2,1)
+
+        self.main_layout.addLayout(self.lay_right, 0,0, 3,1)
+        self.main_layout.addWidget(self.label, 0,1, 1,4)
+        self.main_layout.addWidget(self.table, 1,1, 6,4)
+
+
+
+        # self.main_layout.addWidget(self.b_predict, 2,0)
+        # self.main_layout.addWidget(self.b_clear, 3,0)
+        # self.main_layout.addWidget(self.b_save, 4,0)
 
 
         self.complete_data = []
@@ -210,7 +227,7 @@ class RightTableWidget(QWidget):
         self.signal_for_ml_widget.emit('hasło od right table')
 
     @pyqtSlot(tuple)
-    def get_signal_for_ml_widget(self, parameters):
+    def get_signal_from_ml_widget(self, parameters):
         print("From ML WIDGET:  ", parameters)
 
         self.update_table_with_results(parameters[0], parameters[1], parameters[2])
@@ -362,23 +379,6 @@ class RightTableWidget(QWidget):
         print('c')
         print(df_c)
 
-
-        # if new_a.shape[1] >= df_a.shape[1]:
-        #     df_aa = new_a.append(df_a, ignore_index=True)
-        # else:
-        #     df_aa = df_a.append(new_a, ignore_index=True)
-        #
-        #
-        # if new_b.shape[1] >= df_b.shape[1]:
-        #     df_bb = new_b.append(df_b, ignore_index=True)
-        # else:
-        #     df_bb = df_b.append(new_b, ignore_index=True)
-        #
-        # if new_c.shape[1] >= df_c.shape[1]:
-        #     df_cc = new_c.append(df_c, ignore_index=True)
-        # else:
-        #     df_cc = df_c.append(new_c, ignore_index=True)
-
         df_aa = new_a.append(df_a, ignore_index=True)
         df_bb = new_b.append(df_b, ignore_index=True)
         df_cc = new_c.append(df_c, ignore_index=True)
@@ -419,130 +419,11 @@ class RightTableWidget(QWidget):
             self.next_time(par, parameters_labels, len)
         self.table.set_column_labels(self.dataframe.columns)
 
-        # ############################################
-        # a = len[0]  # 5
-        # b = len[0] + len[1] # 6
-        # c = b + len[2]  # 8
-        # print(a,b,c)
-        #
-        #
-        # print(self.labels_b)
-        # print(len(self.labels_b))
-        # if len(self.labels_b) == 0:
-        #     print('dddddddddddddddddddd')
-        #
-        # arr = np.array(self.complete_data)
-        # sum = np.max(arr, axis = 0)
-        # a0 = sum[0]
-        # b0 = sum[0] + sum[1]
-        # c0 = b0 + sum[2]
-        # print(a0, b0, c0)
-        #
-        # self.labels_b = list(self.dataframe.columns[a0:b0])
-        # print('labels b: ', self.labels_b)
-        #
-        # new_labels_b = parameters_labels[a:b]
-        #
-        # for n in new_labels_b:
-        #     if n not in self.labels_b:
-        #         self.labels_b.append(n)
-        # print('labels b :', self.labels_b)
-        #
-        # new_labels_c = parameters_labels[b:]
-        #
-        # for n in new_labels_c:
-        #     if n not in self.labels_c:
-        #         self.labels_c.append(n)
-        # print('labels c :', self.labels_c)
-        #
-        #
-        # ind_1 = list(self.dataframe.columns).index(self.labels_c[0])
-        # ind_2 = list(self.dataframe.columns).index(self.labels_c[-1])
-        #
-        #
-        # print(ind1, ind_2)
-        #
-        # df_a = pd.DataFrame(data=self.dataframe.values[:,:a0], columns=list(self.dataframe.columns[:a0]))
-        # df2_a = pd.DataFrame(data=np.array(par[:a]).reshape(1, -1), columns=parameters_labels[:a])
-        # print('a shapes: ', df_a.shape, df2_a.shape)
-        #
-        # if df2_a.shape[1] >= df_a.shape[1]:
-        #     df_aa = df2_a.append(df_a, ignore_index=True)
-        # else:
-        #     df_aa = df_a.append(df2_a, ignore_index=True)
-        # print('a')
-        # print(df_a)
-        # print(df2_a)
-        # print(df_aa)
-        # print(df_aa.shape)
-        #
-        # df_b = pd.DataFrame(data=self.dataframe.values[:,a0:b0], columns=list(self.dataframe.columns[a0:b0]))
-        # df2_b = pd.DataFrame(data=np.array(par[a:b]).reshape(1, -1), columns=parameters_labels[a:b])
-        # print('b shapes: ', df_b.shape, df2_b.shape)
-        #
-        # print('b')
-        # print(df_b)
-        # print(df2_b)
-        #
-        # if df2_b.shape[1] >= df_b.shape[1]:
-        #     df_bb = df2_b.append(df_b, ignore_index=True)
-        # else:
-        #     df_bb = df_b.append(df2_b, ignore_index=True)
-        #
-        #
-        # print(df_bb)
-        # print(df_bb.shape)
-        #
-        # df_c = pd.DataFrame(data=self.dataframe.values[:,b0:], columns=list(self.dataframe.columns[b0:]))
-        # df2_c = pd.DataFrame(data=np.array(par[b:]).reshape(1, -1), columns=parameters_labels[b:])
-        # print('c shapes: ', df_c.shape, df2_c.shape)
-        #
-        # print(df_c)
-        # print(df2_c)
-        #
-        # if df2_c.shape[1] >= df_c.shape[1]:
-        #     df_cc = df2_c.append(df_c, ignore_index=True)
-        # else:
-        #     df_cc = df_c.append(df2_c, ignore_index=True)
-        #
-        # print(df_cc)
-        # print(df_cc.shape)
-        #
-        # r = pd.concat([df_aa, df_bb, df_cc], axis=1)
-        # print('r')
-        # print(r)
-        # self.dataframe = r
-        # self.update_with_values(self.dataframe.values, list(self.dataframe.columns))
-        # return r
-
-        ############################################
-        # par = np.array(par)
-        # par2 = par.reshape(1,-1)
-        # print(self.dataframe.shape, par2.shape)
-        #
-        # # df1 = pd.DataFrame(par2, columns = [str(x) for x in range(par2.shape[1])])
-        # df1 = pd.DataFrame(par2, columns = parameters_label#s)
-        #
-        # print('df1')
-        # print(df1)
-        # print('df1')
-        #
-        # if df1.shape[1] > self.dataframe.shape[0]:
-        #     self.dataframe = df1.append(self.dataframe,ignore_index = True)
-        # else:
-        #     self.dataframe = self.dataframe.append(df1, ignore_index=True)
-        #
-        # print(self.dataframe)
-        # # print(x)
-        # # print('x')
-        # self.update_with_values(self.dataframe.values, parameters_labels)
-
 
 
     def reset(self):
         print('reset table ')
-        self.dataframe = pd.DataFrame()
-        self.table.update_from_df(self.dataframe)
+        self.table.reset()
         self.first_time_value = True
         # self.table.reset()
 
@@ -569,10 +450,3 @@ class RightTableWidget(QWidget):
                     writer.writerow(row_data)
 
 
-# class Right_Table(QTableWidget):
-#     def __init__(self, r ,c ):
-#         super().__init__(r,c)
-#         self.rows = r
-#         self.columns = c
-#
-#

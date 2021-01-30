@@ -18,6 +18,7 @@ from sklearn.tree import DecisionTreeClassifier
 
 from sklearn.metrics import auc, accuracy_score, roc_auc_score, roc_curve, precision_score, recall_score, f1_score, confusion_matrix, classification_report, plot_confusion_matrix, ConfusionMatrixDisplay
 from sklearn.model_selection import train_test_split, cross_val_score, cross_val_predict, cross_validate
+from sklearn import pipeline 
 
 
 # # new check-able combo box
@@ -76,7 +77,6 @@ class TabClassification(QWidget):
         self.formLayout.addRow(self.radiobutton, self.w)
         self.formLayout.addRow(self.radiobutton2, self.w2)
         self.formLayout.addRow(self.radiobutton3, self.w3)
-        self.formLayout.addRow(self.radiobutton4, self.w4)
 
         self.scroll.setWidget(self.groupBox)
 
@@ -151,7 +151,7 @@ class TabClassification(QWidget):
                     w.setEnabled(False)
 
 
-    def predict(self, current_widget, tab, cv_type, number):
+    def predict(self, current_widget, tab, cv_type, number, pipe):
         print('class predict')
         metrics = self.l_combobox_metrics.get_text()
         metrics = list(metrics.split(', '))
@@ -161,7 +161,7 @@ class TabClassification(QWidget):
         # print(predict_label)
         # def predict(self, table, Y_index, cv_type, number, metrics):
 
-        current_widget.predict(tab,  predict_label, cv_type, number, metrics)
+        current_widget.predict(tab,  predict_label, cv_type, number, metrics, pipe = pipe)
 
     def update_outputcombobox(self, col_labels):
         self.l_combobox_prediction.clear()
@@ -236,7 +236,7 @@ class TabRegression(TabClassification):
         self.bottom_layout.addWidget(self.l_combobox_prediction)
         self.bottom_layout.setContentsMargins(5,5,5,5)
 
-    def predict(self, current_widget, tab, cv_type, number):
+    def predict(self, current_widget, tab, cv_type, number, pipe):
         print('regression predict')
         metrics = self.l_combobox_metrics.get_text()
         metrics = list(metrics.split(', '))
@@ -246,11 +246,12 @@ class TabRegression(TabClassification):
         # print(predict_label)
         # def predict(self, table, Y_index, cv_type, number, metrics):
 
-        current_widget.predict(tab, predict_label, cv_type, number, metrics)
+        current_widget.predict(tab, predict_label, cv_type, number, metrics, pipe = pipe)
 
 
 class MLWidget(QWidget):
     signal_for_right_table = pyqtSignal(tuple)
+    signal_for_preprocessing_widget = pyqtSignal()
 
     def __init__(self):
         print('subwindow init')
@@ -274,6 +275,8 @@ class MLWidget(QWidget):
         self.tabs.addTab(self.tab2, "Regression")
 
         self.main_layout.addWidget(self.tabs)
+
+        self.pipeline = None
 
         # self.bottom_layout = QVBoxLayout(self)
         # self.pushButton2 = QPushButton(self)
@@ -311,7 +314,7 @@ class MLWidget(QWidget):
 
         self.frame_MLWidget_lower.setLayout(self.layout_MLWidget_lower)
         self.main_layout.addWidget(self.frame_MLWidget_lower)
-
+ 
         self.number_of_tabs = self.tabs.count()
         self.list_of_tabs = [self.tabs.widget(index) for index in range(self.number_of_tabs)]
         # print(self.tabs.widget(0))
@@ -321,7 +324,7 @@ class MLWidget(QWidget):
     # ======================= SIGNALS ==============================
 
     @pyqtSlot(str)
-    def get_signal_for_right_table(self, message):
+    def get_signal_from_right_table(self, message):
         print("signal_for_right_table " + message)
         self.raise_()
 
@@ -331,6 +334,27 @@ class MLWidget(QWidget):
         print('emit_signal_for_right_table ', parameters)
         self.signal_for_right_table.emit(parameters)
 
+
+    @pyqtSlot(pd.core.frame.DataFrame)
+    def get_signal_from_table(self, df):
+        print("signal_from_table ", df)
+        self.set_col_labels(list(df.columns))
+        self.set_dataframe(df)
+        self.raise_()
+
+
+    # this signal emits signal to receive signal below
+    @pyqtSlot()
+    def emit_signal_for_preprocessing_widget(self):
+        print("signal_for_preprocessing widget ")
+        self.signal_for_preprocessing_widget.emit()
+
+    
+    @pyqtSlot(pipeline.Pipeline)
+    def get_signal_from_preprocessing_widget(self, pipeline):
+        print("signal_from_preprocessing widget ", pipeline)
+        self.pipeline = pipeline
+        self.raise_()
 
 
     # ======================= METHODS ==============================
@@ -422,8 +446,16 @@ class MLWidget(QWidget):
             cv_type = self.l_combobox_cv_type.get_text()
             number = self.sp.get_value()
 
+
             # jeśli trzeba coś dodać w predict dla danego tabu to 1 wybór
-            current_tab.predict(current_widget, self.dataframe, cv_type, number)
+            print('przed pred')
+            # try:
+            #     current_tab.predict(current_widget, self.dataframe, cv_type, number, self.pipeline)
+            # except NameError:
+            #     print('bez ')
+            #     current_tab.predict(current_widget, self.dataframe, cv_type, number)
+            self.emit_signal_for_preprocessing_widget() # signal to get self.pipeline
+            current_tab.predict(current_widget, self.dataframe, cv_type, number, self.pipeline)
             print(' po predykcji current tabu')
             # current_tab.current_widget.predict(tab, out)
 
