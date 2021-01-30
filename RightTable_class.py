@@ -9,22 +9,22 @@ import csv
 import numpy as np
 import pandas as pd
 
-from MyTable_class import MyTable
+from TableWidget_class import TableWidget
 
 
-class RightTableWidget(QWidget):
+class ResultsTableWidget(QWidget):
     signal_for_ml_widget = pyqtSignal(str)
 
     def __init__(self):
         print('subwindow init')
-        super(RightTableWidget, self).__init__()
+        super(ResultsTableWidget, self).__init__()
 
 
         # self.main_layout = QVBoxLayout(self)
         self.main_layout = QGridLayout(self)
 
         # self.table = Right_Table(10,10)
-        self.table = MyTable(1, 15)
+        self.table = TableWidget(1, 15)
 
         self.table.setContextMenuPolicy(Qt.CustomContextMenu)  # +++
         self.table.customContextMenuRequested.connect(self.generateMenu)  # +++

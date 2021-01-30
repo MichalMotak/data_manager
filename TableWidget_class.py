@@ -6,7 +6,7 @@ import os.path
 import numpy as np
 
 
-class MyTable(QTableWidget):
+class TableWidget(QTableWidget):
     resized = pyqtSignal()
     signal_for_preprocessing_widget = pyqtSignal(pd.core.frame.DataFrame)
     signal_for_ml_widget = pyqtSignal(pd.core.frame.DataFrame)

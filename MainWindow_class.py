@@ -13,7 +13,7 @@ from PyQt5.QtWidgets import *
 
 
 import Database_class
-import MyTable_class
+import TableWidget_class
 import MLWidget_class
 import RightTable_class
 import PlotWidget_class
@@ -43,7 +43,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle('Data Manager')
         self.move_to_center()
 
-        self.table = MyTable_class.MyTable(20, 5)
+        self.table = TableWidget_class.TableWidget(20, 5)
 
         # layout = QGridLayout(self)
         self._main = QtWidgets.QWidget()
@@ -301,7 +301,7 @@ class MainWindow(QMainWindow):
 
         self.layout_right_table = QGridLayout()
 
-        self.right_table = RightTable_class.RightTableWidget()
+        self.right_table = RightTable_class.ResultsTableWidget()
 
         self.layout_right_table.addWidget(self.right_table)
 
