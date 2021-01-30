@@ -40,7 +40,7 @@ class MainWindow(QMainWindow):
 
     def UI(self):
         self.setGeometry(self.left, self.top, self.width, self.height)
-        self.setWindowTitle('File manager')
+        self.setWindowTitle('Data Manager')
         self.move_to_center()
 
         self.table = MyTable_class.MyTable(20, 5)
