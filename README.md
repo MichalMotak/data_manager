@@ -29,5 +29,5 @@ Data Manager is an desktop application for data analysis, data visualization and
 # Screenshots 
 
 
-- **Screen 1** - TableWidget
+- **Screen 1** - Presentation of app
 ![alt text](https://github.com/MichalMotak/data_manager/blob/master/Readme_images/screen1.png?raw=true)
