@@ -656,7 +656,7 @@ class MainWindow(QMainWindow):
 
             self.plot_widget.clear_axes()
         else:
-            print('nie działa')
+            print('nie działa dd')
 
 
     def save_file_act(self):
