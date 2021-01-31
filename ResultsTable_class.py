@@ -161,7 +161,7 @@ class ResultsTableWidget(QWidget):
                 self.menu.addMenu(self.submenu_del_data)
 
                 # menu.exec_(event.globalPos())
-        return super(RightTableWidget, self).eventFilter(source, event)
+        return super(ResultsTableWidget, self).eventFilter(source, event)
 
     def generateMenu(self, pos):
         print("pos======", pos)

@@ -969,6 +969,13 @@ class PlotCanvas(FigureCanvas):
         self.signal_for_upgrade_widget_spinbox.emit(value)
         print('emmited')
 
+    @pyqtSlot()
+    def get_signal_from_preprocessing_widget(self):
+        print('signal_from_preprocessing_widget')
+        # self.signal_for_ml_widget.emit(x)
+        
+        self.raise_()
+
 
     def plot_indexes(self, t, x, y, h):
 

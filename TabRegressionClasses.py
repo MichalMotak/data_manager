@@ -161,13 +161,11 @@ class TabDecisionTreeReg(ParentMLWidget):
         self.l_combobox_criterion.add_items(decision_tree_reg_criterion_list)
 
 
-        self.slider = ImprovedSlider(0, 100, 'Train_test_split')
         self.slider_min_samples_split = ImprovedSlider(0, 50, 'min_samples_split')
 
         self.l_sp_max_depth = LabelAndSpinbox('max depth')
 
         self.lay2.addWidget(self.label_name)
-        self.lay2.addWidget(self.slider)
         self.lay2.addWidget(self.l_sp_max_depth)
         self.lay2.addWidget(self.l_combobox_criterion)
         self.lay2.addWidget(self.slider_min_samples_split)
@@ -261,7 +259,7 @@ class TabRandomForestReg(ParentMLWidget):
         # self.lineedit = QLineEdit(self)
         #
 
-        self.slider = ImprovedSlider(0, 100, 'Train_test_split')
+        self.slider = ImprovedSlider(0, 100, 'min_samples_split')
 
         self.lay2.addWidget(self.label_name)
         self.lay2.addWidget(self.slider)
@@ -301,8 +299,9 @@ class TabRandomForestReg(ParentMLWidget):
         X_data = dataframe.drop(Y_index, 1)
         Y_data = dataframe[Y_index]
 
-        train_test_split_value = int(self.slider.get_current_value())/100.0
-        X_train, X_test, y_train, y_test = train_test_split(X_data, Y_data, test_size=train_test_split_value, random_state=1)
+
+        # train_test_split_value = int(self.slider.get_current_value())/100.0
+        # X_train, X_test, y_train, y_test = train_test_split(X_data, Y_data, test_size=train_test_split_value, random_state=1)
 
         n_estim, max_depth, min_samples_split_arg = self.get_parameters(as_list=False)
         print('zzz')

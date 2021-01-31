@@ -1,8 +1,8 @@
 import sys
 from PyQt5 import QtWidgets, QtCore
-from PyQt5.QtWidgets import QDesktopWidget,\
-    QSplitter, QGridLayout, QAction, QApplication, QMainWindow, \
-    QPushButton,QMessageBox, QCheckBox, QFileDialog, QLabel,QSizePolicy, QLineEdit, QComboBox
+# from PyQt5.QtWidgets import QDesktopWidget,\
+#     QSplitter, QGridLayout, QAction, QApplication, QMainWindow, \
+#     QPushButton,QMessageBox, QCheckBox, QFileDialog, QLabel,QSizePolicy, QLineEdit, QComboBox
 
 import pandas as pd
 import csv
@@ -15,7 +15,7 @@ from PyQt5.QtWidgets import *
 import Database_class
 import TableWidget_class
 import MLWidget_class
-import RightTable_class
+import ResultsTable_class
 import PlotWidget_class
 import CustomDialogWidgets
 import PreprocessingWidget_class
@@ -187,7 +187,7 @@ class MainWindow(QMainWindow):
 
 
 
-        self.table_describe = MyTable_class.MyTable(5,3)
+        self.table_describe = TableWidget_class.TableWidget(5,3)
         self.table_describe.hide()
         # self.hor_lay_left.setStretchFactor(self.table_describe, 3)
         # self.hor_lay_left.setSpacing(3)
@@ -301,7 +301,7 @@ class MainWindow(QMainWindow):
 
         self.layout_right_table = QGridLayout()
 
-        self.right_table = RightTable_class.ResultsTableWidget()
+        self.right_table = ResultsTable_class.ResultsTableWidget()
 
         self.layout_right_table.addWidget(self.right_table)
 

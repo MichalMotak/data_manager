@@ -119,12 +119,19 @@ class TabClassification(QWidget):
     def create_bottom_layout(self):
         self.l_combobox_metrics = LabelAndComboboxCheckable('Metrics')
         self.l_combobox_metrics.add_items(class_metrics_list)
+        self.l_combobox_prediction = LabelAndCombobox('Prediction output')
+
+
+
+        multiclass_types_list = ['OneVsRest', 'OneVsOne']
+        self.l_combobox_multiclass_type = LabelAndCombobox('Multiclass Classification type', lay_dir='Horizontal')
+        self.l_combobox_multiclass_type.add_items(multiclass_types_list)
+
+
 
         self.bottom_layout.addWidget(self.l_combobox_metrics)
-
-
-        self.l_combobox_prediction = LabelAndCombobox('Prediction output')
         self.bottom_layout.addWidget(self.l_combobox_prediction)
+        self.bottom_layout.addWidget(self.l_combobox_multiclass_type)
 
 
         self.bottom_layout.setContentsMargins(5,5,5,5)
@@ -156,12 +163,13 @@ class TabClassification(QWidget):
         metrics = self.l_combobox_metrics.get_text()
         metrics = list(metrics.split(', '))
         predict_label = self.l_combobox_prediction.get_text()
+        multiclass_type = self.l_combobox_multiclass_type.get_text()
         print(metrics)
         # print(cv_type)
         # print(predict_label)
         # def predict(self, table, Y_index, cv_type, number, metrics):
 
-        current_widget.predict(tab,  predict_label, cv_type, number, metrics, pipe = pipe)
+        current_widget.predict(tab, predict_label, cv_type, number, metrics, multiclass_type, pipe = pipe)
 
     def update_outputcombobox(self, col_labels):
         self.l_combobox_prediction.clear()
@@ -242,9 +250,6 @@ class TabRegression(TabClassification):
         metrics = list(metrics.split(', '))
         predict_label = self.l_combobox_prediction.get_text()
         print(metrics)
-        # print(cv_type)
-        # print(predict_label)
-        # def predict(self, table, Y_index, cv_type, number, metrics):
 
         current_widget.predict(tab, predict_label, cv_type, number, metrics, pipe = pipe)
 
@@ -299,8 +304,9 @@ class MLWidget(QWidget):
 
         # self.layout_MLWidget_lower.addWidget(self.label222)
 
+
         cv_types_list = ['Cross Validation', 'K-Fold']
-        self.l_combobox_cv_type = LabelAndCombobox('Cross Validation type', lay_dir='Vertical')
+        self.l_combobox_cv_type = LabelAndCombobox('Validation type', lay_dir='Vertical')
         self.l_combobox_cv_type.add_items(cv_types_list)
 
         self.sp = LabelAndSpinbox('number', 'Vertical')
@@ -308,9 +314,12 @@ class MLWidget(QWidget):
         self.hbox = QHBoxLayout()
         self.hbox.addWidget(self.l_combobox_cv_type)
         self.hbox.addWidget(self.sp)
-        self.layout_MLWidget_lower.addLayout(self.hbox, 0,0)
 
+
+        self.layout_MLWidget_lower.addLayout(self.hbox, 0,0)
         self.layout_MLWidget_lower.addWidget(self.b_predict, 1,0)
+
+
 
         self.frame_MLWidget_lower.setLayout(self.layout_MLWidget_lower)
         self.main_layout.addWidget(self.frame_MLWidget_lower)
@@ -440,8 +449,8 @@ class MLWidget(QWidget):
         # Emit signal with prediction results etc.
 
         try:
-            current_tab_index, current_tab = self.which_tab_is_opened()
-            current_widget_index, current_widget = self.which_widget_is_opened()
+            _, current_tab = self.which_tab_is_opened()
+            _, current_widget = self.which_widget_is_opened()
 
             cv_type = self.l_combobox_cv_type.get_text()
             number = self.sp.get_value()
@@ -449,11 +458,8 @@ class MLWidget(QWidget):
 
             # jeśli trzeba coś dodać w predict dla danego tabu to 1 wybór
             print('przed pred')
-            # try:
-            #     current_tab.predict(current_widget, self.dataframe, cv_type, number, self.pipeline)
-            # except NameError:
-            #     print('bez ')
-            #     current_tab.predict(current_widget, self.dataframe, cv_type, number)
+
+
             self.emit_signal_for_preprocessing_widget() # signal to get self.pipeline
             current_tab.predict(current_widget, self.dataframe, cv_type, number, self.pipeline)
             print(' po predykcji current tabu')
@@ -462,8 +468,8 @@ class MLWidget(QWidget):
             # check if its needed to update Right Table with results
             self.emit_signal_for_right_table()
 
-        except:
-            pass
+        except Exceotion as e:
+            print(e)
 
 
 

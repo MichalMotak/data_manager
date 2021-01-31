@@ -19,7 +19,7 @@ from sklearn.svm import LinearSVC, SVC
 
 from sklearn.metrics import auc, accuracy_score, roc_auc_score, roc_curve, precision_score, recall_score, f1_score, confusion_matrix, classification_report, plot_confusion_matrix, ConfusionMatrixDisplay
 from sklearn.model_selection import train_test_split, cross_val_score, cross_val_predict, cross_validate, KFold
-
+from sklearn.multiclass import OneVsOneClassifier, OneVsRestClassifier
 
 
 
@@ -103,11 +103,8 @@ class RandomForestClassWidget(ParentMLWidget):
         # self.lineedit = QLineEdit(self)
         #
 
-        self.slider = ImprovedSlider(0, 100, 'Train_test_split')
-
         self.lay2.addWidget(self.label_name)
 
-        self.lay2.addWidget(self.slider)
         # self.lay2.addWidget(self.label_estimators)
         # self.lay2.addWidget(self.lineedit)
 
@@ -117,7 +114,7 @@ class RandomForestClassWidget(ParentMLWidget):
         self.l_sp = LabelAndSpinbox('Number of estimators')
         self.lay2.addWidget(self.l_sp)
 
-    def predict(self, table, Y_index, cv_type, number, metrics, pipe):
+    def predict(self, table, Y_index, cv_type, number, metrics, multiclass_type, pipe):
 
         print(self.name + ' predict')
         print('pipe ' , pipe)
@@ -127,18 +124,35 @@ class RandomForestClassWidget(ParentMLWidget):
         X_data = dataframe.drop(Y_index, 1)
         Y_data = dataframe[Y_index]
 
-        train_test_split_value = int(self.slider.get_current_value())/100.0
-        X_train, X_test, y_train, y_test = train_test_split(X_data, Y_data, test_size=train_test_split_value, random_state=1)
+        Y_data_unique = np.unique(Y_data)
+        print(Y_data_unique)
+        # train_test_split_value = int(self.slider.get_current_value())/100.0
+        # X_train, X_test, y_train, y_test = train_test_split(X_data, Y_data, test_size=train_test_split_value, random_state=1)
 
         n_estim = self.get_parameters(as_list=False)
 
-        clf = RandomForestClassifier(n_estimators=n_estim,
-                                     bootstrap=True,
-                                     max_features='sqrt')
+        if len(Y_data_unique) > 1:
+            print(multiclass_type)
+            if multiclass_type == 'OneVsRest':
+                clf = OneVsRestClassifier(RandomForestClassifier(n_estimators=n_estim,
+                                        bootstrap=True,
+                                        max_features='sqrt'))
+
+            elif multiclass_type == 'OneVsOne':
+                clf = OneVsOneClassifier(RandomForestClassifier(n_estimators=n_estim,
+                                        bootstrap=True,
+                                        max_features='sqrt'))
+
+        else:
+            clf = RandomForestClassifier(n_estimators=n_estim,
+                                        bootstrap=True,
+                                        max_features='sqrt')
 
         print('pipe ', pipe)
         pipe.steps.append(("class", clf))
         print('create with pipe ', pipe)
+
+
 
         if cv_type == 'Cross Validation':
             print(cv_type, number, metrics)
@@ -150,29 +164,30 @@ class RandomForestClassWidget(ParentMLWidget):
             cv = KFold(number=number)
             scores = cross_validate(pipe, X_data, Y_data, cv=cv, scoring=metrics, return_train_score=True)
             self.results(scores, metrics)
-        else:
+            
+        # elif cv_type == 'train_test_split':
+        #     X_train, X_test, y_train, y_test = train_test_split(X_data, Y_data, test_size=train_test_split_value, random_state=1)
+        #     # jednokrotna predykcja
+        #     clf = clf.fit(X_train, y_train)
 
-            # jednokrotna predykcja
-            clf = clf.fit(X_train, y_train)
+        #     y_pred = clf.predict(X_test)
+        #     y_train_pred = clf.predict(X_train)
 
-            y_pred = clf.predict(X_test)
-            y_train_pred = clf.predict(X_train)
+        #     labels = [0,1]
+        #     print('Test acc: ', accuracy_score(y_test, y_pred))
 
-            labels = [0,1]
-            print('Test acc: ', accuracy_score(y_test, y_pred))
+        #     # print(classification_report(y_test, y_pred, labels=labels))
 
-            # print(classification_report(y_test, y_pred, labels=labels))
-
-            print('Train acc: ', accuracy_score(y_train, y_train_pred))
-            # print(classification_report(y_train, y_train_pred, labels=labels))
+        #     print('Train acc: ', accuracy_score(y_train, y_train_pred))
+        #     # print(classification_report(y_train, y_train_pred, labels=labels))
 
 
-            # cv = cross_val_score(clf_org, X_data, Y_data, cv=10, scoring='accuracy')
-            # cv1 = cross_val_score(clf_org, X_test, y_test, cv=2, scoring='accuracy')
+        #     # cv = cross_val_score(clf_org, X_data, Y_data, cv=10, scoring='accuracy')
+        #     # cv1 = cross_val_score(clf_org, X_test, y_test, cv=2, scoring='accuracy')
 
-            print(cv)
-            print(cv.mean())
-            # print(cv1)
+        #     print(cv)
+        #     print(cv.mean())
+        #     # print(cv1)
 
 
             # print('Accuracy (std): %0.3f' % scores_acc.std())
@@ -201,16 +216,14 @@ class DecisionTreeClassWidget(ParentMLWidget):
         self.label_name.setStyleSheet(" QLabel")
 
         self.l_sp = LabelAndSpinbox('max depth')
-        self.slider = ImprovedSlider(0, 100, 'Train_test_split')
         self.slider_min_samples_split = ImprovedSlider(0, 50, 'min_samples_split')
 
 
         self.lay2.addWidget(self.label_name)
-        self.lay2.addWidget(self.slider)
         self.lay2.addWidget(self.l_sp)
         self.lay2.addWidget(self.slider_min_samples_split)
 
-    def predict(self, table, Y_index, cv_type, number, metrics, pipe):
+    def predict(self, table, Y_index, cv_type, number, metrics, multiclass_type, pipe):
 
 
         print(self.name + ' predict')
@@ -218,12 +231,11 @@ class DecisionTreeClassWidget(ParentMLWidget):
         dataframe = table
         X_data = dataframe.drop(Y_index, 1)
         Y_data = dataframe[Y_index]
-        train_test_split_value = int(self.slider.get_current_value())/100.0
-        print(train_test_split_value)
+        Y_data_unique = np.unique(Y_data)
+        print(Y_data_unique)
 
         max_depth_arg, min_samples_split_arg = self.get_parameters(as_list=False)
 
-        X_train, X_test, y_train, y_test = train_test_split(X_data, Y_data, test_size=train_test_split_value, random_state=1)
 
         # max_depth_arg = self.l_sp.get_value()
         # min_samples_split_arg = int(self.slider_min_samples_split.get_current_value())
@@ -233,7 +245,15 @@ class DecisionTreeClassWidget(ParentMLWidget):
         #       f"max depth arg {max_depth_arg}")
 
 
-        clf = DecisionTreeClassifier(max_depth=max_depth_arg, min_samples_split= min_samples_split_arg)
+        if len(Y_data_unique) > 1:
+            print(multiclass_type)
+            if multiclass_type == 'OneVsRest':
+                clf = OneVsRestClassifier(DecisionTreeClassifier(max_depth=max_depth_arg, min_samples_split= min_samples_split_arg))
+            elif multiclass_type == 'OneVsOne':
+                clf = OneVsOneClassifier(DecisionTreeClassifier(max_depth=max_depth_arg, min_samples_split= min_samples_split_arg))
+                
+        elif len(Y_data_unique) == 0:
+            clf = DecisionTreeClassifier(max_depth=max_depth_arg, min_samples_split= min_samples_split_arg)
 
 
         print('pipe ', pipe)
@@ -432,7 +452,7 @@ class SupportVectorMachineClassWidget(ParentMLWidget):
             return parameters_dict
 
 
-    def predict(self, table, Y_index, cv_type, number, metrics, pipe):
+    def predict(self, table, Y_index, cv_type, number, metrics,multiclass_type, pipe):
 
 
         print(self.name + ' predict')
@@ -442,6 +462,7 @@ class SupportVectorMachineClassWidget(ParentMLWidget):
         dataframe = table
         X_data = dataframe.drop(Y_index, 1)
         Y_data = dataframe[Y_index]
+        Y_data_unique = np.unique(Y_data)
         # train_test_split_value = int(self.slider.get_current_value())/100.0
         # print(train_test_split_value)
         print('1')
@@ -462,6 +483,18 @@ class SupportVectorMachineClassWidget(ParentMLWidget):
         else:
             clf = SVC(**pars)
         print(clf)
+
+        if len(Y_data_unique) > 1:
+            print(multiclass_type)
+
+            if multiclass_type == 'OneVsRest':
+                clf = OneVsRestClassifier(clf)
+            elif multiclass_type == 'OneVsOne':
+                clf = OneVsOneClassifier(clf)
+                
+        elif len(Y_data_unique) == 0:
+            pass
+
 
         print('pipe ', pipe)
         pipe.steps.append(("class", clf))

@@ -28,7 +28,7 @@ class TableWidget(QTableWidget):
 
     def resizeEvent(self, event):
         self.resized.emit()
-        return super(MyTable, self).resizeEvent(event)
+        return super(TableWidget, self).resizeEvent(event)
 
     def resized_fun(self):
         None
