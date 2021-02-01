@@ -33,6 +33,27 @@ class PreprocessingWidget(QWidget):
         self.label.setAlignment(Qt.AlignCenter)
         self.label.setText('Preprocessing')
 
+        # Missing Data
+
+        # df.dropna()
+        self.pb_dropna = QPushButton()
+        self.pb_dropna.setText('drop NA')
+        self.pb_dropna.clicked.connect(self.drop_na)
+
+        self.pb_fillna = QPushButton()
+        self.pb_fillna.setText('fill NA')
+        self.pb_fillna.clicked.connect(self.fill_na)
+
+        self.l_combobox_fillna_method = UpgradedWidgets.LabelAndCombobox('fillna method')
+        self.l_combobox_fillna_method.add_items(['Mean', 'Median', 'Interpolate', 'Constant value'])
+
+
+        # self.l_rb_PCA = UpgradedWidgets.LabelAndRadioButton('PCA')
+        self.l_sb_fillna_value = UpgradedWidgets.LabelAndSpinbox('fillna constant value', double_spinbox=True)
+        self.l_sb_fillna_value.set_step(0.01)
+
+
+
         self.pushButton = QPushButton()
         self.pushButton.setText('one hot encoder')
         self.pushButton.clicked.connect(self.one_hot_encoder)
@@ -64,6 +85,14 @@ class PreprocessingWidget(QWidget):
 
 
         self.main_layout.addWidget(self.label)
+
+
+        self.main_layout.addWidget(self.pb_dropna)
+        self.main_layout.addWidget(self.l_combobox_fillna_method)
+        self.main_layout.addWidget(self.l_sb_fillna_value)
+        self.main_layout.addWidget(self.pb_fillna)
+
+
         self.main_layout.addWidget(self.l_combobox_labels)
         self.main_layout.addWidget(self.pushButton)
         self.main_layout.addWidget(self.l_combobox_scaler)
@@ -81,6 +110,8 @@ class PreprocessingWidget(QWidget):
         self.setLayout(self.main_layout)
 
 
+
+
     def set_dataframe(self, df):
         self.dataframe = df
 
@@ -88,14 +119,51 @@ class PreprocessingWidget(QWidget):
         self.col_labels = col_labels
         # self.update_output_combobox()
 
-    # def update_output_combobox(self, col_labels):
-    #     self.l_combobox_labels.clear_items()
-    #     self.l_combobox_labels.add_items(col_labels)
+    def update_output_combobox(self, col_labels):
+        self.l_combobox_labels.clear_items()
+        self.l_combobox_labels.add_items(col_labels)
 
 
     #     self.l_combobox_PCA_labels.clear()
     #     self.l_combobox_PCA_labels.add_items(col_labels)
 
+    def show_information_about_missing_values(self):
+        #df.isna().any()
+        #df.isna().sum()
+        pass
+
+    def drop_na(self):
+        print('drop na')
+
+        new_df = self.dataframe.dropna()
+
+        self.emit_signal_for_table(new_df)
+
+    def fill_na(self):
+        method = self.l_combobox_fillna_method.get_text()
+
+        if method == 'Default':
+            return 0
+
+        elif method == 'Mean':
+            new_df = self.dataframe.fillna(self.dataframe.mean())
+
+        elif method == 'Median':
+            new_df = self.dataframe.fillna(self.dataframe.median())
+
+        elif method == 'Interpolate':
+            new_df = self.dataframe.interpolate()
+
+        elif method == 'Constant value':
+            value = self.l_sb_fillna_value.get_value()
+            new_df = self.dataframe.fillna(value)
+
+
+
+        # dff.where(pd.notna(dff), dff.mean(), axis="columns")
+        # https://pandas.pydata.org/pandas-docs/stable/user_guide/missing_data.html
+
+        self.emit_signal_for_table(new_df)
 
     def button(self):
         print('x')
@@ -147,26 +215,6 @@ class PreprocessingWidget(QWidget):
         imputer = impute.SimpleImputer()
         return imputer
 
-    # def PCA_plot(self):
-    #     print('PCA_plot')
-
-    #     imputer = impute.SimpleImputer()
-    #     scaler = self.get_scalers_objects()
-
-    #     pca = PCA()
-    #     pipe = pipeline.Pipeline( [('imputer', imputer), ('scaler', scaler), ('PCA', pca)] )
-    #     # pipe.fit()
-    #     print(pipe)
-    #     Y_index = self.l_combobox_PCA_labels.get_text()
-
-    #     X_data = self.dataframe.drop(Y_index, 1)
-    #     Y_data = self.dataframe[Y_index]
-    #     print(X_data.shape, Y_data.shape)
-    #     pipe_fitted = pipe.fit(X_data)
-
-    #     print(pca.explained_variance_ratio_)
-
-    #     self.emit_signal_for_PlotWidget(list(pca.explained_variance_ratio_))
 
 
     def pipe(self):
@@ -174,10 +222,7 @@ class PreprocessingWidget(QWidget):
         if self.l_rb_pipeline.get_state():
 
             imputer = impute.SimpleImputer()
-            # scaler = preprocessing.StandardScaler()
             scaler = self.get_scalers_objects()
-
-            
 
             print('scaler : ', scaler)
             print('imputer : ', imputer)
@@ -216,7 +261,7 @@ class PreprocessingWidget(QWidget):
         print(dataframe.shape)
  
         self.set_dataframe(dataframe)
-        # self.update_output_combobox(col_labels = list(dataframe.columns))
+        self.update_output_combobox(col_labels = list(dataframe.columns))
         self.raise_()
 
     @pyqtSlot()

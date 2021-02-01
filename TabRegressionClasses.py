@@ -193,12 +193,12 @@ class TabDecisionTreeReg(ParentMLWidget):
         X_data = dataframe.drop(Y_index, 1)
         Y_data = dataframe[Y_index]
 
-        train_test_split_value = int(self.slider.get_current_value())/100.0
-        X_train, X_test, y_train, y_test = train_test_split(X_data, Y_data, test_size=train_test_split_value, random_state=1)
+        # train_test_split_value = int(self.slider.get_current_value())/100.0
+        # X_train, X_test, y_train, y_test = train_test_split(X_data, Y_data, test_size=train_test_split_value, random_state=1)
 
         max_depth_arg, min_samples_split_arg, criterion = self.get_parameters(as_list=False)
 
-        print(Y_index, train_test_split_value, min_samples_split_arg, criterion)
+        print(Y_index,  min_samples_split_arg, criterion)
         reg = DecisionTreeRegressor(criterion = criterion, max_depth=max_depth_arg, min_samples_split= min_samples_split_arg)
 
 
