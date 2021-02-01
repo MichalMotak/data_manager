@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 
 import UpgradedWidgets
+import CustomDialogWidgets
 
 from sklearn import pipeline 
 from sklearn import impute 
@@ -18,7 +19,7 @@ class PreprocessingWidget(QWidget):
     signal_for_table = pyqtSignal(pd.core.frame.DataFrame)
     signal_for_ml_widget = pyqtSignal(pipeline.Pipeline)
 
-    signal_for_PlotWidget = pyqtSignal()
+    signal_for_PlotWidget = pyqtSignal(list)
 
     def __init__(self):
         print('PreprocessingWidget init')
@@ -37,19 +38,21 @@ class PreprocessingWidget(QWidget):
         self.pushButton.clicked.connect(self.one_hot_encoder)
 
         # self.l_rb_ = UpgradedWidgets.LabelAndRadioButton('one hot encoder')
-        self.l_combobox_labels = UpgradedWidgets.LabelAndComboboxCheckable('labels')
+        self.l_combobox_labels = UpgradedWidgets.LabelAndComboboxCheckable('One Hot Labels', lay_dir = 'Horizontal')
 
 
         self.l_combobox_scaler = UpgradedWidgets.LabelAndCombobox('scaler')
         self.l_combobox_scaler.add_items(['Standard', 'MinMax'])
 
         self.l_rb_PCA = UpgradedWidgets.LabelAndRadioButton('PCA')
-        self.l_sb_components = UpgradedWidgets.LabelAndSpinbox('number of components')
-        self.l_sb_components.set_step(0.05)
+        self.l_sb_components = UpgradedWidgets.LabelAndSpinbox('number of components', double_spinbox=True)
+        self.l_sb_components.set_step(0.01)
+        self.l_sb_components.setToolTip('Float in range [0,1] or Int')
 
-        self.b_create_PCA_plot = QPushButton()
-        self.b_create_PCA_plot.setText('create PCA plot')
-        self.b_create_PCA_plot.clicked.connect(self.PCA_plot)
+
+
+        # self.l_combobox_PCA_labels = UpgradedWidgets.LabelAndCombobox('Predict label for PCA plot')
+
 
 
         self.l_rb_pipeline = UpgradedWidgets.LabelAndRadioButton('create pipeline')
@@ -69,6 +72,9 @@ class PreprocessingWidget(QWidget):
         self.main_layout.addWidget(self.l_rb_PCA)
         self.main_layout.addWidget(self.l_sb_components)
 
+        # self.main_layout.addWidget(self.l_combobox_PCA_labels)
+
+
         self.main_layout.addWidget(self.l_rb_pipeline)
 
 
@@ -82,9 +88,14 @@ class PreprocessingWidget(QWidget):
         self.col_labels = col_labels
         # self.update_output_combobox()
 
-    def update_output_combobox(self, col_labels):
-        self.l_combobox_labels.clear_items()
-        self.l_combobox_labels.add_items(col_labels)
+    # def update_output_combobox(self, col_labels):
+    #     self.l_combobox_labels.clear_items()
+    #     self.l_combobox_labels.add_items(col_labels)
+
+
+    #     self.l_combobox_PCA_labels.clear()
+    #     self.l_combobox_PCA_labels.add_items(col_labels)
+
 
     def button(self):
         print('x')
@@ -136,15 +147,26 @@ class PreprocessingWidget(QWidget):
         imputer = impute.SimpleImputer()
         return imputer
 
-    def PCA_plot(self):
-        print('PCA_plot')
+    # def PCA_plot(self):
+    #     print('PCA_plot')
 
-        imputer = impute.SimpleImputer()
-        scaler = self.get_scalers_objects()
+    #     imputer = impute.SimpleImputer()
+    #     scaler = self.get_scalers_objects()
 
-        self.emit_signal_for_PlotWidget()
-        pca = PCA()
-        pipe = pipeline.Pipeline( [('imputer', imputer), ('scaler', scaler), ('PCA', pca)] )
+    #     pca = PCA()
+    #     pipe = pipeline.Pipeline( [('imputer', imputer), ('scaler', scaler), ('PCA', pca)] )
+    #     # pipe.fit()
+    #     print(pipe)
+    #     Y_index = self.l_combobox_PCA_labels.get_text()
+
+    #     X_data = self.dataframe.drop(Y_index, 1)
+    #     Y_data = self.dataframe[Y_index]
+    #     print(X_data.shape, Y_data.shape)
+    #     pipe_fitted = pipe.fit(X_data)
+
+    #     print(pca.explained_variance_ratio_)
+
+    #     self.emit_signal_for_PlotWidget(list(pca.explained_variance_ratio_))
 
 
     def pipe(self):
@@ -163,17 +185,25 @@ class PreprocessingWidget(QWidget):
             if self.l_rb_PCA.get_state():
                 n_comp = self.l_sb_components.get_value()
                 print('n_comp: ', n_comp)
-                pca = PCA(n_components=n_comp)
-                pipe = pipeline.Pipeline( [('imputer', imputer), ('scaler', scaler), ('PCA', pca)] )
+
+                if (n_comp >= 0.0 and n_comp <= 1.0) or n_comp.is_integer():
+                    if n_comp.is_integer():
+                        n_comp = int(n_comp)
+                    pca = PCA(n_components=n_comp)
+                    pipe = pipeline.Pipeline( [('imputer', imputer), ('scaler', scaler), ('PCA', pca)] )
+                else:
+                    d = CustomDialogWidgets.CustomMessageBoxWarning('n_components must be Float in range [0,1] or Int')
+                    return 0
+
             else:
                 pipe = pipeline.Pipeline( [('imputer', imputer), ('scaler', scaler)] )
 
-            self.emit_signal_for_preprocessing_widget(pipe)
+            self.emit_signal_for_ml_widget(pipe)
 
         else:
             imputer = impute.SimpleImputer()
             pipe = pipeline.Pipeline([('imputer', imputer)])
-            self.emit_signal_for_preprocessing_widget(pipe)
+            self.emit_signal_for_ml_widget(pipe)
 
     @pyqtSlot()
     def emit_signal_for_table(self, df):
@@ -186,12 +216,12 @@ class PreprocessingWidget(QWidget):
         print(dataframe.shape)
  
         self.set_dataframe(dataframe)
-        self.update_output_combobox(col_labels = list(dataframe.columns))
+        # self.update_output_combobox(col_labels = list(dataframe.columns))
         self.raise_()
 
     @pyqtSlot()
-    def emit_signal_for_preprocessing_widget(self, pipe):
-        print('emit_signal_for_preprocessing_widget ', pipe)
+    def emit_signal_for_ml_widget(self, pipe):
+        print('emit_signal_ml_widget ', pipe)
         self.signal_for_ml_widget.emit(pipe)
 
     @pyqtSlot()
@@ -206,6 +236,6 @@ class PreprocessingWidget(QWidget):
     # Emit PCA PLOT FOR Plot WIDGET
 
     @pyqtSlot()
-    def emit_signal_for_PlotWidget(self):
-        print('emit_signal_for_plot_widget ')
-        self.signal_for_PlotWidget.emit()
+    def emit_signal_for_PlotWidget(self, list):
+        print('emit_signal_for_plot_widget ', list)
+        self.signal_for_PlotWidget.emit(list)

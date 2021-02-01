@@ -358,6 +358,9 @@ class MainWindow(QMainWindow):
         self.preproc_widget.signal_for_ml_widget.connect(self.ml_widget.get_signal_from_preprocessing_widget)
         self.ml_widget.signal_for_preprocessing_widget.connect(self.preproc_widget.get_signal_from_preprocessing_widget)
 
+        self.preproc_widget.signal_for_PlotWidget.connect(self.plot_widget.get_signal_from_preprocessing_widget)
+
+        self.table.signal_for_plot_widget.connect(self.plot_widget.get_signal_from_table_widget)
 
         self.table.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)  # +++
         self.table.customContextMenuRequested.connect(self.generateMenu)  # +++

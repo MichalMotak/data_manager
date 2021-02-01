@@ -11,6 +11,8 @@ class TableWidget(QTableWidget):
     signal_for_preprocessing_widget = pyqtSignal(pd.core.frame.DataFrame)
     signal_for_ml_widget = pyqtSignal(pd.core.frame.DataFrame)
 
+    signal_for_plot_widget = pyqtSignal(list)
+
     def __init__(self, r ,c ):
         super().__init__(r,c)
         self.rows = r
@@ -83,6 +85,7 @@ class TableWidget(QTableWidget):
 
         self.emit_signal_for_preprocessing_widget()
         self.emit_signal_for_ml_widget()
+        self.emit_signal_for_plot_widget()
 
 
     def add_row_bottom(self, row):
@@ -239,3 +242,9 @@ class TableWidget(QTableWidget):
     def emit_signal_for_ml_widget(self):
         print('emit_signal_for_table ', self.dataframe)
         self.signal_for_ml_widget.emit(self.dataframe)
+
+
+    @pyqtSlot()
+    def emit_signal_for_plot_widget(self):
+        print('emit_signal_for_table ', self.col_labels)
+        self.signal_for_plot_widget.emit(list(self.col_labels))

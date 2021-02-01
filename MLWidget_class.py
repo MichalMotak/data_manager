@@ -468,7 +468,7 @@ class MLWidget(QWidget):
             # check if its needed to update Right Table with results
             self.emit_signal_for_right_table()
 
-        except Exceotion as e:
+        except Exception as e:
             print(e)
 
 

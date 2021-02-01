@@ -325,10 +325,14 @@ class LabelAndSpinbox(QWidget):
         self.raise_()
 
 class LabelAndComboboxCheckable(QWidget):
-    def __init__(self, name):
+    def __init__(self, name, lay_dir = 'Horizontal'):
         super(LabelAndComboboxCheckable, self).__init__()
 
-        self.main_layout = QVBoxLayout()
+        if lay_dir == 'Horizontal':
+            self.main_layout = QHBoxLayout()
+        elif lay_dir == 'Vertical':
+            self.main_layout = QVBoxLayout()
+
         self.main_layout.setContentsMargins(0, 0, 0, 0)
         self.name = name
 
@@ -397,6 +401,13 @@ class LabelAndCombobox(QWidget):
 
     def set_current_index(self, index):
         self.combobox.setCurrentIndex(index)
+
+
+    def signal_current_text_changed(self, function):
+        self.combobox.currentTextChanged.connect(function)
+        return function()
+
+
 
 
 class LabelAndRadioButton(QWidget):

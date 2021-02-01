@@ -1,10 +1,12 @@
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+# from matplotlib.backends.backend_qt5agg import ToolbarQt
 
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 import seaborn as sns
 import pandas as pd
+import numpy as np
 
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
@@ -13,6 +15,12 @@ from PyQt5.QtCore import *
 from UpgradedWidgets import *
 from CustomDialogWidgets import *
 from globals_ import matplotlib_colors_list
+
+from sklearn import pipeline 
+from sklearn import impute 
+from sklearn import preprocessing
+
+from sklearn.decomposition import PCA 
 
 class ParentPlotTab(QWidget):
     def __init__(self, name):
@@ -508,6 +516,87 @@ class TabPlotCategoricalEstimate(ParentPlotTab):
         return plot
 
 
+class TabPlotDimentionReduction(ParentPlotTab):
+
+
+    def __init__(self, name):
+        super(TabPlotDimentionReduction, self).__init__(name)
+        self.name = name
+
+    def create_layout(self):
+        self.main_layout = QGridLayout(self)
+
+        self.b_create_PCA_plot = QPushButton()
+        self.b_create_PCA_plot.setText('create PCA plot')
+        # self.b_create_PCA_plot.clicked.connect(self.plot)
+
+        self.l_combobox_PCA_labels = LabelAndCombobox('Predict label for PCA plot')
+
+        self.l_rb_cumsum = LabelAndRadioButton('Cumsum')
+
+        self.main_layout.addWidget(self.b_create_PCA_plot)
+        self.main_layout.addWidget(self.l_combobox_PCA_labels)
+
+        self.main_layout.addWidget(self.l_rb_cumsum)
+
+
+        self.main_layout.setContentsMargins(5,5,5,5)
+
+    def get_explained_variance(self, pca, cumsum_bool = False):
+        exp_var = pca.explained_variance_ratio_
+
+        if cumsum_bool:
+            return np.cumsum(exp_var)
+        else:
+            return exp_var
+    
+    def get_explained_variance_plot_labels(self, cumsum_bool):
+
+        xlabel = 'Number of components' 
+        if cumsum_bool:
+            ylabel = 'Cumulative explained variance'
+        else:
+            ylabel = 'explained variance'
+
+        return xlabel, ylabel
+
+    def plot(self, table, x_, y_, hue_, ax_):
+
+        imputer = impute.SimpleImputer()
+        scaler = preprocessing.StandardScaler()
+
+        pca = PCA()
+        pipe = pipeline.Pipeline( [('imputer', imputer), ('scaler', scaler), ('PCA', pca)] )
+        # pipe.fit()
+        print(pipe)
+        Y_index = self.l_combobox_PCA_labels.get_text()
+
+        X_data = table.dataframe.drop(Y_index, 1)
+        Y_data = table.dataframe[Y_index]
+        print(X_data.shape, Y_data.shape)
+        pipe_fitted = pipe.fit(X_data)
+
+        cumsum_bool = self.l_rb_cumsum.get_state()
+        exp_var = self.get_explained_variance(pca, cumsum_bool)
+        xlabel, ylabel = self.get_explained_variance_plot_labels(cumsum_bool)
+
+        print(exp_var)
+
+        print('plot ', self.name)
+        # self.canv.plot_PCA(list_)
+
+        plot = sns.barplot(np.arange(1,len(exp_var)+1), exp_var, ax =ax_)
+        for p in plot.patches:
+            plot.annotate(format(p.get_height(), '.2f'), (p.get_x() + p.get_width() / 2., p.get_height()), 
+                        ha = 'center', va = 'center', xytext = (0, 10), textcoords = 'offset points')
+        ax_.set_xlabel(xlabel) 
+        ax_.set_ylabel(ylabel)
+
+        return plot
+
+    def update_combobox(self, list_):
+        self.l_combobox_PCA_labels.clear()
+        self.l_combobox_PCA_labels.add_items(list_)
 
 
 # wszystkie caterogical
@@ -576,6 +665,7 @@ class TabPlot2(ParentPlotTab):
 
 
 class PlotWidget(QWidget):
+
     def __init__(self, table):
         super(PlotWidget, self).__init__(table)
 
@@ -584,6 +674,20 @@ class PlotWidget(QWidget):
 
         self.canv = PlotCanvas(table, 5, 3)
         self.navbar = NavigationToolbar(self.canv, self) 
+
+        # print(self.navbar.toolitems)
+
+        # print(self.navbar.parent)
+        # print(self.navbar.canvas)
+
+
+        # toolbar = self.navbar.findChild(QToolBar)
+
+        anotherWidget=QLineEdit()
+        # add the new widget to the existing navigation toolbar
+        self.navbar.addWidget(anotherWidget)
+
+        # print(toolbar)
 
 
         self.xx = QPushButton('plot')
@@ -598,14 +702,18 @@ class PlotWidget(QWidget):
         self.tab4 = TabPlotCategoricalDistribution("Categorical_Distribution")
         self.tab5 = TabPlotCategoricalEstimate("Categorical_Estimate")
 
+        self.tab6 = TabPlotDimentionReduction("Dimention Reduction")
+
+
         self.tabs.addTab(self.tab1, self.tab1.name)
         self.tabs.addTab(self.tab2, self.tab2.name)
         self.tabs.addTab(self.tab3, self.tab3.name)
         self.tabs.addTab(self.tab4, self.tab4.name)
         self.tabs.addTab(self.tab5, self.tab5.name)
+        self.tabs.addTab(self.tab6, self.tab6.name)
 
 
-        self.list_of_tabs = [self.tab1, self.tab2, self.tab3, self.tab4, self.tab5]
+        self.list_of_tabs = [self.tab1, self.tab2, self.tab3, self.tab4, self.tab5, self.tab6]
 
         self.l_sp_number_of_plots = LabelAndSpinbox('Number of plots',stretches=[6,4], lay_dir = 'Horizontal', minimal_size=[25,50])
         self.l_sp_number_of_plots.set_range(0,6)
@@ -801,7 +909,7 @@ class PlotWidget(QWidget):
             try:
                 if reset_plots:
                     self.canv.clear_current_plot(ax_ind)
-                plot = current_tab.plot(self.table, x,y,hue, self.canv.fig.axes[ax_ind-1])
+                plot = current_tab.plot(self.table, x,y, hue, self.canv.fig.axes[ax_ind-1])
                 print('plot type ', type(plot))
                 # print(type(plot[0]))
                 # print(plot[0])
@@ -818,6 +926,51 @@ class PlotWidget(QWidget):
                 # d = Custom_Message_Box_Warning('plots not found')
         else:
             d = CustomMessageBoxWarning(f'plot number {ax_ind} is\'nt activated')
+
+    def plot_PCA(self, list_):
+        print('plot pca')
+        # self.canv.plot_PCA(list_)
+
+        ax_ind = self.l_sp_current_of_plots.get_value()
+        reset_plots = self.checkbox_reset_plots.isChecked()
+        print('reset ', reset_plots)
+
+        if ax_ind <= self.l_sp_number_of_plots.get_value():
+
+            try:
+                if reset_plots:
+                    self.canv.clear_current_plot(ax_ind)
+                plot = sns.barplot(np.arange(1,len(list_)+1), list_, ax =self.canv.fig.axes[ax_ind-1])
+                print('plot type ', type(plot))
+
+                self.canv.fig.tight_layout()
+                self.canv.draw()
+
+            except IndexError:
+                pass
+
+        else:
+            d = CustomMessageBoxWarning(f'plot number {ax_ind} is\'nt activated')
+
+    def update_dimention_reduction_tab(self):
+        # self.tab6.update_combobox()
+        pass
+
+    @pyqtSlot(list)
+    def get_signal_from_preprocessing_widget(self, list_):
+        print('signal_from_preprocessing_widget', list_)
+        # self.signal_for_ml_widget.emit(x)
+        self.plot_PCA(list_)
+        self.raise_()
+
+    @pyqtSlot(list)
+    def get_signal_from_table_widget(self, list_):
+        print("signal_from table widget ")
+        # self.update_from_df(df)
+        # self.update_dimention_reduction_tab(list_)
+        self.tab6.update_combobox(list_)
+        self.raise_()
+
 
     
 class PlotCanvas(FigureCanvas):
@@ -842,6 +995,9 @@ class PlotCanvas(FigureCanvas):
 
     def change(self):
         print('change')
+
+    def plot_PCA(self, list_):
+        self.c
 
 
 
@@ -969,12 +1125,6 @@ class PlotCanvas(FigureCanvas):
         self.signal_for_upgrade_widget_spinbox.emit(value)
         print('emmited')
 
-    @pyqtSlot()
-    def get_signal_from_preprocessing_widget(self):
-        print('signal_from_preprocessing_widget')
-        # self.signal_for_ml_widget.emit(x)
-        
-        self.raise_()
 
 
     def plot_indexes(self, t, x, y, h):

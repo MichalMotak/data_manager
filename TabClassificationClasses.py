@@ -299,6 +299,8 @@ class SupportVectorMachineClassWidget(ParentMLWidget):
         super().__init__(name)
         self.name = name
 
+
+
     def create_layout(self):
         self.lay2 = QGridLayout(self)
 
@@ -307,6 +309,8 @@ class SupportVectorMachineClassWidget(ParentMLWidget):
 
         self.l_combobox_kernel = LabelAndCombobox('kernel', stretches=[2,2], lay_dir = 'Horizontal', minimal_size=[20,20])
         self.l_combobox_kernel.add_items(['linear', 'poly', 'rbf', 'sigmoid'])
+
+        self.l_combobox_kernel.signal_current_text_changed(self.fun)
 
         self.l_sp_C = LabelAndSpinbox('C', stretches=[2,2], lay_dir = 'Horizontal', minimal_size=[20,20], double_spinbox=True)
         self.l_sp_C.set_value(1.0)
@@ -392,6 +396,9 @@ class SupportVectorMachineClassWidget(ParentMLWidget):
 
 
         self.lay2.addWidget(self.label_sigmoid, 9, 0, 1, 2)
+
+    def fun(self):
+        print('FUN FUN ')
 
 
     def get_parameters(self, as_list=False, return_labels=False, as_dict = False):
