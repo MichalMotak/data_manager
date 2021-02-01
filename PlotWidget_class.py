@@ -120,10 +120,23 @@ class TabPlotRelatonships(ParentPlotTab):
 
         # self.main_layout.addWidget(self.l_le_hue, 1,1)
 
-
+        self.l_combobox_kind.signal_current_text_changed(self.manage_enability_of_widgets)
         # self.main_layout.addWidget(self.b)
 
         self.setLayout(self.main_layout)
+
+    def manage_enability_of_widgets(self):
+
+        kind = self.l_combobox_kind.get_text()
+
+        if kind == 'line':
+            self.l_sp_alpha.setEnabled(False)
+            self.l_combobox_err_style.setEnabled(True)
+ 
+        elif kind == 'scatter':
+            self.l_combobox_err_style.setEnabled(False)
+            self.l_sp_alpha.setEnabled(True)
+
 
     def get_parameters(self, plot_kind):
 
@@ -203,7 +216,7 @@ class TabPlotCategoricalScatterplots(ParentPlotTab):
         self.l_sp_linewidth.set_value(0)
         self.l_sp_linewidth.set_step(0.1)
 
-        self.l_sp_jitter = LabelAndSpinbox('jitter (stripplot)', stretches=[7,3], lay_dir = 'Horizontal', minimal_size=[30,50], double_spinbox=True)
+        self.l_sp_jitter = LabelAndSpinbox('jitter', stretches=[7,3], lay_dir = 'Horizontal', minimal_size=[30,50], double_spinbox=True)
         self.l_sp_jitter.set_value(0.1)
         self.l_sp_jitter.set_step(0.05)
 
@@ -225,8 +238,19 @@ class TabPlotCategoricalScatterplots(ParentPlotTab):
         self.main_layout.addWidget(self.l_radiobutton_dodge, 1,2)
 
         # self.main_layout.addWidget(self.l_combobox_col)
+        self.l_combobox_kind.signal_current_text_changed(self.manage_enability_of_widgets)
 
         self.setLayout(self.main_layout)
+
+    def manage_enability_of_widgets(self):
+
+        kind = self.l_combobox_kind.get_text()
+
+        if kind == 'swarm':
+            self.l_sp_jitter.setEnabled(False)
+        else:
+            self.l_sp_jitter.setEnabled(True)
+
 
     def get_parameters(self, plot_kind):
         markers_size = self.l_sp_size.get_value()
@@ -238,17 +262,17 @@ class TabPlotCategoricalScatterplots(ParentPlotTab):
             d = CustomMessageBoxWarning('wrong color')
             edgecolor = 'gray'
 
+        pars_common = {'edgecolor': edgecolor, 'linewidth' : linewidth, 'size': markers_size,'dodge': dodge}
+
         if plot_kind == 'strip':
             jitter = self.l_sp_jitter.get_value()
-            pars = {'edgecolor': edgecolor, 'linewidth' : linewidth,
-            'dodge': dodge, 'jitter' : jitter}
+            pars_new = {'jitter' : jitter}
 
+            pars = {**pars_common, **pars_new}
             return pars
+
         elif plot_kind == 'swarm':
-            pars = {'edgecolor': edgecolor, 'linewidth' : linewidth,
-            'dodge': dodge}
-
-            return pars
+            return pars_common
 
 
     def plot(self, table, x_, y_, hue_, ax_):
@@ -343,17 +367,51 @@ class TabPlotCategoricalDistribution(ParentPlotTab):
         self.main_layout.addWidget(self.l_sp_linewidth, 0,2)
         self.main_layout.addWidget(self.l_sp_saturation, 0,3)
 
-        self.main_layout.addWidget(self.l_sp_whis, 1,0)
-        self.main_layout.addWidget(self.l_sp_width, 1,1)
-        self.main_layout.addWidget(self.l_sp_fliersize, 1,2)
+        self.main_layout.addWidget(self.l_sp_whis, 1,1)
+        self.main_layout.addWidget(self.l_sp_width, 1,2)
+        self.main_layout.addWidget(self.l_sp_fliersize, 1,3)
 
-        self.main_layout.addWidget(self.l_combobox_inner, 2,0)
-        self.main_layout.addWidget(self.l_rb_split, 2,1)
-        self.main_layout.addWidget(self.l_sp_cut, 2,2)
+        self.main_layout.addWidget(self.l_combobox_inner, 2,1)
+        self.main_layout.addWidget(self.l_rb_split, 2,2)
+        self.main_layout.addWidget(self.l_sp_cut, 2,3)
 
         # self.main_layout.addWidget(self.l_combobox_col)
 
+        self.l_combobox_kind.signal_current_text_changed(self.manage_enability_of_widgets)
+
         self.setLayout(self.main_layout)
+
+    def manage_enability_of_widgets(self):
+
+        plot_kind = self.l_combobox_kind.get_text()
+
+        self.l_combobox_inner.setEnabled(True)
+        self.l_rb_split.setEnabled(True)
+        self.l_sp_cut.setEnabled(True)
+        self.l_sp_whis.setEnabled(True)
+        self.l_sp_width.setEnabled(True)
+        self.l_sp_fliersize.setEnabled(True)
+
+
+        if plot_kind == 'box':
+            self.l_combobox_inner.setEnabled(False)
+            self.l_rb_split.setEnabled(False)
+            self.l_sp_cut.setEnabled(False)
+
+        elif plot_kind == 'violin':
+            self.l_sp_whis.setEnabled(False)
+            self.l_sp_width.setEnabled(False)
+            self.l_sp_fliersize.setEnabled(False)
+
+
+        elif plot_kind == 'boxen':
+            self.l_combobox_inner.setEnabled(False)
+            self.l_rb_split.setEnabled(False)
+            self.l_sp_cut.setEnabled(False)
+            self.l_sp_whis.setEnabled(False)
+            self.l_sp_width.setEnabled(False)
+            self.l_sp_fliersize.setEnabled(False)
+
 
     def get_parameters(self, plot_kind):
 
@@ -365,30 +423,31 @@ class TabPlotCategoricalDistribution(ParentPlotTab):
         # width = self.l_sp_width.get_value()
         # fliersize = self.l_sp_fliersize.get_value()
 
-        inner = self.l_combobox_inner.get_text()
-        split = self.l_rb_split.get_state()
-        cut = self.l_sp_cut.get_value()
+
+        pars_common = {'dodge': dodge, 'linewidth' :linewidth, 'saturation':saturation}
 
         if plot_kind == 'box':
             whis = self.l_sp_whis.get_value()
             width = self.l_sp_width.get_value()
             fliersize = self.l_sp_fliersize.get_value()
 
-            pars = {'dodge': dodge, 'linewidth' :linewidth, 'saturation':saturation,
-             'whis': whis, 'width' : width, 'fliersize' : fliersize}
+            pars_new = {'whis': whis, 'width' : width, 'fliersize' : fliersize}
+            pars = {**pars_common, **pars_new}
+
             return pars
 
         elif plot_kind == 'violin':
             inner = self.l_combobox_inner.get_text()
             split = self.l_rb_split.get_state()
             cut = self.l_sp_cut.get_value()
-            pars = {'dodge': dodge, 'linewidth' :linewidth, 'saturation':saturation,
-             'inner': inner, 'split' : split, 'cut' : cut}
+
+            pars_new = {'inner': inner, 'split' : split, 'cut' : cut}
+            pars = {**pars_common, **pars_new}
+
             return pars
 
         elif plot_kind == 'boxen':
-            pars = {'dodge': dodge, 'linewidth' :linewidth, 'saturation':saturation}
-            return pars
+            return pars_common
 
 
     def plot(self, table, x_, y_, hue_, ax_):
@@ -447,7 +506,7 @@ class TabPlotCategoricalEstimate(ParentPlotTab):
         self.l_sp_errwidth.set_step(0.1)
         self.l_sp_errwidth.set_range(0.1, 10)
 
-        self.l_sp_saturation = LabelAndSpinbox('saturation (bar/count)', stretches=[7,3], lay_dir = 'Horizontal', minimal_size=[10,50], double_spinbox=True)
+        self.l_sp_saturation = LabelAndSpinbox('saturation ', stretches=[7,3], lay_dir = 'Horizontal', minimal_size=[10,50], double_spinbox=True)
         self.l_sp_saturation.set_value(1.0)
         self.l_sp_saturation.set_step(0.05)
         self.l_sp_saturation.set_range(0.05, 1.0)
@@ -463,8 +522,22 @@ class TabPlotCategoricalEstimate(ParentPlotTab):
         self.main_layout.addWidget(self.l_sp_saturation, 1,1)
 
 
+        self.l_combobox_kind.signal_current_text_changed(self.manage_enability_of_widgets)
 
         self.setLayout(self.main_layout)
+
+    def manage_enability_of_widgets(self):
+        kind = self.l_combobox_kind.get_text()
+
+        # self.l_sp_capsize.setEnables(True)
+        # self.l_sp_errwidth.setEnables(True)
+        # self.l_sp_saturation.setEnables(True)
+
+        if kind == 'point':
+            self.l_sp_saturation.setEnabled(False)
+        else:
+            self.l_sp_saturation.setEnabled(True)
+
 
 
     def get_parameters(self, plot_kind):

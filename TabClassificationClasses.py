@@ -310,8 +310,6 @@ class SupportVectorMachineClassWidget(ParentMLWidget):
         self.l_combobox_kernel = LabelAndCombobox('kernel', stretches=[2,2], lay_dir = 'Horizontal', minimal_size=[20,20])
         self.l_combobox_kernel.add_items(['linear', 'poly', 'rbf', 'sigmoid'])
 
-        self.l_combobox_kernel.signal_current_text_changed(self.fun)
-
         self.l_sp_C = LabelAndSpinbox('C', stretches=[2,2], lay_dir = 'Horizontal', minimal_size=[20,20], double_spinbox=True)
         self.l_sp_C.set_value(1.0)
         self.l_sp_C.set_step(0.1) 
@@ -320,8 +318,6 @@ class SupportVectorMachineClassWidget(ParentMLWidget):
         self.l_le_tol = LabelAndLineedit('tol', stretches=[2,4], lay_dir = 'Horizontal', minimal_size=[20,20])
         # self.l_le_tol.set_lineedit_text('1e-4')
         self.l_le_tol.set_lineedit_text('0.0001')
-
-
 
         self.label_linear = QLabel('Linear')
         self.label_linear.setAlignment(Qt.AlignCenter)
@@ -360,17 +356,17 @@ class SupportVectorMachineClassWidget(ParentMLWidget):
         self.l_combobox_poly_gamma.set_current_index(0)
 
 
-        self.label_rbf = QLabel('rbf - C, gamma, tol')
-        self.label_rbf.setAlignment(Qt.AlignCenter)
-        self.label_rbf.setMinimumHeight(20)
-        self.label_rbf.setMinimumWidth(30)
+        # self.label_rbf = QLabel('rbf - C, gamma, tol')
+        # self.label_rbf.setAlignment(Qt.AlignCenter)
+        # self.label_rbf.setMinimumHeight(20)
+        # self.label_rbf.setMinimumWidth(30)
 
 
 
-        self.label_sigmoid = QLabel('sigmoid - C, gamma, tol')
-        self.label_sigmoid.setAlignment(Qt.AlignCenter)
-        self.label_sigmoid.setMinimumHeight(20)
-        self.label_sigmoid.setMinimumWidth(30)
+        # self.label_sigmoid = QLabel('sigmoid - C, gamma, tol')
+        # self.label_sigmoid.setAlignment(Qt.AlignCenter)
+        # self.label_sigmoid.setMinimumHeight(20)
+        # self.label_sigmoid.setMinimumWidth(30)
 
 
 
@@ -392,13 +388,47 @@ class SupportVectorMachineClassWidget(ParentMLWidget):
         self.lay2.addWidget(self.l_sp_poly_degree, 7, 1)
 
 
-        self.lay2.addWidget(self.label_rbf, 8, 0, 1, 2)
+        # self.lay2.addWidget(self.label_rbf, 8, 0, 1, 2)
 
 
-        self.lay2.addWidget(self.label_sigmoid, 9, 0, 1, 2)
+        # self.lay2.addWidget(self.label_sigmoid, 9, 0, 1, 2)
 
-    def fun(self):
-        print('FUN FUN ')
+        self.l_combobox_kernel.signal_current_text_changed(self.manage_disability_of_widgets)
+
+
+    def manage_disability_of_widgets(self):
+        # this function is triggered by text changed signal
+
+        # index = self.lay2.count()
+        # print(index)
+        # myWidget_list = []
+        # while(index >= 0):
+        #     myWidget_list.append(self.lay2.itemAt(index))
+        #     index -=1
+        # print(myWidget_list)
+        self.l_combobox_linear_penalty.setEnabled(True)
+        self.l_sp_poly_degree.setEnabled(True)
+        self.l_combobox_linear_loss.setEnabled(True)
+        self.l_rb_linear_dual.setEnabled(True)
+        self.l_combobox_linear_penalty.setEnabled(True)
+        self.l_combobox_poly_gamma.setEnabled(True)
+
+        kernel = self.l_combobox_kernel.get_text()
+
+        if kernel == 'rbf' or kernel =='sigmoid':
+            self.l_combobox_linear_penalty.setEnabled(False)
+            self.l_sp_poly_degree.setEnabled(False)
+            self.l_combobox_linear_loss.setEnabled(False)
+            self.l_rb_linear_dual.setEnabled(False)
+
+        elif kernel == 'poly':
+            self.l_combobox_linear_penalty.setEnabled(False)
+            self.l_combobox_linear_loss.setEnabled(False)
+            self.l_rb_linear_dual.setEnabled(False)
+
+        elif kernel == 'linear':
+            self.l_sp_poly_degree.setEnabled(False)
+            self.l_combobox_poly_gamma.setEnabled(False)
 
 
     def get_parameters(self, as_list=False, return_labels=False, as_dict = False):
