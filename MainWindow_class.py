@@ -265,13 +265,6 @@ class MainWindow(QMainWindow):
 
 
 
-    def predict(self):
-        print('predict')
-
-        combobox_output = self.combo_box_Y.currentText()
-        print(combobox_output)
-        self.ml_widget.predict(self.table, combobox_output)
-
     def manage_layout_checked_action(self):
         """
         This function manages trigger action from self.manage_layout_menu

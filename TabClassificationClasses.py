@@ -75,11 +75,6 @@ class ParentMLWidget(QWidget):
     def get_last_results(self):
         return self.results_dict
 
-    # def predict_cross_validation(self, clf):
-
-
-    # def predict_Kfold(self):
-
 
 
 
@@ -98,19 +93,7 @@ class RandomForestClassWidget(ParentMLWidget):
         self.label_name.setAlignment(Qt.AlignCenter)
         self.label_name.setStyleSheet(" QLabel")
 
-        # self.label_estimators = QLabel('Number of estimators')
-        # self.label_estimators.setAlignment(Qt.AlignCenter)
-        # self.label_estimators.setStyleSheet(" QLabel")
-        # self.lineedit = QLineEdit(self)
-        #
-
         self.lay2.addWidget(self.label_name)
-
-        # self.lay2.addWidget(self.label_estimators)
-        # self.lay2.addWidget(self.lineedit)
-
-        # self.w = Label_and_Lineedit()
-        # self.lay2.addWidget(self.w)
 
         self.l_sp = UpgradedWidgets.LabelAndSpinbox('Number of estimators')
         self.lay2.addWidget(self.l_sp)
@@ -336,9 +319,6 @@ class SupportVectorMachineClassWidget(ParentMLWidget):
         self.l_rb_linear_dual = UpgradedWidgets.LabelAndRadioButton('dual', stretches=[3,3], lay_dir = 'Horizontal', minimal_size=[20,40])
         self.l_rb_linear_dual.set_state(True)
 
-        # self.l_sp = LabelAndSpinbox('max depth')
-        # self.slider = ImprovedSlider(0, 100, 'Train_test_split')
-        # self.slider_min_samples_split = ImprovedSlider(0, 50, 'min_samples_split')
 
         self.label_poly = QLabel('poly')
         self.label_poly.setAlignment(Qt.AlignCenter)
@@ -353,19 +333,6 @@ class SupportVectorMachineClassWidget(ParentMLWidget):
         self.l_combobox_poly_gamma = UpgradedWidgets.LabelAndCombobox('gamma', stretches=[2,5], lay_dir = 'Horizontal', minimal_size=[20,40])
         self.l_combobox_poly_gamma.add_items(['scale', 'auto'])
         self.l_combobox_poly_gamma.set_current_index(0)
-
-
-        # self.label_rbf = QLabel('rbf - C, gamma, tol')
-        # self.label_rbf.setAlignment(Qt.AlignCenter)
-        # self.label_rbf.setMinimumHeight(20)
-        # self.label_rbf.setMinimumWidth(30)
-
-
-
-        # self.label_sigmoid = QLabel('sigmoid - C, gamma, tol')
-        # self.label_sigmoid.setAlignment(Qt.AlignCenter)
-        # self.label_sigmoid.setMinimumHeight(20)
-        # self.label_sigmoid.setMinimumWidth(30)
 
 
 
@@ -387,10 +354,6 @@ class SupportVectorMachineClassWidget(ParentMLWidget):
         self.lay2.addWidget(self.l_sp_poly_degree, 7, 1)
 
 
-        # self.lay2.addWidget(self.label_rbf, 8, 0, 1, 2)
-
-
-        # self.lay2.addWidget(self.label_sigmoid, 9, 0, 1, 2)
 
         self.l_combobox_kernel.signal_current_text_changed(self.manage_disability_of_widgets)
 
@@ -398,13 +361,6 @@ class SupportVectorMachineClassWidget(ParentMLWidget):
     def manage_disability_of_widgets(self):
         # this function is triggered by text changed signal
 
-        # index = self.lay2.count()
-        # print(index)
-        # myWidget_list = []
-        # while(index >= 0):
-        #     myWidget_list.append(self.lay2.itemAt(index))
-        #     index -=1
-        # print(myWidget_list)
         self.l_combobox_linear_penalty.setEnabled(True)
         self.l_sp_poly_degree.setEnabled(True)
         self.l_combobox_linear_loss.setEnabled(True)
@@ -544,17 +500,4 @@ class SupportVectorMachineClassWidget(ParentMLWidget):
             cv = KFold(number=number)
             scores = cross_validate(pipe, X_data, Y_data, cv=cv, scoring=metrics, return_train_score=True)
             self.results(scores, metrics)
-
-        # else:
-        #     clf = clf.fit(X_train, y_train)
-        #     y_train_pred = clf.predict(X_train)
-
-        #     print("Accuracy (train): %0.3f" % accuracy_score(y_train, y_train_pred))
-
-        #     y_pred = clf.predict(X_test)
-        #     print("Accuracy (test): %0.3f" % accuracy_score(y_test, y_pred))
-
-        #     labels = np.unique(Y_data)
-        #     print('\n Classification report: \n', classification_report(y_test, y_pred, labels=labels))
-
 

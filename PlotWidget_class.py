@@ -19,64 +19,19 @@ from globals_ import matplotlib_colors_list
 from sklearn import pipeline 
 from sklearn import impute 
 from sklearn import preprocessing
-
-from sklearn.decomposition import PCA 
+from sklearn import decomposition
 
 class ParentPlotTab(QWidget):
     def __init__(self, name):
         super(ParentPlotTab, self).__init__()
         self.name = name
 
-        # self.frame = QFrame()
-        # self.frame.setStyleSheet("QFrame {background-color: rgb(255, 255, 255);"
-        #                          "border-width: 1;"
-        #                          "border-radius: 3;"
-        #                          "border-style: solid;"
-        #                          "border-color: rgb(50,50,50)}"
-        #                          )
-        # self.main_layout.addWidget(self.frame)
         self.create_layout()
-        # self.frame.setLayout(self.lay2)
-
 
     def create_layout(self):
         self.main_layout = QVBoxLayout(self)
         self.main_layout.setContentsMargins(5,5,5,5)
         self.setLayout(self.main_layout)
-
-
-    # def col_or_indexes(self, x,y):
-
-    #     # check if lineEdits contain indexes or column names
-    #     # returns 'col_names', 'indexes' or None
-
-    #     print('check')
-    #     xs = x.split(',')
-    #     xs = [i for i in xs]
-    #     ys = y.split(',')
-    #     ys = [i for i in ys]
-    #     print(xs, ys)
-
-    #     xs2 = set(xs)
-    #     ys2 = set(ys)
-    #     # c = self.table.col_labels.tolist()
-    #     c = ['xx', 'yy', 'zz']
-    #     ints = [str(i) for i in range(len(c))]
-    #     print(ints)
-
-    #     if (xs2.issubset(set(c)) and ys2.issubset(set(c))):
-    #         return ('col_names')
-    #     elif (xs2.issubset(set(ints)) and ys2.issubset(set(ints))):
-    #         return ('indexes')
-    #     else:
-    #         return None
-    
-    
-    # def plot(self):
-    #     print('plotting')
-    #     x,y = self.get_x_y_axis()
-    #     r = self.col_or_indexes(x,y)
-    #     print(r)
 
         
 class TabPlotRelatonships(ParentPlotTab):
@@ -90,19 +45,12 @@ class TabPlotRelatonships(ParentPlotTab):
         self.main_layout = QGridLayout(self)
         self.main_layout.setContentsMargins(5,5,5,5)
 
-        # self.label_x = QLabel(self)
-        # self.label_x.setText('info')
-        # self.label_x.setAlignment(Qt.AlignCenter)
-        # self.label_x.setMinimumHeight(10)
-        # self.label_x.setMinimumWidth(50)
 
         self.l_combobox_kind = UpgradedWidgets.LabelAndCombobox('plot kind', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[10,50])
         self.l_combobox_kind.add_items(['scatter', 'line'])
 
         self.l_radiobutton_markers = UpgradedWidgets.LabelAndRadioButton('Markers', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[10,50])
 
-        # self.b = QPushButton('plot')
-        # self.b.clicked.connect(self.plot)
         self.l_combobox_err_style = UpgradedWidgets.LabelAndCombobox('err_style (line)', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[10,50])
         self.l_combobox_err_style.add_items(['band', 'bars'])
 
@@ -111,17 +59,13 @@ class TabPlotRelatonships(ParentPlotTab):
         self.l_sp_alpha.set_step(0.05)
         self.l_sp_alpha.set_range(0.05,1.0)
 
-
-        # self.main_layout.addWidget(self.label_x, 0,0)
         self.main_layout.addWidget(self.l_combobox_kind, 0,0)
         self.main_layout.addWidget(self.l_radiobutton_markers, 0,1)
         self.main_layout.addWidget(self.l_combobox_err_style, 1,0)
         self.main_layout.addWidget(self.l_sp_alpha, 1,1)
 
-        # self.main_layout.addWidget(self.l_le_hue, 1,1)
 
         self.l_combobox_kind.signal_current_text_changed(self.manage_enability_of_widgets)
-        # self.main_layout.addWidget(self.b)
 
         self.setLayout(self.main_layout)
 
@@ -189,7 +133,6 @@ class TabPlotDistribution(ParentPlotTab):
 
 
 class TabPlotCategoricalScatterplots(ParentPlotTab):
-    # Strip Swarm plot
 
     def __init__(self, name):
         super().__init__(name)
@@ -199,13 +142,10 @@ class TabPlotCategoricalScatterplots(ParentPlotTab):
         self.main_layout = QGridLayout(self)
         self.main_layout.setContentsMargins(5,5,5,5)
 
-        # self.label_pt = QLabel(self)
-        # self.label_pt.setText('Plot type')
         self.l_combobox_kind = UpgradedWidgets.LabelAndCombobox('plot kind', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[30,50])
         l = ["strip", "swarm"]
         self.l_combobox_kind.add_items(l)
 
-        # self.l_combobox_col = Label_and_combobox('col argument', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[10,50])
         self.l_sp_size = UpgradedWidgets.LabelAndSpinbox('markers size', stretches=[7,3], lay_dir = 'Horizontal', minimal_size=[30,50])
         self.l_sp_size.set_value(5)
 
@@ -223,13 +163,6 @@ class TabPlotCategoricalScatterplots(ParentPlotTab):
         self.l_radiobutton_dodge = UpgradedWidgets.LabelAndRadioButton('dodge', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[30,50])
 
 
-        # self.main_layout.addWidget(self.label_pt, 0,0,1,2)
-        # self.main_layout.addWidget(self.l_combobox_kind, 1,0)
-        # self.main_layout.addWidget(self.l_sp_size, 1,1)
-        # self.main_layout.addWidget(self.l_le_edgecolor, 2,0)
-        # self.main_layout.addWidget(self.l_sp_linewidth, 2,1)
-        # self.main_layout.addWidget(self.label_pt, 0,0,1,4)
-
         self.main_layout.addWidget(self.l_combobox_kind, 0,0)
         self.main_layout.addWidget(self.l_sp_size, 0,1)
         self.main_layout.addWidget(self.l_le_edgecolor, 0,2)
@@ -237,7 +170,6 @@ class TabPlotCategoricalScatterplots(ParentPlotTab):
         self.main_layout.addWidget(self.l_sp_jitter, 1,1)
         self.main_layout.addWidget(self.l_radiobutton_dodge, 1,2)
 
-        # self.main_layout.addWidget(self.l_combobox_col)
         self.l_combobox_kind.signal_current_text_changed(self.manage_enability_of_widgets)
 
         self.setLayout(self.main_layout)
@@ -305,7 +237,6 @@ class TabPlotCategoricalScatterplots(ParentPlotTab):
 
 
 class TabPlotCategoricalDistribution(ParentPlotTab):
-    # Strip Swarm plot
 
     def __init__(self, name):
         super().__init__(name)
@@ -315,8 +246,6 @@ class TabPlotCategoricalDistribution(ParentPlotTab):
         self.main_layout = QGridLayout(self)
         self.main_layout.setContentsMargins(5,5,5,5)
 
-        # self.label_pt = QLabel(self)
-        # self.label_pt.setText('Plot type')
         self.l_combobox_kind = UpgradedWidgets.LabelAndCombobox('plot kind', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[20,50])
         l = ["box", "violin", "boxen"]
         self.l_combobox_kind.add_items(l)
@@ -375,7 +304,6 @@ class TabPlotCategoricalDistribution(ParentPlotTab):
         self.main_layout.addWidget(self.l_rb_split, 2,2)
         self.main_layout.addWidget(self.l_sp_cut, 2,3)
 
-        # self.main_layout.addWidget(self.l_combobox_col)
 
         self.l_combobox_kind.signal_current_text_changed(self.manage_enability_of_widgets)
 
@@ -418,11 +346,6 @@ class TabPlotCategoricalDistribution(ParentPlotTab):
         dodge = self.l_rb_dodge.get_state()
         linewidth = self.l_sp_linewidth.get_value()
         saturation = self.l_sp_saturation.get_value()
-
-        # whis = self.l_sp_whis.get_value()
-        # width = self.l_sp_width.get_value()
-        # fliersize = self.l_sp_fliersize.get_value()
-
 
         pars_common = {'dodge': dodge, 'linewidth' :linewidth, 'saturation':saturation}
 
@@ -488,9 +411,6 @@ class TabPlotCategoricalEstimate(ParentPlotTab):
         self.main_layout = QGridLayout(self)
         self.main_layout.setContentsMargins(5,5,5,5)
 
-        # self.label_pt = QLabel(self)
-        # self.label_pt.setText('Plot type')
-
         self.l_combobox_kind = UpgradedWidgets.LabelAndCombobox('plot kind', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[10,50])
         l = ["point", "bar", "count"]
         self.l_combobox_kind.add_items(l)
@@ -511,11 +431,6 @@ class TabPlotCategoricalEstimate(ParentPlotTab):
         self.l_sp_saturation.set_step(0.05)
         self.l_sp_saturation.set_range(0.05, 1.0)
 
-        # self.slider = Improved_Slider(0, 100, 'Train_test_split')
-
-
-
-        # self.main_layout.addWidget(self.label_pt)
         self.main_layout.addWidget(self.l_combobox_kind, 0,0)
         self.main_layout.addWidget(self.l_sp_capsize, 0,1)
         self.main_layout.addWidget(self.l_sp_errwidth, 1,0)
@@ -528,23 +443,15 @@ class TabPlotCategoricalEstimate(ParentPlotTab):
 
     def manage_enability_of_widgets(self):
         kind = self.l_combobox_kind.get_text()
-
-        # self.l_sp_capsize.setEnables(True)
-        # self.l_sp_errwidth.setEnables(True)
-        # self.l_sp_saturation.setEnables(True)
-
         if kind == 'point':
             self.l_sp_saturation.setEnabled(False)
         else:
             self.l_sp_saturation.setEnabled(True)
 
-
-
     def get_parameters(self, plot_kind):
         capsize = self.l_sp_capsize.get_value()
         errwidth = self.l_sp_errwidth.get_value()
         saturation = self.l_sp_saturation.get_value()
-
 
         if plot_kind == 'point':
             pars = {"capsize": capsize, "errwidth" : errwidth}
@@ -563,8 +470,6 @@ class TabPlotCategoricalEstimate(ParentPlotTab):
 
         kind = self.l_combobox_kind.get_text()
         print(kind, hue_)
-
-
 
         if hue_ =='':
             hue_ = None
@@ -585,12 +490,10 @@ class TabPlotCategoricalEstimate(ParentPlotTab):
         print(plot)
         print(type(plot))
 
-
         return plot
 
 
 class TabPlotDimentionReduction(ParentPlotTab):
-
 
     def __init__(self, name):
         super(TabPlotDimentionReduction, self).__init__(name)
@@ -601,7 +504,6 @@ class TabPlotDimentionReduction(ParentPlotTab):
 
         self.b_create_PCA_plot = QPushButton()
         self.b_create_PCA_plot.setText('create PCA plot')
-        # self.b_create_PCA_plot.clicked.connect(self.plot)
 
         self.l_combobox_PCA_labels = UpgradedWidgets.LabelAndCombobox('Predict label for PCA plot')
 
@@ -609,7 +511,6 @@ class TabPlotDimentionReduction(ParentPlotTab):
 
         self.main_layout.addWidget(self.b_create_PCA_plot)
         self.main_layout.addWidget(self.l_combobox_PCA_labels)
-
         self.main_layout.addWidget(self.l_rb_cumsum)
 
 
@@ -638,9 +539,8 @@ class TabPlotDimentionReduction(ParentPlotTab):
         imputer = impute.SimpleImputer()
         scaler = preprocessing.StandardScaler()
 
-        pca = PCA()
+        pca = decomposition.PCA()
         pipe = pipeline.Pipeline( [('imputer', imputer), ('scaler', scaler), ('PCA', pca)] )
-        # pipe.fit()
         print(pipe)
         Y_index = self.l_combobox_PCA_labels.get_text()
 
@@ -656,7 +556,6 @@ class TabPlotDimentionReduction(ParentPlotTab):
         print(exp_var)
 
         print('plot ', self.name)
-        # self.canv.plot_PCA(list_)
 
         plot = sns.barplot(np.arange(1,len(exp_var)+1), exp_var, ax =ax_)
         for p in plot.patches:
@@ -672,7 +571,6 @@ class TabPlotDimentionReduction(ParentPlotTab):
         self.l_combobox_PCA_labels.add_items(list_)
 
 
-# wszystkie caterogical
 class TabPlot2(ParentPlotTab):
     def __init__(self, name):
         super().__init__(name)
@@ -749,32 +647,21 @@ class PlotWidget(QWidget):
         self.navbar = NavigationToolbar(self.canv, self) 
 
         # print(self.navbar.toolitems)
-
         # print(self.navbar.parent)
         # print(self.navbar.canvas)
-
-
         # toolbar = self.navbar.findChild(QToolBar)
-
         anotherWidget=QLineEdit()
         # add the new widget to the existing navigation toolbar
         self.navbar.addWidget(anotherWidget)
-
-        # print(toolbar)
-
-
-        self.xx = QPushButton('plot')
 
         self.under_canv_layout = QGridLayout()
 
         self.tabs = QTabWidget(self)
         self.tab1 = TabPlotRelatonships("Relationships")
         self.tab2 = TabPlotDistribution("Distribution")
-
         self.tab3 = TabPlotCategoricalScatterplots('Categorical_Scatterplots')
         self.tab4 = TabPlotCategoricalDistribution("Categorical_Distribution")
         self.tab5 = TabPlotCategoricalEstimate("Categorical_Estimate")
-
         self.tab6 = TabPlotDimentionReduction("Dimention Reduction")
 
 
@@ -813,53 +700,26 @@ class PlotWidget(QWidget):
 
 
         self.checkbox = QCheckBox("col_names/indexes ", self)
-        # self.checkbox.stateChanged.connect(lambda:self.checkbox_changed(self.checkbox))
         self.checkbox_reset_plots = QCheckBox("reset plots", self)
         self.checkbox_reset_plots.setChecked(True)
         self.checkbox_reset_plots.setToolTip('activated plot will be overwritten')
 
         self.under_canv_layout.addWidget(self.tabs, 0, 0, 1, 4)
-        
-        # self.under_canv_layout.setRowStretch(0, 1)
-        # self.under_canv_layout.setRowStretch(1, 50)
-        # self.under_canv_layout.setRowStretch(2, 50)
 
-        # self.under_canv_layout.setVerticalSpacing(30)
-
-        # self.under_canv_layout.setColumnStretch(0,3)
-        # self.under_canv_layout.setColumnStretch(1,1)
-        # self.under_canv_layout.setColumnStretch(2,1)
-
-        # self.lay = QHBoxLayout()
         self.under_canv_layout.addWidget(self.l_sp_number_of_plots, 1,0)
         self.under_canv_layout.addWidget(self.l_sp_current_of_plots, 1,1)
         self.under_canv_layout.addWidget(self.checkbox_reset_plots, 1,3)
 
-
         self.under_canv_layout.addWidget(self.l_le_x_axis, 2,0)
         self.under_canv_layout.addWidget(self.l_le_y_axis, 2,1)
         self.under_canv_layout.addWidget(self.l_le_hue, 2,2)
-        # self.under_canv_layout.addWidget(self.checkbox, 2,3)
         self.under_canv_layout.addWidget(self.b_switch_axes, 2,3)
 
-
-        # self.under_canv_layout.setVerticalSpacing(0)
         self.under_canv_layout.addWidget(self.b_plot, 3,0)
         self.under_canv_layout.addWidget(self.b_clear_all_plots, 3,1)
-        # self.under_canv_layout.addWidget(self.b_switch_axes, 3,2)
         self.under_canv_layout.addWidget(self.b_clear_plot, 3,2)
         self.under_canv_layout.addWidget(self.checkbox, 3,3)
 
-
-
-        # self.under_canv_layout.addWidget(self.checkbox_reset_plots, 3,3)
-
-
-        # self.b_plot.setMinimumHeight(100)
-
-        # self.under_canv_layout.addStretch(2)
-
-        # self.under_canv_layout.addLayout(self.lay)
 
         self.frame_under_canv = QFrame(self)
         self.frame_under_canv.setLayout(self.under_canv_layout)
@@ -868,29 +728,22 @@ class PlotWidget(QWidget):
 
         self.splitter_center = QSplitter(Qt.Vertical)
 
-        self.f = QFrame()
-        self.lay = QVBoxLayout()
-        self.lay.addWidget(self.navbar)
-        self.lay.addWidget(self.canv)
-        self.f.setLayout(self.lay)
-        # self.splitter_center.addWidget(self.navbar)
-        # self.splitter_center.addWidget(self.canv)
-        # self.splitter_center.addL(self.under_canv_layout)
-        self.splitter_center.addWidget(self.f)
+        self.frame_canv= QFrame()
+        self.layout_canv = QVBoxLayout()
+        self.layout_canv.addWidget(self.navbar)
+        self.layout_canv.addWidget(self.canv)
+        self.frame_canv.setLayout(self.layout_canv)
 
+
+        self.splitter_center.addWidget(self.frame_canv)
         self.splitter_center.addWidget(self.frame_under_canv)
-        # self.splitter_center.setStretchFactor(900,300)
         self.splitter_center.setStretchFactor(0, 12)
         self.splitter_center.setStretchFactor(1, 1)
-
-
 
         index = self.splitter_center.indexOf(self.frame_under_canv)
         self.splitter_center.setCollapsible(index, False)
 
-
         self.canv.signal_for_upgrade_widget_spinbox.connect(self.l_sp_number_of_plots.get_signal_for_plot_widget)
-        # self.l_sp_number_of_plots.set_value(10)
 
         self.main_layout.addWidget(self.splitter_center)
 
@@ -944,7 +797,6 @@ class PlotWidget(QWidget):
 
     def clear_all_plots(self):
         print('clear all plots')
-        # self.canv.ax.clear()
         self.canv.clear_all_plots()
 
     def clear_current_plot(self):
@@ -970,9 +822,6 @@ class PlotWidget(QWidget):
         
         hue = self.get_hue()
 
-        # if self.checkbox_reset_plots.isChecked():
-        #     self.clear_plot()
-        # plot = current_tab.plot(self.table, x,y,hue, self.canv.ax)
         ax_ind = self.l_sp_current_of_plots.get_value()
         reset_plots = self.checkbox_reset_plots.isChecked()
         print('reset ', reset_plots)
@@ -984,13 +833,10 @@ class PlotWidget(QWidget):
                     self.canv.clear_current_plot(ax_ind)
                 plot = current_tab.plot(self.table, x,y, hue, self.canv.fig.axes[ax_ind-1])
                 print('plot type ', type(plot))
-                # print(type(plot[0]))
-                # print(plot[0])
                 # print(self.canv.fig.axes)
                 # ax2 = self.canv.fig.add_axes()
                 # self.canv.fig.axes[0] = plot[0]
                 # self.canv.fig.axes.append(plot[0])
-                # print(self.canv.fig.axes)
                 self.canv.fig.tight_layout()
                 self.canv.draw()
                 # self.canv.fig.canvas.draw_idle()
@@ -1002,7 +848,6 @@ class PlotWidget(QWidget):
 
     def plot_PCA(self, list_):
         print('plot pca')
-        # self.canv.plot_PCA(list_)
 
         ax_ind = self.l_sp_current_of_plots.get_value()
         reset_plots = self.checkbox_reset_plots.isChecked()
@@ -1025,22 +870,23 @@ class PlotWidget(QWidget):
         else:
             d = CustomMessageBoxWarning(f'plot number {ax_ind} is\'nt activated')
 
-    def update_dimention_reduction_tab(self):
-        # self.tab6.update_combobox()
-        pass
+
 
     @pyqtSlot(list)
     def get_signal_from_preprocessing_widget(self, list_):
         print('signal_from_preprocessing_widget', list_)
         # self.signal_for_ml_widget.emit(x)
-        self.plot_PCA(list_)
+        # self.plot_PCA(list_)
         self.raise_()
 
     @pyqtSlot(list)
     def get_signal_from_table_widget(self, list_):
+        """ Receive list of columns labels from TableWidget. Update Dimension Reduction with list.
+
+        Args:
+            list_ (list): list of columns labels 
+        """
         print("signal_from table widget ")
-        # self.update_from_df(df)
-        # self.update_dimention_reduction_tab(list_)
         self.tab6.update_combobox(list_)
         self.raise_()
 
@@ -1054,24 +900,11 @@ class PlotCanvas(FigureCanvas):
 
         self.fig = Figure(figsize=(width, height), dpi=100, facecolor='none')
         plt.style.use('dark_background')
-        # self.fig.set_facecolor("none")
-        # self.ax = self.fig.add_subplot(111) # poczatkowe ustawienia
-        # self.ax.grid()
-        # self.fig.subplots_adjust(left = 0.09, right = 0.85)  # umiejscowienie fig w FigureCanvas, robimy miejsce dla legendy
-
         self.ax_list = []
 
         FigureCanvas.__init__(self, self.fig)
         self.setParent(table)
         self.table = table
-
-
-    def change(self):
-        print('change')
-
-    def plot_PCA(self, list_):
-        self.c
-
 
 
     def update_num_of_subplots(self, number):
