@@ -12,7 +12,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
-from UpgradedWidgets import *
+import UpgradedWidgets 
 from CustomDialogWidgets import *
 from globals_ import matplotlib_colors_list
 
@@ -96,17 +96,17 @@ class TabPlotRelatonships(ParentPlotTab):
         # self.label_x.setMinimumHeight(10)
         # self.label_x.setMinimumWidth(50)
 
-        self.l_combobox_kind = LabelAndCombobox('plot kind', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[10,50])
+        self.l_combobox_kind = UpgradedWidgets.LabelAndCombobox('plot kind', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[10,50])
         self.l_combobox_kind.add_items(['scatter', 'line'])
 
-        self.l_radiobutton_markers = LabelAndRadioButton('Markers', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[10,50])
+        self.l_radiobutton_markers = UpgradedWidgets.LabelAndRadioButton('Markers', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[10,50])
 
         # self.b = QPushButton('plot')
         # self.b.clicked.connect(self.plot)
-        self.l_combobox_err_style = LabelAndCombobox('err_style (line)', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[10,50])
+        self.l_combobox_err_style = UpgradedWidgets.LabelAndCombobox('err_style (line)', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[10,50])
         self.l_combobox_err_style.add_items(['band', 'bars'])
 
-        self.l_sp_alpha = LabelAndSpinbox('alpha (scatter)', stretches=[7,3], lay_dir = 'Horizontal', minimal_size=[30,50], double_spinbox=True)
+        self.l_sp_alpha = UpgradedWidgets.LabelAndSpinbox('alpha (scatter)', stretches=[7,3], lay_dir = 'Horizontal', minimal_size=[30,50], double_spinbox=True)
         self.l_sp_alpha.set_value(1.0)
         self.l_sp_alpha.set_step(0.05)
         self.l_sp_alpha.set_range(0.05,1.0)
@@ -201,26 +201,26 @@ class TabPlotCategoricalScatterplots(ParentPlotTab):
 
         # self.label_pt = QLabel(self)
         # self.label_pt.setText('Plot type')
-        self.l_combobox_kind = LabelAndCombobox('plot kind', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[30,50])
+        self.l_combobox_kind = UpgradedWidgets.LabelAndCombobox('plot kind', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[30,50])
         l = ["strip", "swarm"]
         self.l_combobox_kind.add_items(l)
 
         # self.l_combobox_col = Label_and_combobox('col argument', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[10,50])
-        self.l_sp_size = LabelAndSpinbox('markers size', stretches=[7,3], lay_dir = 'Horizontal', minimal_size=[30,50])
+        self.l_sp_size = UpgradedWidgets.LabelAndSpinbox('markers size', stretches=[7,3], lay_dir = 'Horizontal', minimal_size=[30,50])
         self.l_sp_size.set_value(5)
 
-        self.l_le_edgecolor = LabelAndLineedit('edgecolor', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[30,50])
+        self.l_le_edgecolor = UpgradedWidgets.LabelAndLineedit('edgecolor', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[30,50])
         self.l_le_edgecolor.set_lineedit_text('gray')
 
-        self.l_sp_linewidth = LabelAndSpinbox('linewidth', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[30,50], double_spinbox=True)
+        self.l_sp_linewidth = UpgradedWidgets.LabelAndSpinbox('linewidth', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[30,50], double_spinbox=True)
         self.l_sp_linewidth.set_value(0)
         self.l_sp_linewidth.set_step(0.1)
 
-        self.l_sp_jitter = LabelAndSpinbox('jitter', stretches=[7,3], lay_dir = 'Horizontal', minimal_size=[30,50], double_spinbox=True)
+        self.l_sp_jitter = UpgradedWidgets.LabelAndSpinbox('jitter', stretches=[7,3], lay_dir = 'Horizontal', minimal_size=[30,50], double_spinbox=True)
         self.l_sp_jitter.set_value(0.1)
         self.l_sp_jitter.set_step(0.05)
 
-        self.l_radiobutton_dodge = LabelAndRadioButton('dodge', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[30,50])
+        self.l_radiobutton_dodge = UpgradedWidgets.LabelAndRadioButton('dodge', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[30,50])
 
 
         # self.main_layout.addWidget(self.label_pt, 0,0,1,2)
@@ -317,32 +317,32 @@ class TabPlotCategoricalDistribution(ParentPlotTab):
 
         # self.label_pt = QLabel(self)
         # self.label_pt.setText('Plot type')
-        self.l_combobox_kind = LabelAndCombobox('plot kind', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[20,50])
+        self.l_combobox_kind = UpgradedWidgets.LabelAndCombobox('plot kind', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[20,50])
         l = ["box", "violin", "boxen"]
         self.l_combobox_kind.add_items(l)
 
         # boxplot
-        self.l_sp_whis = LabelAndSpinbox('whis', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[20,50], double_spinbox=True)
+        self.l_sp_whis = UpgradedWidgets.LabelAndSpinbox('whis', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[20,50], double_spinbox=True)
         self.l_sp_whis.set_value(1.5)
         self.l_sp_whis.set_step(0.10)
         
-        self.l_sp_width = LabelAndSpinbox('width', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[20,50], double_spinbox=True)
+        self.l_sp_width = UpgradedWidgets.LabelAndSpinbox('width', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[20,50], double_spinbox=True)
         self.l_sp_width.set_value(0.8)
         self.l_sp_width.set_step(0.05)
 
-        self.l_sp_fliersize = LabelAndSpinbox('fliersize', stretches=[7,3], lay_dir = 'Horizontal', minimal_size=[20,50], double_spinbox=True)
+        self.l_sp_fliersize = UpgradedWidgets.LabelAndSpinbox('fliersize', stretches=[7,3], lay_dir = 'Horizontal', minimal_size=[20,50], double_spinbox=True)
         self.l_sp_fliersize.set_value(5)
         self.l_sp_fliersize.set_step(0.5)
 
 
         # violinplot
-        self.l_combobox_inner = LabelAndCombobox('inner', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[20,50])
+        self.l_combobox_inner = UpgradedWidgets.LabelAndCombobox('inner', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[20,50])
         l = ["box", "quartile", "point", "stick"]
         self.l_combobox_inner.add_items(l)
 
-        self.l_rb_split = LabelAndRadioButton('split', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[20,50])
+        self.l_rb_split = UpgradedWidgets.LabelAndRadioButton('split', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[20,50])
 
-        self.l_sp_cut = LabelAndSpinbox('cut', stretches=[7,3], lay_dir = 'Horizontal', minimal_size=[20,50])
+        self.l_sp_cut = UpgradedWidgets.LabelAndSpinbox('cut', stretches=[7,3], lay_dir = 'Horizontal', minimal_size=[20,50])
         self.l_sp_cut.set_value(2)
         self.l_sp_cut.set_step(1)
 
@@ -350,13 +350,13 @@ class TabPlotCategoricalDistribution(ParentPlotTab):
 
 
         # wszystkie
-        self.l_rb_dodge = LabelAndRadioButton('dodge', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[20,50])
+        self.l_rb_dodge = UpgradedWidgets.LabelAndRadioButton('dodge', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[20,50])
 
-        self.l_sp_linewidth = LabelAndSpinbox('linewidth', stretches=[6,4], lay_dir = 'Horizontal', minimal_size=[20,50], double_spinbox=True)
+        self.l_sp_linewidth = UpgradedWidgets.LabelAndSpinbox('linewidth', stretches=[6,4], lay_dir = 'Horizontal', minimal_size=[20,50], double_spinbox=True)
         self.l_sp_linewidth.set_value(1)
         self.l_sp_linewidth.set_step(0.2)
 
-        self.l_sp_saturation = LabelAndSpinbox('saturation', stretches=[6,4], lay_dir = 'Horizontal', minimal_size=[20,50], double_spinbox=True)
+        self.l_sp_saturation = UpgradedWidgets.LabelAndSpinbox('saturation', stretches=[6,4], lay_dir = 'Horizontal', minimal_size=[20,50], double_spinbox=True)
         self.l_sp_saturation.set_value(1)
         self.l_sp_saturation.set_step(0.05)
         self.l_sp_saturation.set_range(0, 1.0)
@@ -491,22 +491,22 @@ class TabPlotCategoricalEstimate(ParentPlotTab):
         # self.label_pt = QLabel(self)
         # self.label_pt.setText('Plot type')
 
-        self.l_combobox_kind = LabelAndCombobox('plot kind', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[10,50])
+        self.l_combobox_kind = UpgradedWidgets.LabelAndCombobox('plot kind', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[10,50])
         l = ["point", "bar", "count"]
         self.l_combobox_kind.add_items(l)
 
-        self.l_sp_capsize = LabelAndSpinbox('capsize', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[10,50], double_spinbox=True)
+        self.l_sp_capsize = UpgradedWidgets.LabelAndSpinbox('capsize', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[10,50], double_spinbox=True)
         self.l_sp_capsize.set_value(1.0)
         self.l_sp_capsize.set_step(0.05)
         self.l_sp_capsize.set_range(0.05,5)
 
 
-        self.l_sp_errwidth = LabelAndSpinbox('error width', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[10,50], double_spinbox=True)
+        self.l_sp_errwidth = UpgradedWidgets.LabelAndSpinbox('error width', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[10,50], double_spinbox=True)
         self.l_sp_errwidth.set_value(1.0)
         self.l_sp_errwidth.set_step(0.1)
         self.l_sp_errwidth.set_range(0.1, 10)
 
-        self.l_sp_saturation = LabelAndSpinbox('saturation ', stretches=[7,3], lay_dir = 'Horizontal', minimal_size=[10,50], double_spinbox=True)
+        self.l_sp_saturation = UpgradedWidgets.LabelAndSpinbox('saturation ', stretches=[7,3], lay_dir = 'Horizontal', minimal_size=[10,50], double_spinbox=True)
         self.l_sp_saturation.set_value(1.0)
         self.l_sp_saturation.set_step(0.05)
         self.l_sp_saturation.set_range(0.05, 1.0)
@@ -603,9 +603,9 @@ class TabPlotDimentionReduction(ParentPlotTab):
         self.b_create_PCA_plot.setText('create PCA plot')
         # self.b_create_PCA_plot.clicked.connect(self.plot)
 
-        self.l_combobox_PCA_labels = LabelAndCombobox('Predict label for PCA plot')
+        self.l_combobox_PCA_labels = UpgradedWidgets.LabelAndCombobox('Predict label for PCA plot')
 
-        self.l_rb_cumsum = LabelAndRadioButton('Cumsum')
+        self.l_rb_cumsum = UpgradedWidgets.LabelAndRadioButton('Cumsum')
 
         self.main_layout.addWidget(self.b_create_PCA_plot)
         self.main_layout.addWidget(self.l_combobox_PCA_labels)
@@ -684,11 +684,11 @@ class TabPlot2(ParentPlotTab):
 
         self.label_pt = QLabel(self)
         self.label_pt.setText('Plot type')
-        self.l_combobox_kind = LabelAndCombobox('plot kind', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[10,50])
+        self.l_combobox_kind = UpgradedWidgets.LabelAndCombobox('plot kind', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[10,50])
         l = ["strip", "swarm", "box", "violin", "boxen", "point", "bar", "count"]
         self.l_combobox_kind.add_items(l)
 
-        self.l_combobox_col = LabelAndCombobox('col argument', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[10,50])
+        self.l_combobox_col = UpgradedWidgets.LabelAndCombobox('col argument', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[10,50])
 
 
         self.main_layout.addWidget(self.label_pt)
@@ -788,16 +788,16 @@ class PlotWidget(QWidget):
 
         self.list_of_tabs = [self.tab1, self.tab2, self.tab3, self.tab4, self.tab5, self.tab6]
 
-        self.l_sp_number_of_plots = LabelAndSpinbox('Number of plots',stretches=[6,4], lay_dir = 'Horizontal', minimal_size=[25,50])
+        self.l_sp_number_of_plots = UpgradedWidgets.LabelAndSpinbox('Number of plots',stretches=[6,4], lay_dir = 'Horizontal', minimal_size=[25,50])
         self.l_sp_number_of_plots.set_range(0,6)
         self.l_sp_number_of_plots.sp.valueChanged.connect(self.l_sp_number_of_plots_changed)
 
-        self.l_sp_current_of_plots = LabelAndSpinbox('current plot',stretches=[5,5], lay_dir = 'Horizontal', minimal_size=[25,50])
+        self.l_sp_current_of_plots = UpgradedWidgets.LabelAndSpinbox('current plot',stretches=[5,5], lay_dir = 'Horizontal', minimal_size=[25,50])
         self.l_sp_current_of_plots.set_range(0,6)
 
-        self.l_le_x_axis = LabelAndLineedit('X Label', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[25,50])
-        self.l_le_y_axis = LabelAndLineedit('Y Label', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[25,50])
-        self.l_le_hue = LabelAndLineedit('Hue', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[25,50])
+        self.l_le_x_axis = UpgradedWidgets.LabelAndLineedit('X Label', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[25,50])
+        self.l_le_y_axis = UpgradedWidgets.LabelAndLineedit('Y Label', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[25,50])
+        self.l_le_hue = UpgradedWidgets.LabelAndLineedit('Hue', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[25,50])
 
         self.b_plot = QPushButton('plot')
         self.b_plot.clicked.connect(self.plot)

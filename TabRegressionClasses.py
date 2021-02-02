@@ -25,7 +25,7 @@ class TabLinearReg(ParentMLWidget):
         super(TabLinearReg, self).__init__(name)
 
     def create_layout(self):
-        self.lay2 = QVBoxLayout(self)
+        self.lay2 = QVBoxLayout()
         self.label_name = QLabel(self.name)
         self.label_name.setAlignment(Qt.AlignCenter)
         self.label_name.setStyleSheet(" QLabel")
@@ -149,7 +149,7 @@ class TabDecisionTreeReg(ParentMLWidget):
         super(TabDecisionTreeReg, self).__init__(name)
 
     def create_layout(self):
-        self.lay2 = QVBoxLayout(self)
+        self.lay2 = QVBoxLayout()
         self.label_name = QLabel(self.name)
         self.label_name.setAlignment(Qt.AlignCenter)
         self.label_name.setStyleSheet(" QLabel")
@@ -248,7 +248,7 @@ class TabRandomForestReg(ParentMLWidget):
 
     def create_layout(self):
 
-        self.lay2 = QVBoxLayout(self)
+        self.lay2 = QVBoxLayout()
         self.label_name = QLabel(self.name)
         self.label_name.setAlignment(Qt.AlignCenter)
         self.label_name.setStyleSheet(" QLabel")

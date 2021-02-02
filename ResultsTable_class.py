@@ -57,7 +57,7 @@ class ResultsTableWidget(QWidget):
         # self.main_layout.addWidget(self.b_clear)
         # self.main_layout.addWidget(self.b_save)
 
-        self.lay_right = QGridLayout(self)
+        self.lay_right = QGridLayout()
         self.lay_right.addWidget(self.b_predict, 0,0)
         self.lay_right.addWidget(self.b_clear, 1,0)
         self.lay_right.addWidget(self.b_save, 2,0)

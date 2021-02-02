@@ -1,5 +1,5 @@
 import sys
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtCore
 # from PyQt5.QtWidgets import QDesktopWidget,\
 #     QSplitter, QGridLayout, QAction, QApplication, QMainWindow, \
 #     QPushButton,QMessageBox, QCheckBox, QFileDialog, QLabel,QSizePolicy, QLineEdit, QComboBox
@@ -43,10 +43,9 @@ class MainWindow(QMainWindow):
         self.setWindowTitle('Data Manager')
         self.move_to_center()
 
-        self.table = TableWidget_class.TableWidget(20, 5)
 
         # layout = QGridLayout(self)
-        self._main = QtWidgets.QWidget()
+        self._main = QWidget()
         self.setCentralWidget(self._main)
         # self.setCentralWidget(self.table)
         # self.canv = PlotCanvas(self.table, 5, 3)
@@ -110,18 +109,50 @@ class MainWindow(QMainWindow):
 
         # ===========================================
 
-        self.main_layout = QtWidgets.QVBoxLayout(self._main)
-
-        # self.frame_up = QFrame(self)
+        self.main_layout = QVBoxLayout(self._main)
 
 
-        # ========================== Menu Database
+        # ================== Menu Database ==================
 
         self.Database_menu = self.menubar.addMenu('&Database')
         self.add_db_action = QAction('add database')
         self.Database_menu.addAction(self.add_db_action)
         self.add_db_action.triggered.connect(lambda: self.create_subwindow_subw())
 
+
+        # ================== Tables Widgets ==================
+
+        self.table = TableWidget_class.TableWidget(20, 5)
+        self.table.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)  
+        self.table.customContextMenuRequested.connect(self.generateMenu) 
+        self.table.viewport().installEventFilter(self)
+
+        self.table_describe = TableWidget_class.TableWidget(5,3)
+        self.table_describe.hide()
+
+        # ================== Frame and Layout Preprocessing Widget ==================
+        
+        self.frame_preproc_widget = QFrame()
+        self.layout_preproc_widget = QVBoxLayout()
+
+        self.preproc_widget = PreprocessingWidget_class.PreprocessingWidget()
+        self.layout_preproc_widget.addWidget(self.preproc_widget)
+        self.frame_preproc_widget.setLayout(self.layout_preproc_widget)
+
+
+        # ================== Frame, Layout and Spliiter Left  ==================
+ 
+        self.splitter_left = QSplitter(Qt.Vertical)
+
+        self.splitter_left.addWidget(self.table)
+        self.splitter_left.addWidget(self.table_describe)
+        self.splitter_left.addWidget(self.frame_preproc_widget)
+
+        index = self.splitter_left.indexOf(self.table_describe)
+        self.splitter_left.setCollapsible(index, False)
+
+        self.splitter_left.setStretchFactor(0, 10)
+        self.splitter_left.setStretchFactor(1, 1)
 
 
         self.frame_left = QFrame(self)
@@ -132,151 +163,48 @@ class MainWindow(QMainWindow):
                                       "border-color: rgb(0,0,0)}"
                                       )
 
-        # ======================= Left upper frame
+        self.layout_left = QVBoxLayout()
+        self.layout_left.addWidget(self.splitter_left)
 
-        # self.frame_button_lay = QFrame(self)
-        # # self.frame_button_lay.setStyleSheet("QFrame {} ")
-        # # self.frame_button_lay.setStyleSheet("QFrame {background-color: rgb(250, 255, 255);"
-        # #                               "border-width: 1;"
-        # #                               "border-radius: 3;"
-        # #                               "border-style: solid;"
-        # #                               "border-color: rgb(50,50,50)}"
-        # #                               )
-        # self.frame_button_lay.setStyleSheet("QFrame {"
-        #                         "border-width: 1;"
-        #                         "border-radius: 3;"
-        #                         "border-style: solid;"
-        #                         "border-color: rgb(0,0,0)}"
-        #                         )
-
-
-        # self.button_lay = QVBoxLayout(self)
-        # self.pushButton = QPushButton(self)
-        # self.pushButton.setGeometry(QRect(350, 100, 80, 20))
-        # self.pushButton.setText('add column')
-        # self.pushButton.clicked.connect(self.button)
-
-
-        # self.pushButton2 = QPushButton(self)
-        # self.pushButton2.setGeometry(QRect(350, 100, 80, 20))
-        # self.pushButton2.setText('Clear table')
-        # # self.pushButton2.clicked.connect(self.clear_table)
-
-        # self.b_describe = QPushButton(self)
-        # # self.b_describe.clicked.connect(self.show_describe)
-        # self.b_describe.setText('Describe dataframe')
-
-
-
-        # self.button_lay.addWidget(self.pushButton)
-        # self.button_lay.addWidget(self.pushButton2)
-        # self.button_lay.addWidget(self.b_describe)
-
-
-        # self.frame_button_lay.setLayout(self.button_lay)
-
-
-        # ======================= Preprocessing Widget
-        
-
-        self.frame_preproc_widget = QFrame()
-        self.preproc_widget_lay = QVBoxLayout()
-        self.preproc_widget = PreprocessingWidget_class.PreprocessingWidget()
-        self.preproc_widget_lay.addWidget(self.preproc_widget)
-        self.frame_preproc_widget.setLayout(self.preproc_widget_lay)
-
-
-
-        self.table_describe = TableWidget_class.TableWidget(5,3)
-        self.table_describe.hide()
-        # self.hor_lay_left.setStretchFactor(self.table_describe, 3)
-        # self.hor_lay_left.setSpacing(3)
-        # self.hor_lay_left.addWidget(self.table_describe)
-
-
-
-        self.splitter_left = QSplitter(Qt.Vertical)
-
-        # self.splitter_center.addWidget(self.navbar)
-        # self.splitter_center.addWidget(self.canv)
-        # self.splitter_center.addL(self.under_canv_layout)
-        self.splitter_left.addWidget(self.table)
-        self.splitter_left.addWidget(self.table_describe)
-        self.splitter_left.addWidget(self.frame_preproc_widget)
-
-        index = self.splitter_left.indexOf(self.table_describe)
-        self.splitter_left.setCollapsible(index, False)
-
-        # self.splitter_center.setStretchFactor(900,300)
-        self.splitter_left.setStretchFactor(0, 10)
-        self.splitter_left.setStretchFactor(1, 1)
-
-
-
-        # =================== Layout of frame and table on the left
-
-        self.hor_lay_left = QVBoxLayout()
-        # self.hor_lay_left.addWidget(self.frame_button_lay)
-        self.hor_lay_left.addWidget(self.splitter_left)
-
-        # self.hor_lay_left.addWidget(self.frame_button_lay)
-        # self.hor_lay_left.addWidget(self.table)
-
-
-        self.frame_left.setLayout(self.hor_lay_left)
-
+        self.frame_left.setLayout(self.layout_left)
         self.frame_left.setMinimumWidth(self.width/6)
 
 
 
-        # ================== Center Frame and Layout
+        # ================== Frame and Layout Plot Widget ==================
 
-        self.frame_center = QFrame(self)
-        # self.frame_center.setStyleSheet("QFrame {background-color: rgb(255, 255, 255);"
-        #                         "border-width: 1;"
-        #                         "border-radius: 3;"
-        #                         "border-style: solid;"
-        #                         "border-color: rgb(50,50,50)}")
-
-        self.frame_center.setStyleSheet("QFrame {"
+        self.frame_PlotWidget = QFrame(self)
+        self.frame_PlotWidget.setStyleSheet("QFrame {"
                                 "border-width: 1;"
                                 "border-radius: 3;"
                                 "border-style: solid;"
                                 "border-color: rgb(0,0,0)}"
                                 )
+        self.frame_PlotWidget.setMinimumWidth(self.width / 6)
 
-        self.frame_center.setMinimumWidth(self.width / 6)
-
-        self.center_lay = QVBoxLayout(self)
+        self.layout_PlotWidget = QVBoxLayout(self)
         self.plot_widget = PlotWidget_class.PlotWidget(self.table)
 
-        self.center_lay.addWidget(self.plot_widget)
+        self.layout_PlotWidget.addWidget(self.plot_widget)
+
+        self.frame_PlotWidget.setLayout(self.layout_PlotWidget)
 
 
-
-
-        self.frame_center.setLayout(self.center_lay)
+        # ================== Frame and Layout ML Widget ==================
 
 
         self.frame_MLWidget = QFrame(self)
-        self.layout_MLWidget = QGridLayout()
-
-        self.ml_widget = MLWidget_class.MLWidget()
-
-        self.layout_MLWidget.addWidget(self.ml_widget)
-
-        # self.frame_MLWidget.setStyleSheet("QFrame {background-color: rgb(250, 255, 255);"
-        #                               "border-width: 1;"
-        #                               "border-radius: 3;"
-        #                               "border-style: solid;"
-        #                               "border-color: rgb(50,50,50)}"
-        #                               )
         self.frame_MLWidget.setStyleSheet("QFrame {"
                                 "border-width: 1;"
                                 "border-radius: 3;"
                                 "border-style: solid;"
                                 "border-color: rgb(0,0,0)}"
                                 )
+        self.layout_MLWidget = QGridLayout()
+
+
+        self.ml_widget = MLWidget_class.MLWidget()
+        self.layout_MLWidget.addWidget(self.ml_widget)
 
         self.frame_MLWidget.setLayout(self.layout_MLWidget)
         self.frame_MLWidget.setMinimumWidth(self.width / 6)
@@ -284,70 +212,43 @@ class MainWindow(QMainWindow):
         self.layout_MLWidget.setContentsMargins(5,5,5,5)
 
 
-        # ============== RIGHT TABLE WIDGET  ================================
-        self.frame_right_table = QFrame(self)
-        # self.frame_right_table.setStyleSheet("QFrame {background-color: rgb(250, 255, 255);"
-        #                               "border-width: 1;"
-        #                               "border-radius: 3;"
-        #                               "border-style: solid;"
-        #                               "border-color: rgb(50,50,50)}"
-        #                               )
-        self.frame_right_table.setStyleSheet("QFrame {"
+        # ============== Frame and Layout Results Table Widget  ================================
+        self.frame_results_table = QFrame(self)
+
+        self.frame_results_table.setStyleSheet("QFrame {"
                                 "border-width: 1;"
                                 "border-radius: 3;"
                                 "border-style: solid;"
                                 "border-color: rgb(0,0,0)}"
                                 )
 
-        self.layout_right_table = QGridLayout()
+        self.layout_results_table = QGridLayout()
+        self.results_table = ResultsTable_class.ResultsTableWidget()
+        self.layout_results_table.addWidget(self.results_table)
+        self.frame_results_table.setLayout(self.layout_results_table)
 
-        self.right_table = ResultsTable_class.ResultsTableWidget()
+        # ============== Splitters ================================
 
-        self.layout_right_table.addWidget(self.right_table)
+        self.splitter_hor = QSplitter(Qt.Horizontal)
+        self.splitter_hor.addWidget(self.frame_left)
+        self.splitter_hor.addWidget(self.frame_PlotWidget)
+        self.splitter_hor.addWidget(self.frame_MLWidget)
 
+        self.splitter_vert = QSplitter(Qt.Vertical)
+        self.splitter_vert.addWidget(self.splitter_hor)
+        self.splitter_vert.addWidget(self.frame_results_table)
 
-        self.frame_right_table.setLayout(self.layout_right_table)
+        self.splitter_vert.setStretchFactor(0, 10)
+        self.splitter_vert.setStretchFactor(1, 3)
 
-        # ============== FINAL SPLITTER ================================
-        # self.splitter = QSplitter(Qt.Horizontal)
-        # self.splitter.addWidget(self.frame_left)
-        # self.splitter.addWidget(self.frame_center)
-        # self.splitter.addWidget(self.frame_MLWidget)
-        # # self.splitter.addWidget(self.frame_right_table)
-
-        # self.splitter.setStretchFactor(10, 10)
-
-        # self.main_layout.addWidget(self.splitter)
-        # self.main_layout.addWidget(self.frame_right_table)
-
-
-        self.splitter = QSplitter(Qt.Horizontal)
-        self.splitter.addWidget(self.frame_left)
-        self.splitter.addWidget(self.frame_center)
-        self.splitter.addWidget(self.frame_MLWidget)
-
-        
-        self.splitter2 = QSplitter(Qt.Vertical)
-        self.splitter2.addWidget(self.splitter)
-        self.splitter2.addWidget(self.frame_right_table)
-
-        self.splitter2.setStretchFactor(0, 10)
-        self.splitter2.setStretchFactor(1, 3)
+        self.main_layout.addWidget(self.splitter_vert)
 
 
-        self.main_layout.addWidget(self.splitter2)
-
-        # =============== Frame and layout under canvas ======================================
+        # ============== Connect Signals ================================
 
 
-
-
-        # ================= Center splitter between canv and frame under canv =======================
-
-
-
-        self.right_table.signal_for_ml_widget.connect(self.ml_widget.get_signal_from_right_table)
-        self.ml_widget.signal_for_right_table.connect(self.right_table.get_signal_from_ml_widget)
+        self.results_table.signal_for_ml_widget.connect(self.ml_widget.get_signal_from_results_table)
+        self.ml_widget.signal_for_results_table.connect(self.results_table.get_signal_from_ml_widget)
 
 
         self.table.signal_for_preprocessing_widget.connect(self.preproc_widget.get_signal_from_table)
@@ -362,15 +263,10 @@ class MainWindow(QMainWindow):
 
         self.table.signal_for_plot_widget.connect(self.plot_widget.get_signal_from_table_widget)
 
-        self.table.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)  # +++
-        self.table.customContextMenuRequested.connect(self.generateMenu)  # +++
-        self.table.viewport().installEventFilter(self)
 
-        # self.show()
 
     def predict(self):
         print('predict')
-        # self.frame_center.show()
 
         combobox_output = self.combo_box_Y.currentText()
         print(combobox_output)
@@ -602,13 +498,6 @@ class MainWindow(QMainWindow):
     def show_describe(self):
         print('show_describe')
 
-        # self.table_describe = MyTable_class.MyTable(self, 5,3)
-        # # self.hor_lay_left.setStretchFactor(self.table_describe, 3)
-        # self.hor_lay_left.setSpacing(3)
-
-        # self.hor_lay_left.addWidget(self.table_describe)
-
-        # self.table_describe.hide()
         if not self.table_describe.isVisible(): # jeśli ukryty
             self.table_describe.show()
 

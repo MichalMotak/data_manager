@@ -2,10 +2,11 @@
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
-from UpgradedWidgets import *
 from globals_ import *
-import CustomDialogWidgets
 
+
+import CustomDialogWidgets
+import UpgradedWidgets
 
 import numpy as np
 import pandas as pd
@@ -46,10 +47,10 @@ class ParentMLWidget(QWidget):
 
         self.frame.setLayout(self.lay2)
         self.main_layout.setContentsMargins(0, 0, 0, 0)
-        self.setLayout(self.main_layout)
+        # self.setLayout(self.main_layout)
 
     def create_layout(self):
-        self.lay2 = QVBoxLayout(self)
+        self.lay2 = QVBoxLayout()
 
     def give_name(self):
         self.name = ''
@@ -90,7 +91,7 @@ class RandomForestClassWidget(ParentMLWidget):
         self.name = name
 
     def create_layout(self):
-        self.lay2 = QVBoxLayout(self)
+        self.lay2 = QVBoxLayout()
 
 
         self.label_name = QLabel(self.name)
@@ -111,7 +112,7 @@ class RandomForestClassWidget(ParentMLWidget):
         # self.w = Label_and_Lineedit()
         # self.lay2.addWidget(self.w)
 
-        self.l_sp = LabelAndSpinbox('Number of estimators')
+        self.l_sp = UpgradedWidgets.LabelAndSpinbox('Number of estimators')
         self.lay2.addWidget(self.l_sp)
 
     def predict(self, table, Y_index, cv_type, number, metrics, multiclass_type, pipe):
@@ -209,15 +210,14 @@ class DecisionTreeClassWidget(ParentMLWidget):
         self.name = name
 
     def create_layout(self):
-        self.lay2 = QVBoxLayout(self)
+        self.lay2 = QVBoxLayout()
 
         self.label_name = QLabel(self.name)
         self.label_name.setAlignment(Qt.AlignCenter)
         self.label_name.setStyleSheet(" QLabel")
 
-        self.l_sp = LabelAndSpinbox('max depth')
-        self.slider_min_samples_split = ImprovedSlider(0, 50, 'min_samples_split')
-
+        self.l_sp = UpgradedWidgets.LabelAndSpinbox('max depth')
+        self.slider_min_samples_split = UpgradedWidgets.ImprovedSlider(0, 50, 'min_samples_split')
 
         self.lay2.addWidget(self.label_name)
         self.lay2.addWidget(self.l_sp)
@@ -302,20 +302,19 @@ class SupportVectorMachineClassWidget(ParentMLWidget):
 
 
     def create_layout(self):
-        self.lay2 = QGridLayout(self)
+        self.lay2 = QGridLayout()
 
         self.label_name = QLabel(self.name)
         self.label_name.setAlignment(Qt.AlignCenter)
 
-        self.l_combobox_kernel = LabelAndCombobox('kernel', stretches=[2,2], lay_dir = 'Horizontal', minimal_size=[20,20])
+        self.l_combobox_kernel = UpgradedWidgets.LabelAndCombobox('kernel', stretches=[2,2], lay_dir = 'Horizontal', minimal_size=[20,20])
         self.l_combobox_kernel.add_items(['linear', 'poly', 'rbf', 'sigmoid'])
 
-        self.l_sp_C = LabelAndSpinbox('C', stretches=[2,2], lay_dir = 'Horizontal', minimal_size=[20,20], double_spinbox=True)
+        self.l_sp_C = UpgradedWidgets.LabelAndSpinbox('C', stretches=[2,2], lay_dir = 'Horizontal', minimal_size=[20,20], double_spinbox=True)
         self.l_sp_C.set_value(1.0)
         self.l_sp_C.set_step(0.1) 
 
-
-        self.l_le_tol = LabelAndLineedit('tol', stretches=[2,4], lay_dir = 'Horizontal', minimal_size=[20,20])
+        self.l_le_tol = UpgradedWidgets.LabelAndLineedit('tol', stretches=[2,4], lay_dir = 'Horizontal', minimal_size=[20,20])
         # self.l_le_tol.set_lineedit_text('1e-4')
         self.l_le_tol.set_lineedit_text('0.0001')
 
@@ -325,16 +324,16 @@ class SupportVectorMachineClassWidget(ParentMLWidget):
         self.label_linear.setMinimumWidth(20)
 
 
-        self.l_combobox_linear_penalty = LabelAndCombobox('penalty', stretches=[3,3], lay_dir = 'Horizontal', minimal_size=[20,60])
+        self.l_combobox_linear_penalty = UpgradedWidgets.LabelAndCombobox('penalty', stretches=[3,3], lay_dir = 'Horizontal', minimal_size=[20,60])
         self.l_combobox_linear_penalty.add_items(['l1', 'l2'])
         self.l_combobox_linear_penalty.set_current_index(1)
 
-        self.l_combobox_linear_loss = LabelAndCombobox('loss', stretches=[3,3], lay_dir = 'Horizontal', minimal_size=[20,40])
+        self.l_combobox_linear_loss = UpgradedWidgets.LabelAndCombobox('loss', stretches=[3,3], lay_dir = 'Horizontal', minimal_size=[20,40])
         self.l_combobox_linear_loss.add_items(['hinge', 'squared_hinge'])
         self.l_combobox_linear_loss.set_current_index(1)
 
 
-        self.l_rb_linear_dual = LabelAndRadioButton('dual', stretches=[3,3], lay_dir = 'Horizontal', minimal_size=[20,40])
+        self.l_rb_linear_dual = UpgradedWidgets.LabelAndRadioButton('dual', stretches=[3,3], lay_dir = 'Horizontal', minimal_size=[20,40])
         self.l_rb_linear_dual.set_state(True)
 
         # self.l_sp = LabelAndSpinbox('max depth')
@@ -347,11 +346,11 @@ class SupportVectorMachineClassWidget(ParentMLWidget):
         self.label_poly.setMinimumWidth(30)
 
 
-        self.l_sp_poly_degree = LabelAndSpinbox('degree', stretches=[3,3], lay_dir = 'Horizontal', minimal_size=[20,30])
+        self.l_sp_poly_degree = UpgradedWidgets.LabelAndSpinbox('degree', stretches=[3,3], lay_dir = 'Horizontal', minimal_size=[20,30])
         self.l_sp_poly_degree.set_value(3)
         self.l_sp_poly_degree.set_step(1) 
 
-        self.l_combobox_poly_gamma = LabelAndCombobox('gamma', stretches=[2,5], lay_dir = 'Horizontal', minimal_size=[20,40])
+        self.l_combobox_poly_gamma = UpgradedWidgets.LabelAndCombobox('gamma', stretches=[2,5], lay_dir = 'Horizontal', minimal_size=[20,40])
         self.l_combobox_poly_gamma.add_items(['scale', 'auto'])
         self.l_combobox_poly_gamma.set_current_index(0)
 

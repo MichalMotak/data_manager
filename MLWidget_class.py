@@ -8,6 +8,9 @@ from globals_ import *
 from TabClassificationClasses import *
 from TabRegressionClasses import *
 
+import UpgradedWidgets
+
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -21,13 +24,6 @@ from sklearn.model_selection import train_test_split, cross_val_score, cross_val
 from sklearn import pipeline 
 
 
-# # new check-able combo box
-# class CheckableComboBox(QComboBox):
-#
-#     # https://www.geeksforgeeks.org/pyqt5-adding-action-to-combobox-with-checkable-items/
-#     # https://www.geeksforgeeks.org/pyqt5-checkable-combobox-showing-checked-items-in-textview/
-
-
 
 class TabClassification(QWidget):
     def __init__(self):
@@ -36,23 +32,15 @@ class TabClassification(QWidget):
         # self.main_layout = QVBoxLayout(self)
 
         self.main_layout = QVBoxLayout(self)
-        self.height, self.width,  = 100, 100
         self.name = 'Classification'
         self.frame = QFrame()
-        # self.frame.setStyleSheet("QFrame {background-color: rgb(255, 255, 255);"
-        #                         "border-width: 1;"
-        #                         "border-radius: 3;"
-        #                         "border-style: solid;"
-        #                         "border-color: rgb(50,50,50)}"
-        #                         )
-        # self.frame.setStyleSheet("")
+
         self.groupBox = QGroupBox("")
+
         self.scroll = QScrollArea()
         self.scroll.setWidgetResizable(True)
         self.scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
         self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.main_layout.addWidget(self.frame)
-
 
         self.create_layout()
         self.frame.setLayout(self.lay2)
@@ -61,12 +49,13 @@ class TabClassification(QWidget):
         self.bottom_layout = QVBoxLayout(self)
         self.create_bottom_layout()
 
+        self.main_layout.addWidget(self.frame)
         self.main_layout.addLayout(self.bottom_layout)
         self.main_layout.setContentsMargins(0, 0, 0, 0)
-        self.setLayout(self.main_layout)
+        # self.setLayout(self.main_layout)
 
     def create_layout(self):
-        self.lay2 = QVBoxLayout(self)
+        self.lay2 = QVBoxLayout()
 
         self.formLayout = QFormLayout()
 
@@ -92,7 +81,6 @@ class TabClassification(QWidget):
         self.radiobutton.widget = self.w
         self.radiobutton.type = 'Random Forest'
         self.radiobutton.toggled.connect(self.radio_button_clicked)
-        # self.radiobutton.setChecked(True)
 
         self.radiobutton2 = QRadioButton("")
         self.radiobutton2.widget = self.w2
@@ -117,22 +105,17 @@ class TabClassification(QWidget):
         self.radiobutton.setChecked(True)
 
     def create_bottom_layout(self):
-        self.l_combobox_metrics = LabelAndComboboxCheckable('Metrics')
+        self.l_combobox_metrics = UpgradedWidgets.LabelAndComboboxCheckable('Metrics')
         self.l_combobox_metrics.add_items(class_metrics_list)
-        self.l_combobox_prediction = LabelAndCombobox('Prediction output')
-
-
+        self.l_combobox_prediction = UpgradedWidgets.LabelAndCombobox('Prediction output')
 
         multiclass_types_list = ['OneVsRest', 'OneVsOne']
-        self.l_combobox_multiclass_type = LabelAndCombobox('Multiclass Classification type', lay_dir='Horizontal')
+        self.l_combobox_multiclass_type = UpgradedWidgets.LabelAndCombobox('Multiclass Classification type', lay_dir='Horizontal')
         self.l_combobox_multiclass_type.add_items(multiclass_types_list)
-
-
 
         self.bottom_layout.addWidget(self.l_combobox_metrics)
         self.bottom_layout.addWidget(self.l_combobox_prediction)
         self.bottom_layout.addWidget(self.l_combobox_multiclass_type)
-
 
         self.bottom_layout.setContentsMargins(5,5,5,5)
 
@@ -165,9 +148,6 @@ class TabClassification(QWidget):
         predict_label = self.l_combobox_prediction.get_text()
         multiclass_type = self.l_combobox_multiclass_type.get_text()
         print(metrics)
-        # print(cv_type)
-        # print(predict_label)
-        # def predict(self, table, Y_index, cv_type, number, metrics):
 
         current_widget.predict(tab, predict_label, cv_type, number, metrics, multiclass_type, pipe = pipe)
 
@@ -195,13 +175,11 @@ class TabRegression(TabClassification):
         self.w = TabDecisionTreeReg('Decision Tree')
         self.w2 = TabRandomForestReg('Random Forest')
         self.w3 = TabLinearReg('Linear Models')
-        # self.w3 = Tab_Random_Forest_Reg('Random Forest')
 
         self.radiobutton = QRadioButton("")
         self.radiobutton.widget = self.w
         self.radiobutton.type = 'Random Forest'
         self.radiobutton.toggled.connect(self.radio_button_clicked)
-        # self.radiobutton.setChecked(True)
 
         self.radiobutton2 = QRadioButton("")
         self.radiobutton2.widget = self.w2
@@ -213,7 +191,6 @@ class TabRegression(TabClassification):
         self.radiobutton3.type = 'Linear'
         self.radiobutton3.toggled.connect(self.radio_button_clicked)
 
-
         self.widgets_list = [self.w, self.w2, self.w3]
         self.radio_buttons_list = [self.radiobutton, self.radiobutton2, self.radiobutton3]
         self.widgets_types_list = [w.type for w in self.radio_buttons_list]
@@ -221,7 +198,7 @@ class TabRegression(TabClassification):
 
 
     def create_layout(self):
-        self.lay2 = QVBoxLayout(self)
+        self.lay2 = QVBoxLayout()
 
         self.formLayout = QFormLayout()
 
@@ -255,113 +232,111 @@ class TabRegression(TabClassification):
 
 
 class MLWidget(QWidget):
-    signal_for_right_table = pyqtSignal(tuple)
+    signal_for_results_table = pyqtSignal(tuple)
     signal_for_preprocessing_widget = pyqtSignal()
 
     def __init__(self):
         print('subwindow init')
         QWidget.__init__(self)
-        self.left, self.top =  300, 200
-        self.width, self.height = 500, 200
+
         self.UI()
 
     def UI(self):
         print('ml widget createed')
-
-
         self.main_layout = QVBoxLayout(self)
-        # self.frame_2 = QFrame(self)
+
+        # =============== Creating QTabWidget ===============
 
         self.tabs = QTabWidget(self)
         self.tab1 = TabClassification()
         self.tab2 = TabRegression()
-
         self.tabs.addTab(self.tab1, "Classification")
         self.tabs.addTab(self.tab2, "Regression")
 
-        self.main_layout.addWidget(self.tabs)
 
-        self.pipeline = None
+        # =============== Bottom Frame and Layout ===============
 
-        # self.bottom_layout = QVBoxLayout(self)
-        # self.pushButton2 = QPushButton(self)
-        # self.pushButton2.setText('tab2')
-        # self.bottom_layout.addWidget(self.pushButton2)
-        #
-        # self.main_layout.addLayout(self.bottom_layout)
-
-        self.frame_MLWidget_lower = QFrame()
-        self.frame_MLWidget_lower.setStyleSheet(" ")
-
-        # =============== Layout dodatkowy na sam dół =====================
+        # self.frame_MLWidget_lower = QFrame()
+        # self.frame_MLWidget_lower.setStyleSheet(" ")
         self.layout_MLWidget_lower = QGridLayout()
 
+        # =============== Bottom Frame and Layout Widgets ===============
 
         self.b_predict = QPushButton(self)
         self.b_predict.setText('predict')
         self.b_predict.clicked.connect(self.predict)
 
 
-        # self.layout_MLWidget_lower.addWidget(self.label222)
-
-
         cv_types_list = ['Cross Validation', 'K-Fold']
-        self.l_combobox_cv_type = LabelAndCombobox('Validation type', lay_dir='Vertical')
+        self.l_combobox_cv_type = UpgradedWidgets.LabelAndCombobox('Validation type', lay_dir='Vertical')
         self.l_combobox_cv_type.add_items(cv_types_list)
 
-        self.sp = LabelAndSpinbox('number', 'Vertical')
+        self.sp_number = UpgradedWidgets.LabelAndSpinbox('Number', lay_dir='Vertical')
 
         self.hbox = QHBoxLayout()
         self.hbox.addWidget(self.l_combobox_cv_type)
-        self.hbox.addWidget(self.sp)
+        self.hbox.addWidget(self.sp_number)
+
+        self.layout_MLWidget_lower.addLayout(self.hbox, 0, 0)
+        self.layout_MLWidget_lower.addWidget(self.b_predict, 1, 0)
+        # self.frame_MLWidget_lower.setLayout(self.layout_MLWidget_lower)
 
 
-        self.layout_MLWidget_lower.addLayout(self.hbox, 0,0)
-        self.layout_MLWidget_lower.addWidget(self.b_predict, 1,0)
-
-
-
-        self.frame_MLWidget_lower.setLayout(self.layout_MLWidget_lower)
-        self.main_layout.addWidget(self.frame_MLWidget_lower)
+        # =============== Main Layout adding Widgets  ===============
+        self.main_layout.addWidget(self.tabs)
+        self.main_layout.addLayout(self.layout_MLWidget_lower)
  
+        # =============== Class Constans  ===============
+        self.pipeline = None
         self.number_of_tabs = self.tabs.count()
         self.list_of_tabs = [self.tabs.widget(index) for index in range(self.number_of_tabs)]
-        # print(self.tabs.widget(0))
 
-        # self.show()
 
-    # ======================= SIGNALS ==============================
+
+    # =============== SIGNALS ===============
 
     @pyqtSlot(str)
-    def get_signal_from_right_table(self, message):
-        print("signal_for_right_table " + message)
+    def get_signal_from_results_table(self, message):
+        print("signal_from_preprocess_table " + message)
         self.raise_()
 
     @pyqtSlot()
-    def emit_signal_for_right_table(self):
+    def emit_signal_for_results_table(self):
+        """ Emit signal for Results Table. Get parameters from get_parameters() and send them.
+        """
         parameters = self.get_parameters()
-        print('emit_signal_for_right_table ', parameters)
-        self.signal_for_right_table.emit(parameters)
+        # print('emit_signal_for_right_table ', parameters)
+        self.signal_for_results_table.emit(parameters)
 
 
     @pyqtSlot(pd.core.frame.DataFrame)
     def get_signal_from_table(self, df):
-        print("signal_from_table ", df)
+        """ Receive dataframe from TableWidget. Call set_col_labels() and set_dataframe() 
+        Args:
+            df ([pd.core.frame.DataFrame]): [description]
+        """
+        # print("signal_from_table ", df)
         self.set_col_labels(list(df.columns))
         self.set_dataframe(df)
         self.raise_()
 
 
-    # this signal emits signal to receive signal below
     @pyqtSlot()
     def emit_signal_for_preprocessing_widget(self):
+        """ Emit signal for Preprocessing Widget to receive signal.
+        """
         print("signal_for_preprocessing widget ")
         self.signal_for_preprocessing_widget.emit()
 
     
     @pyqtSlot(pipeline.Pipeline)
     def get_signal_from_preprocessing_widget(self, pipeline):
-        print("signal_from_preprocessing widget ", pipeline)
+        """ Receive pipeline from Preprocessing Widget and set attribute self.pipeline
+        Args:
+            pipeline ([sklearn.pipeline.Pipeline]): receive pipeline from Preprocessing Widget
+        """
+
+        # print("signal_from_preprocessing widget ", pipeline)
         self.pipeline = pipeline
         self.raise_()
 
@@ -478,15 +453,7 @@ class MLWidget(QWidget):
 
     def set_col_labels(self, col_labels):
         self.col_labels = col_labels
-
         self.update_output_combobox()
-    #     self.update_tab_classification(col_labels)
-    #
-    # def update_tab_classification(self, col_labels):
-    #     current_tab_index, current_tab = self.which_tab_is_opened()
-    #
-    #     if current_tab_index == 0: # classification
-    #         current_tab.update_outputcombobox(col_labels)
 
     def update_output_combobox(self):
         print(self.list_of_tabs)
