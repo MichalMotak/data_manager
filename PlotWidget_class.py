@@ -131,6 +131,178 @@ class TabPlotDistribution(ParentPlotTab):
         self.main_layout = QGridLayout(self)
         self.main_layout.setContentsMargins(5,5,5,5)
 
+        self.l_combobox_kind = UpgradedWidgets.LabelAndCombobox('plot kind', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[10,50])
+        self.l_combobox_kind.add_items(['hist', 'kde', 'ecdf', 'rug'])
+
+        self.l_combobox_multiple = UpgradedWidgets.LabelAndCombobox('multiple', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[10,50])
+        self.l_combobox_multiple.add_items(['layer', 'dodge', 'stack', 'fill'])
+
+        self.l_combobox_stat = UpgradedWidgets.LabelAndCombobox('stat', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[10,50])
+        self.l_combobox_stat.add_items(['count', 'frequency', 'density', 'probability'])
+
+        self.l_combobox_element = UpgradedWidgets.LabelAndCombobox('element', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[10,50])
+        self.l_combobox_element.add_items(['bars', 'step', 'poly'])
+
+        self.l_rb_log_scale = UpgradedWidgets.LabelAndRadioButton('log_scale', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[10,50])
+        self.l_rb_fill = UpgradedWidgets.LabelAndRadioButton('fill', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[10,50])
+        self.l_rb_fill.set_state(True)
+
+        self.l_rb_cumulative = UpgradedWidgets.LabelAndRadioButton('cumulative', stretches=[7,3], lay_dir = 'Horizontal', minimal_size=[10,50])
+        self.l_rb_expand_margins = UpgradedWidgets.LabelAndRadioButton('expand_margins', stretches=[5,5], lay_dir = 'Horizontal', minimal_size=[10,50])
+
+        self.l_sb_bw_adjust = UpgradedWidgets.LabelAndSpinbox('bw_adjust', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[10,50], double_spinbox = True)
+        self.l_sb_bw_adjust.set_value(0)                
+        self.l_sb_bw_adjust.set_step(0.05)
+
+        self.l_sb_bw_cut = UpgradedWidgets.LabelAndSpinbox('cut', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[10,50], double_spinbox = True)
+        self.l_sb_bw_cut.set_step(0.5)
+
+        self.main_layout.addWidget(self.l_combobox_kind, 0,0)
+        self.main_layout.addWidget(self.l_combobox_multiple, 0,1)
+        self.main_layout.addWidget(self.l_combobox_stat, 0,2,1,2)
+
+        self.main_layout.addWidget(self.l_combobox_element, 1,0)
+        self.main_layout.addWidget(self.l_rb_log_scale, 1,1)
+        self.main_layout.addWidget(self.l_rb_fill, 1,2)
+        self.main_layout.addWidget(self.l_rb_cumulative, 1,3)
+
+        self.main_layout.addWidget(self.l_rb_expand_margins, 3,2,1,2)
+        self.main_layout.addWidget(self.l_sb_bw_adjust, 3,0)
+        self.main_layout.addWidget(self.l_sb_bw_cut, 3,1)
+
+        self.l_combobox_kind.signal_current_text_changed(self.update_multiple_combobox)
+        self.l_combobox_kind.signal_current_text_changed(self.manage_enability_of_widgets)
+
+
+    def update_multiple_combobox(self):
+
+        kind = self.l_combobox_kind.get_text()
+
+        if kind == 'hist':
+            self.l_combobox_multiple.clear()
+            self.l_combobox_multiple.add_items(['layer', 'dodge', 'stack', 'fill'])
+
+        elif kind == 'kde':
+            self.l_combobox_multiple.clear()
+            self.l_combobox_multiple.add_items(['layer', 'stack', 'fill'])
+
+    def manage_enability_of_widgets(self):
+
+        plot_kind = self.l_combobox_kind.get_text()
+
+        if plot_kind == 'hist':
+            self.l_combobox_multiple.setEnabled(True)
+            self.l_combobox_stat.setEnabled(True)
+            self.l_combobox_element.setEnabled(True)
+            self.l_rb_log_scale.setEnabled(True)
+            self.l_rb_fill.setEnabled(True)
+            self.l_rb_cumulative.setEnabled(True)
+
+            self.l_rb_expand_margins.setEnabled(False)
+            self.l_sb_bw_adjust.setEnabled(False)
+            self.l_sb_bw_cut.setEnabled(False)
+
+
+        elif plot_kind == 'kde':
+            self.l_sb_bw_adjust.setEnabled(True)
+            self.l_sb_bw_cut.setEnabled(True)
+            self.l_rb_fill.setEnabled(True)
+            self.l_rb_cumulative.setEnabled(True)
+
+            self.l_combobox_multiple.setEnabled(False)
+            self.l_combobox_stat.setEnabled(False)
+            self.l_combobox_element.setEnabled(False)
+            self.l_rb_log_scale.setEnabled(False)
+            self.l_rb_expand_margins.setEnabled(False)
+
+        elif plot_kind == 'ecdf':
+            self.l_combobox_multiple.setEnabled(False)
+            self.l_combobox_stat.setEnabled(False)
+            self.l_combobox_element.setEnabled(False)
+            self.l_rb_log_scale.setEnabled(True)
+            self.l_rb_fill.setEnabled(False)
+            self.l_rb_cumulative.setEnabled(False)
+
+            self.l_rb_expand_margins.setEnabled(False)
+            self.l_sb_bw_adjust.setEnabled(False)
+            self.l_sb_bw_cut.setEnabled(False)
+
+
+        elif plot_kind == 'rug':
+            self.l_combobox_multiple.setEnabled(False)
+            self.l_combobox_stat.setEnabled(False)
+            self.l_combobox_element.setEnabled(False)
+            self.l_rb_log_scale.setEnabled(False)
+            self.l_rb_fill.setEnabled(False)
+            self.l_rb_cumulative.setEnabled(False)
+
+            self.l_rb_expand_margins.setEnabled(True)
+            self.l_sb_bw_adjust.setEnabled(False)
+            self.l_sb_bw_cut.setEnabled(False)
+
+
+    def get_parameters(self, plot_kind):
+
+        log_scale = self.l_rb_log_scale.get_state()
+        fill = self.l_rb_fill.get_state()
+        cumulative = self.l_rb_cumulative.get_state()
+
+
+        if plot_kind == 'hist':
+            multiple = self.l_combobox_multiple.get_text()
+            stat = self.l_combobox_stat.get_text()
+            element = self.l_combobox_element.get_text()
+
+            pars = {"multiple" : multiple, "stat" : stat, "element" : element,
+                    "log_scale" : log_scale, "fill" : fill, "cumulative" : cumulative }
+            return pars
+
+        elif plot_kind == 'kde':
+            bw_adjust = self.l_sb_bw_adjust.get_value()
+            cut = self.l_sb_bw_cut.get_value()
+
+            pars = {"bw_adjust" : bw_adjust, "cut" : cut, "log_scale" : log_scale, 
+            "fill" : fill, "cumulative" : cumulative }
+            return pars
+
+        elif plot_kind == 'ecdf':
+            pars = {"log_scale": log_scale}
+            return pars
+
+        elif plot_kind == 'rug':
+            expand_margins = self.l_rb_expand_margins.get_state()
+
+            pars = {"expand_margins" : expand_margins}
+            return pars
+
+    def plot(self, table, x_, y_, hue_, ax_):
+        print(self.name + ' plot')
+
+        kind = self.l_combobox_kind.get_text()
+        pars = self.get_parameters(kind)
+
+
+
+        if hue_ =='':
+            hue_ = None
+
+        if kind == 'hist':
+            plot = sns.histplot(x=x_, hue=hue_, **pars, data=table.dataframe, ax = ax_)
+
+        elif kind == 'kde':
+            plot = sns.kdeplot(x=x_, hue=hue_, **pars,  data=table.dataframe,  ax = ax_)
+
+        elif kind == 'ecdf':
+            plot = sns.ecdfplot(x=x_, hue=hue_, **pars,  data=table.dataframe, ax = ax_)
+
+        elif kind == 'rug':
+            plot = sns.rugplot(x=x_, hue=hue_, **pars,  data=table.dataframe,  ax = ax_)
+
+        print(plot)
+        print(type(plot))
+
+        return plot
+
 
 class TabPlotCategoricalScatterplots(ParentPlotTab):
 
@@ -810,17 +982,21 @@ class PlotWidget(QWidget):
         print('Plot Widget plot')
         _, current_tab = self.which_tab_is_opened()
         print(current_tab)
+        print(current_tab.name)
         print(self.table.col_labels)
 
-        x, y = self.get_x_y_axis()
-        if x not in self.table.col_labels:
-            d = CustomMessageBoxWarning('Wrong X label')
-            return 0
-        elif y not in self.table.col_labels:
-            d = CustomMessageBoxWarning('Wrong Y label')
-            return 0
+        # x, y = self.get_x_y_axis()
+        # if x not in self.table.col_labels:
+        #     d = CustomMessageBoxWarning('Wrong X label')
+        #     return 0
+        # elif y not in self.table.col_labels:
+        #     d = CustomMessageBoxWarning('Wrong Y label')
+        #     return 0
         
-        hue = self.get_hue()
+        # hue = self.get_hue()
+        # if hue not in self.table.col_labels:
+        #     d = CustomMessageBoxWarning('Wrong Hue label')
+        #     return 0
 
         ax_ind = self.l_sp_current_of_plots.get_value()
         reset_plots = self.checkbox_reset_plots.isChecked()
@@ -831,15 +1007,34 @@ class PlotWidget(QWidget):
             try:
                 if reset_plots:
                     self.canv.clear_current_plot(ax_ind)
+
+
+                x, y = self.get_x_y_axis()
+                hue = self.get_hue()
+
+                if current_tab.name != 'Distribution':
+
+                    if x not in self.table.col_labels:
+                        d = CustomMessageBoxWarning('Wrong X label')
+                        return 0
+                    elif y not in self.table.col_labels:
+                        d = CustomMessageBoxWarning('Wrong Y label')
+                        return 0
+                elif current_tab.name == 'Distribution':
+                    if x not in self.table.col_labels:
+                        d = CustomMessageBoxWarning('Wrong X label')
+                        return 0
+                
+                # hue = self.get_hue()
+                # if hue not in self.table.col_labels:
+                #     d = CustomMessageBoxWarning('Wrong Hue label')
+                #     return 0
+
+                
                 plot = current_tab.plot(self.table, x,y, hue, self.canv.fig.axes[ax_ind-1])
-                print('plot type ', type(plot))
-                # print(self.canv.fig.axes)
-                # ax2 = self.canv.fig.add_axes()
-                # self.canv.fig.axes[0] = plot[0]
-                # self.canv.fig.axes.append(plot[0])
+      
                 self.canv.fig.tight_layout()
                 self.canv.draw()
-                # self.canv.fig.canvas.draw_idle()
             except IndexError:
                 pass
                 # d = Custom_Message_Box_Warning('plots not found')
