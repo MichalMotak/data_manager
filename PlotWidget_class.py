@@ -13,13 +13,18 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
 import UpgradedWidgets 
-from CustomDialogWidgets import *
+# from CustomDialogWidgets import *
+import CustomDialogWidgets
+
+
 from globals_ import matplotlib_colors_list
 
 from sklearn import pipeline 
 from sklearn import impute 
 from sklearn import preprocessing
 from sklearn import decomposition
+
+
 
 class ParentPlotTab(QWidget):
     def __init__(self, name):
@@ -150,7 +155,7 @@ class TabPlotDistribution(ParentPlotTab):
         self.l_rb_cumulative = UpgradedWidgets.LabelAndRadioButton('cumulative', stretches=[7,3], lay_dir = 'Horizontal', minimal_size=[10,50])
         self.l_rb_expand_margins = UpgradedWidgets.LabelAndRadioButton('expand_margins', stretches=[5,5], lay_dir = 'Horizontal', minimal_size=[10,50])
 
-        self.l_sb_bw_adjust = UpgradedWidgets.LabelAndSpinbox('bw_adjust', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[10,50], double_spinbox = True)
+        self.l_sb_bw_adjust = UpgradedWidgets.LabelAndSpinbox('bw_adjust', stretches=[5,5], lay_dir = 'Horizontal', minimal_size=[10,50], double_spinbox = True)
         self.l_sb_bw_adjust.set_value(0)                
         self.l_sb_bw_adjust.set_step(0.05)
 
@@ -169,6 +174,20 @@ class TabPlotDistribution(ParentPlotTab):
         self.main_layout.addWidget(self.l_rb_expand_margins, 3,2,1,2)
         self.main_layout.addWidget(self.l_sb_bw_adjust, 3,0)
         self.main_layout.addWidget(self.l_sb_bw_cut, 3,1)
+
+        # List of widgets to enable for each plot kind 
+        self.enable_widgets_hist = [self.l_combobox_multiple, self.l_combobox_stat, self.l_combobox_element,
+                self.l_rb_log_scale, self.l_rb_fill, self.l_rb_cumulative]
+
+        self.enable_widgets_kde = [self.l_sb_bw_adjust, self.l_sb_bw_cut, self.l_rb_fill, self.l_rb_cumulative]
+
+        self.enable_widgets_ecdf = [self.l_rb_log_scale]
+
+        self.enable_widgets_rug = [self.l_rb_expand_margins]
+
+        self.all_widgets_list = list(set(self.enable_widgets_hist +self.enable_widgets_kde +self.enable_widgets_ecdf + self.enable_widgets_rug ))
+        print('self.all_widgets_list ', self.all_widgets_list)
+
 
         self.l_combobox_kind.signal_current_text_changed(self.update_multiple_combobox)
         self.l_combobox_kind.signal_current_text_changed(self.manage_enability_of_widgets)
@@ -191,54 +210,16 @@ class TabPlotDistribution(ParentPlotTab):
         plot_kind = self.l_combobox_kind.get_text()
 
         if plot_kind == 'hist':
-            self.l_combobox_multiple.setEnabled(True)
-            self.l_combobox_stat.setEnabled(True)
-            self.l_combobox_element.setEnabled(True)
-            self.l_rb_log_scale.setEnabled(True)
-            self.l_rb_fill.setEnabled(True)
-            self.l_rb_cumulative.setEnabled(True)
-
-            self.l_rb_expand_margins.setEnabled(False)
-            self.l_sb_bw_adjust.setEnabled(False)
-            self.l_sb_bw_cut.setEnabled(False)
-
+            [widget.setEnabled(True) if widget in self.enable_widgets_hist else widget.setEnabled(False) for widget in self.all_widgets_list]
 
         elif plot_kind == 'kde':
-            self.l_sb_bw_adjust.setEnabled(True)
-            self.l_sb_bw_cut.setEnabled(True)
-            self.l_rb_fill.setEnabled(True)
-            self.l_rb_cumulative.setEnabled(True)
-
-            self.l_combobox_multiple.setEnabled(False)
-            self.l_combobox_stat.setEnabled(False)
-            self.l_combobox_element.setEnabled(False)
-            self.l_rb_log_scale.setEnabled(False)
-            self.l_rb_expand_margins.setEnabled(False)
+            [widget.setEnabled(True) if widget in self.enable_widgets_kde else widget.setEnabled(False) for widget in self.all_widgets_list]
 
         elif plot_kind == 'ecdf':
-            self.l_combobox_multiple.setEnabled(False)
-            self.l_combobox_stat.setEnabled(False)
-            self.l_combobox_element.setEnabled(False)
-            self.l_rb_log_scale.setEnabled(True)
-            self.l_rb_fill.setEnabled(False)
-            self.l_rb_cumulative.setEnabled(False)
-
-            self.l_rb_expand_margins.setEnabled(False)
-            self.l_sb_bw_adjust.setEnabled(False)
-            self.l_sb_bw_cut.setEnabled(False)
-
+            [widget.setEnabled(True) if widget in self.enable_widgets_ecdf else widget.setEnabled(False) for widget in self.all_widgets_list]
 
         elif plot_kind == 'rug':
-            self.l_combobox_multiple.setEnabled(False)
-            self.l_combobox_stat.setEnabled(False)
-            self.l_combobox_element.setEnabled(False)
-            self.l_rb_log_scale.setEnabled(False)
-            self.l_rb_fill.setEnabled(False)
-            self.l_rb_cumulative.setEnabled(False)
-
-            self.l_rb_expand_margins.setEnabled(True)
-            self.l_sb_bw_adjust.setEnabled(False)
-            self.l_sb_bw_cut.setEnabled(False)
+            [widget.setEnabled(True) if widget in self.enable_widgets_rug else widget.setEnabled(False) for widget in self.all_widgets_list]
 
 
     def get_parameters(self, plot_kind):
@@ -363,7 +344,7 @@ class TabPlotCategoricalScatterplots(ParentPlotTab):
         dodge = self.l_radiobutton_dodge.get_state()
 
         if edgecolor not in matplotlib_colors_list:
-            d = CustomMessageBoxWarning('wrong color')
+            d = CustomDialogWidgets.CustomMessageBoxWarning('wrong color')
             edgecolor = 'gray'
 
         pars_common = {'edgecolor': edgecolor, 'linewidth' : linewidth, 'size': markers_size,'dodge': dodge}
@@ -476,41 +457,31 @@ class TabPlotCategoricalDistribution(ParentPlotTab):
         self.main_layout.addWidget(self.l_rb_split, 2,2)
         self.main_layout.addWidget(self.l_sp_cut, 2,3)
 
+        self.enable_widgets_box = [self.l_sp_whis, self.l_sp_width, self.l_sp_fliersize, self.l_rb_dodge, self.l_sp_linewidth, self.l_sp_saturation]
+        self.enable_widgets_violin = [self.l_combobox_inner, self.l_rb_split, self.l_sp_cut, self.l_rb_dodge, self.l_sp_linewidth, self.l_sp_saturation ]
+        self.enable_widgets_boxen = [self.l_rb_dodge, self.l_sp_linewidth, self.l_sp_saturation]
+
+        self.all_widgets_list = list(set(self.enable_widgets_box +self.enable_widgets_violin + self.enable_widgets_boxen))
 
         self.l_combobox_kind.signal_current_text_changed(self.manage_enability_of_widgets)
 
         self.setLayout(self.main_layout)
 
-    def manage_enability_of_widgets(self):
 
+    
+    def manage_enability_of_widgets(self):
         plot_kind = self.l_combobox_kind.get_text()
 
-        self.l_combobox_inner.setEnabled(True)
-        self.l_rb_split.setEnabled(True)
-        self.l_sp_cut.setEnabled(True)
-        self.l_sp_whis.setEnabled(True)
-        self.l_sp_width.setEnabled(True)
-        self.l_sp_fliersize.setEnabled(True)
-
-
         if plot_kind == 'box':
-            self.l_combobox_inner.setEnabled(False)
-            self.l_rb_split.setEnabled(False)
-            self.l_sp_cut.setEnabled(False)
+            [widget.setEnabled(True) if widget in self.enable_widgets_box else widget.setEnabled(False) for widget in self.all_widgets_list]
 
         elif plot_kind == 'violin':
-            self.l_sp_whis.setEnabled(False)
-            self.l_sp_width.setEnabled(False)
-            self.l_sp_fliersize.setEnabled(False)
+            [widget.setEnabled(True) if widget in self.enable_widgets_violin else widget.setEnabled(False) for widget in self.all_widgets_list]
 
 
         elif plot_kind == 'boxen':
-            self.l_combobox_inner.setEnabled(False)
-            self.l_rb_split.setEnabled(False)
-            self.l_sp_cut.setEnabled(False)
-            self.l_sp_whis.setEnabled(False)
-            self.l_sp_width.setEnabled(False)
-            self.l_sp_fliersize.setEnabled(False)
+            [widget.setEnabled(True) if widget in self.enable_widgets_boxen else widget.setEnabled(False) for widget in self.all_widgets_list]
+
 
 
     def get_parameters(self, plot_kind):
@@ -743,68 +714,6 @@ class TabPlotDimentionReduction(ParentPlotTab):
         self.l_combobox_PCA_labels.add_items(list_)
 
 
-class TabPlot2(ParentPlotTab):
-    def __init__(self, name):
-        super().__init__(name)
-        self.name = name
-
-    def create_layout(self):
-        self.main_layout = QVBoxLayout(self)
-        self.main_layout.setContentsMargins(5,5,5,5)
-
-        self.label_pt = QLabel(self)
-        self.label_pt.setText('Plot type')
-        self.l_combobox_kind = UpgradedWidgets.LabelAndCombobox('plot kind', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[10,50])
-        l = ["strip", "swarm", "box", "violin", "boxen", "point", "bar", "count"]
-        self.l_combobox_kind.add_items(l)
-
-        self.l_combobox_col = UpgradedWidgets.LabelAndCombobox('col argument', stretches=[3,7], lay_dir = 'Horizontal', minimal_size=[10,50])
-
-
-        self.main_layout.addWidget(self.label_pt)
-        self.main_layout.addWidget(self.l_combobox_kind)
-        self.main_layout.addWidget(self.l_combobox_col)
-
-        self.setLayout(self.main_layout)
-
-
-    def plot(self, table, x_, y_, hue_, ax_):
-        print(self.name + ' plot')
-
-        kind = self.l_combobox_kind.get_text()
-        print(kind, hue_)
-
-        col = self.l_combobox_col.get_text()
-        if col == '':
-            col = None
-
-        if hue_ =='':
-            hue_ = None
-
-        if kind == 'strip':
-            # plot = sns.stripplot(x=x_, y=y_, hue = hue_, data=table.dataframe, ax = ax_)
-            # plot = sns.catplot(x=x_, y=y_, hue = hue_, kind = 'strip',data=table.dataframe)
-            sns.histplot(x=x_, data=table.dataframe)
-        elif kind == 'swarm':
-            plot = sns.swarmplot(x=x_, y=y_, hue = hue_, data=table.dataframe, ax = ax_)
-        elif kind == 'box':
-            plot = sns.boxplot(x=x_, y=y_, hue = hue_, data=table.dataframe, ax = ax_)
-        elif kind == 'violin':
-            plot = sns.violinplot(x=x_, y=y_, hue = hue_, data=table.dataframe, ax = ax_)
-        elif kind == 'boxen':
-            plot = sns.boxenplot(x=x_, y=y_, hue = hue_, data=table.dataframe, ax = ax_)
-        elif kind == 'point':
-            plot = sns.pointplot(x=x_, y=y_, hue = hue_, data=table.dataframe, ax = ax_)
-        elif kind == 'bar':
-            plot = sns.barplot(x=x_, y=y_, hue = hue_, data=table.dataframe, ax = ax_)
-        elif kind == 'count':
-            plot = sns.countplot(x=x_, hue = hue_, data=table.dataframe, ax = ax_)
-
-        print(plot)
-        print(type(plot))
-
-
-        return plot
 
 
 class PlotWidget(QWidget):
@@ -1015,14 +924,14 @@ class PlotWidget(QWidget):
                 if current_tab.name != 'Distribution':
 
                     if x not in self.table.col_labels:
-                        d = CustomMessageBoxWarning('Wrong X label')
+                        d = CustomDialogWidgets.CustomMessageBoxWarning('Wrong X label')
                         return 0
                     elif y not in self.table.col_labels:
-                        d = CustomMessageBoxWarning('Wrong Y label')
+                        d = CustomDialogWidgets.CustomMessageBoxWarning('Wrong Y label')
                         return 0
                 elif current_tab.name == 'Distribution':
                     if x not in self.table.col_labels:
-                        d = CustomMessageBoxWarning('Wrong X label')
+                        d = CustomDialogWidgets.CustomMessageBoxWarning('Wrong X label')
                         return 0
                 
                 # hue = self.get_hue()
@@ -1039,7 +948,7 @@ class PlotWidget(QWidget):
                 pass
                 # d = Custom_Message_Box_Warning('plots not found')
         else:
-            d = CustomMessageBoxWarning(f'plot number {ax_ind} is\'nt activated')
+            d = CustomDialogWidgets.CustomMessageBoxWarning(f'plot number {ax_ind} is\'nt activated')
 
     def plot_PCA(self, list_):
         print('plot pca')
@@ -1063,7 +972,7 @@ class PlotWidget(QWidget):
                 pass
 
         else:
-            d = CustomMessageBoxWarning(f'plot number {ax_ind} is\'nt activated')
+            d = CustomDialogWidgets.CustomMessageBoxWarning(f'plot number {ax_ind} is\'nt activated')
 
 
 
@@ -1217,7 +1126,7 @@ class PlotCanvas(FigureCanvas):
             self.draw()
 
         except IndexError:
-            d = CustomMessageBoxWarning(text='plots not found')
+            d = CustomDialogWidgets.CustomMessageBoxWarning(text='plots not found')
 
 
     @pyqtSlot()

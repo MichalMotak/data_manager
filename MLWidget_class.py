@@ -66,6 +66,7 @@ class TabClassification(QWidget):
         self.formLayout.addRow(self.radiobutton, self.w)
         self.formLayout.addRow(self.radiobutton2, self.w2)
         self.formLayout.addRow(self.radiobutton3, self.w3)
+        self.formLayout.addRow(self.radiobutton4, self.w4)
 
         self.scroll.setWidget(self.groupBox)
 
@@ -75,7 +76,9 @@ class TabClassification(QWidget):
         self.w = RandomForestClassWidget('Random Forest')
         self.w2 = DecisionTreeClassWidget('Decision Tree')
         self.w3 = SupportVectorMachineClassWidget('SVM')
-        self.w4 = DecisionTreeClassWidget('Decision Tree')
+        self.w4 = EnsembleClassWidget('Ensemble')
+
+        self.w4.setEnabled(False)
 
         self.radiobutton = QRadioButton("")
         self.radiobutton.widget = self.w
@@ -94,8 +97,9 @@ class TabClassification(QWidget):
 
 
         self.radiobutton4 = QRadioButton("")
+        self.radiobutton4.setAutoExclusive(False)
         self.radiobutton4.widget = self.w4
-        self.radiobutton4.type = 'Decision Tree'
+        self.radiobutton4.type = 'Ensemble'
         self.radiobutton4.toggled.connect(self.radio_button_clicked)
 
 
@@ -117,11 +121,20 @@ class TabClassification(QWidget):
         self.bottom_layout.addWidget(self.l_combobox_prediction)
         self.bottom_layout.addWidget(self.l_combobox_multiclass_type)
 
+        # self.radiobutton = QRadioButton("")
+        # self.radiobutton.setAutoExclusive(False)
+        # self.bottom_layout.addWidget(self.radiobutton)
+
+        # self.radiobutton2 = QRadioButton("")
+        # self.bottom_layout.addWidget(self.radiobutton2)
+
         self.bottom_layout.setContentsMargins(5,5,5,5)
 
     def which_radio_button_is_on(self):
         output = [(index, button) for index, button in enumerate(self.radio_buttons_list) if button.isChecked()]
-        return output[0]
+        print('which_radio_button_is_on ', output)
+
+        return output
 
     def radio_button_clicked(self):
 
@@ -129,19 +142,42 @@ class TabClassification(QWidget):
         widget_on = radioButton.widget
         widget_type = radioButton.type
 
+
+        
+        if widget_type == 'Ensemble':
+        
+            if self.radiobutton4.isChecked():
+                # print('enxemble był on ')
+                self.w4.setEnabled(True)
+            else:
+                self.w4.setEnabled(False)
+
         if radioButton.isChecked():
-            print('xd')
+            print('button checked')
             print(widget_on, widget_type)
 
-            for w,t in zip(self.widgets_list, self.widgets_types_list):
+        # if widget_type == 'Ensemble':
+        
+            # if self.radiobutton4.isChecked():
+            #     # print('enxemble był on ')
+            #     self.w4.setEnabled(True)
+            # else:
+            #     self.w4.setEnabled(False)
+
+            for w, t in zip(self.widgets_list, self.widgets_types_list):
                 print(w,t)
-                if t == widget_type:
+
+                if t == 'Ensemble':
+                    pass
+
+                elif t == widget_type:
                     w.setEnabled(True)
+
                 else:
                     w.setEnabled(False)
 
 
-    def predict(self, current_widget, tab, cv_type, number, pipe):
+    def predict(self, current_widget, tab, cv_type, number, pipe, ensemble_method_enabled):
         print('class predict')
         metrics = self.l_combobox_metrics.get_text()
         metrics = list(metrics.split(', '))
@@ -149,7 +185,19 @@ class TabClassification(QWidget):
         multiclass_type = self.l_combobox_multiclass_type.get_text()
         print(metrics)
 
-        current_widget.predict(tab, predict_label, cv_type, number, metrics, multiclass_type, pipe = pipe)
+        if ensemble_method_enabled:
+            clf = current_widget.get_clf(tab, predict_label, multiclass_type, pipe)
+            new_pipe = self.w4.update_pipe(clf, pipe)
+
+            current_widget.predict(tab, predict_label, cv_type, number, metrics, new_pipe)
+
+        else:
+            print('predict no ensemble')
+            # current_widget.predict(tab, predict_label, cv_type, number, metrics, multiclass_type, pipe = pipe)
+            clf = current_widget.get_clf(tab, predict_label, multiclass_type, pipe)
+
+            current_widget.predict(tab, predict_label, cv_type, number, metrics, pipe, clf, predict_type = 'clf')
+
 
     def update_outputcombobox(self, col_labels):
         self.l_combobox_prediction.clear()
@@ -221,14 +269,17 @@ class TabRegression(TabClassification):
         self.bottom_layout.addWidget(self.l_combobox_prediction)
         self.bottom_layout.setContentsMargins(5,5,5,5)
 
-    def predict(self, current_widget, tab, cv_type, number, pipe):
+    def predict(self, current_widget, tab, cv_type, number, pipe, ensemble_method_enabled):
         print('regression predict')
         metrics = self.l_combobox_metrics.get_text()
         metrics = list(metrics.split(', '))
         predict_label = self.l_combobox_prediction.get_text()
         print(metrics)
 
-        current_widget.predict(tab, predict_label, cv_type, number, metrics, pipe = pipe)
+        if ensemble_method_enabled:
+            pass
+        else:
+            current_widget.predict(tab, predict_label, cv_type, number, metrics, pipe = pipe)
 
 
 class MLWidget(QWidget):
@@ -348,12 +399,12 @@ class MLWidget(QWidget):
 
         # parameters from layout_MLWidget_lower
         cv_type = self.l_combobox_cv_type.get_text()
-        number = self.sp.get_value()
+        number = self.sp_number.get_value()
 
         # Tab and Widget, . Classification, Recision Tree
         _ , current_tab = self.which_tab_is_opened()
         current_tab_name = current_tab.name
-        _, current_widget = self.which_widget_is_opened()
+        _, current_widget, _ = self.which_widget_is_opened()
         current_widget_name = current_widget.name
 
         lens = []
@@ -403,45 +454,64 @@ class MLWidget(QWidget):
 
 
     def which_widget_is_opened(self):
+        print('which_widget_is_opened')
 
         current_tab_index, current_tab = self.which_tab_is_opened() # index of opened tab
         print(current_tab_index, current_tab)
 
         current_widgets_list = current_tab.widgets_list # list of widgets in opened tab
 
-        rb_ind, rb_obj = current_tab.which_radio_button_is_on() # check which radio button is checked (index, object)
-        print(rb_ind, rb_obj)
+        list_ = current_tab.which_radio_button_is_on() # check which radio button is checked (index, object)
 
+        rb_ind, rb_obj = list_[0]  # 
+
+        if len(list_) > 1:
+            ensemble_method_enabled = True  
+        else:
+            ensemble_method_enabled = False
+
+        print(rb_ind, rb_obj)
 
         current_widget_index = rb_ind
         current_widget = current_widgets_list[rb_ind]  # current widget
-        print(current_widget)
-        print(current_widget.name)
+        print(current_widget, current_widget.name)
 
-        return current_widget_index, current_widget
+        return current_widget_index, current_widget, ensemble_method_enabled
 
     def predict(self):
         # Emit signal with prediction results etc.
 
         try:
             _, current_tab = self.which_tab_is_opened()
-            _, current_widget = self.which_widget_is_opened()
+            _, current_widget, ensemble_method_enabled = self.which_widget_is_opened()
 
             cv_type = self.l_combobox_cv_type.get_text()
-            number = self.sp.get_value()
+            number = self.sp_number.get_value()
 
 
-            # jeśli trzeba coś dodać w predict dla danego tabu to 1 wybór
             print('przed pred')
+            print(' ensemble_method_enabled ', ensemble_method_enabled)
 
+            if ensemble_method_enabled:
 
-            self.emit_signal_for_preprocessing_widget() # signal to get self.pipeline
-            current_tab.predict(current_widget, self.dataframe, cv_type, number, self.pipeline)
-            print(' po predykcji current tabu')
-            # current_tab.current_widget.predict(tab, out)
+                print(' ensemble_method_enabled ')
 
-            # check if its needed to update Right Table with results
-            self.emit_signal_for_right_table()
+                self.emit_signal_for_preprocessing_widget() # signal to get self.pipeline
+
+                current_tab.predict(current_widget, self.dataframe, cv_type, number, self.pipeline, ensemble_method_enabled)
+                print(' po predykcji current tabu')
+
+                # check if its needed to update Results Table with results
+                self.emit_signal_for_results_table()
+
+            else:
+                self.emit_signal_for_preprocessing_widget() # signal to get self.pipeline
+
+                current_tab.predict(current_widget, self.dataframe, cv_type, number, self.pipeline, ensemble_method_enabled)
+                print(' po predykcji current tabu')
+
+                # check if its needed to update Results Table with results
+                self.emit_signal_for_results_table()
 
         except Exception as e:
             print(e)

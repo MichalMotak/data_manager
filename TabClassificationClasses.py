@@ -13,7 +13,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, BaggingClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.svm import LinearSVC, SVC
 
@@ -76,9 +76,85 @@ class ParentMLWidget(QWidget):
         return self.results_dict
 
 
+class EnsembleClassWidget(ParentMLWidget):
+    def __init__(self, name):
+        super().__init__(name)
+        self.name = name
+
+    def create_layout(self):
+
+        self.lay2 = QGridLayout()
+
+        self.label_name = QLabel(self.name)
+        self.label_name.setAlignment(Qt.AlignCenter)
+        self.label_name.setStyleSheet(" QLabel")
+
+        self.lay2.addWidget(self.label_name)
+
+        self.l_combobox_method = UpgradedWidgets.LabelAndCombobox('Ensemble Method')
+        self.l_combobox_method.add_items(['AdaBoost', 'Bagging'])
 
 
+        self.l_sp_learning_rate = UpgradedWidgets.LabelAndSpinbox('learning rate', double_spinbox=True)
+        self.l_sp_learning_rate.set_value(1.0)
+        self.l_sp_learning_rate.set_step(0.05)
 
+        self.l_sp_n_estimators = UpgradedWidgets.LabelAndSpinbox('n_estimators')
+        self.l_sp_n_estimators.set_value(50)
+        self.l_sp_n_estimators.set_step(5)
+        self.l_sp_n_estimators.set_range(1,300)
+
+        self.lay2.addWidget(self.l_combobox_method)
+        self.lay2.addWidget(self.l_sp_learning_rate)
+        self.lay2.addWidget(self.l_sp_n_estimators)
+
+
+    def update_pipe(self, clf, pipe):
+        print('update_pipe ensemble')
+
+        kind = self.l_combobox_method.get_text()
+
+        if kind == 'AdaBoost':
+            n_estimators, learning_rate = self.get_parameters(as_list=False)
+            print(n_estimators, learning_rate)
+            ensemble_clf = AdaBoostClassifier(clf, n_estimators=n_estimators, learning_rate=learning_rate)
+
+        elif kind == 'Bagging':
+            n_estimators = self.get_parameters(as_list=False)
+
+            ensemble_clf = BaggingClassifier(clf, n_estimators=n_estimators)
+
+        print('pipe ', pipe)
+        pipe.steps.append(("ensemble class", ensemble_clf))
+
+        return pipe
+
+
+    def get_parameters(self, as_list = False, return_labels=False):
+        print('get parameters from ')
+
+        method = self.l_combobox_method.get_text()
+
+        n_estimators = self.l_sp_n_estimators.get_value()
+
+        if method == 'AdaBoost':
+            learning_rate = self.l_sp_learning_rate.get_value()
+
+            if as_list and return_labels:
+                return [n_estimators, learning_rate], [self.l_sp_n_estimators, self.l_sp_learning_rate]
+
+            elif not as_list:
+                return n_estimators, learning_rate
+
+
+        elif method == 'Bagging':
+
+            if as_list and return_labels:
+                return [n_estimators], [self.l_sp_n_estimators]
+
+            elif not as_list:
+                return n_estimators
+#
 
 class RandomForestClassWidget(ParentMLWidget):
     def __init__(self, name):
@@ -98,24 +174,19 @@ class RandomForestClassWidget(ParentMLWidget):
         self.l_sp = UpgradedWidgets.LabelAndSpinbox('Number of estimators')
         self.lay2.addWidget(self.l_sp)
 
-    def predict(self, table, Y_index, cv_type, number, metrics, multiclass_type, pipe):
 
-        print(self.name + ' predict')
-        print('pipe ' , pipe)
-        print(Y_index)
+    def get_clf(self, table, Y_index, multiclass_type, pipe):
+
         dataframe = table
-
-        X_data = dataframe.drop(Y_index, 1)
         Y_data = dataframe[Y_index]
 
         Y_data_unique = np.unique(Y_data)
         print(Y_data_unique)
-        # train_test_split_value = int(self.slider.get_current_value())/100.0
-        # X_train, X_test, y_train, y_test = train_test_split(X_data, Y_data, test_size=train_test_split_value, random_state=1)
 
+        
         n_estim = self.get_parameters(as_list=False)
 
-        if len(Y_data_unique) > 1:
+        if len(Y_data_unique) > 2:
             print(multiclass_type)
             if multiclass_type == 'OneVsRest':
                 clf = OneVsRestClassifier(RandomForestClassifier(n_estimators=n_estim,
@@ -132,11 +203,23 @@ class RandomForestClassWidget(ParentMLWidget):
                                         bootstrap=True,
                                         max_features='sqrt')
 
-        print('pipe ', pipe)
-        pipe.steps.append(("class", clf))
-        print('create with pipe ', pipe)
+        return clf
 
+    def predict(self, table, Y_index, cv_type, number, metrics, pipe, clf=None, predict_type = None):
 
+        print(self.name + ' predict')
+        print('pipe ' , pipe)
+        print(Y_index)
+
+        dataframe = table
+
+        X_data = dataframe.drop(Y_index, 1)
+        Y_data = dataframe[Y_index]
+
+        if predict_type == 'clf':
+            print('pipe ', pipe)
+            pipe.steps.append(("class", clf))
+            print('create with pipe ', pipe)
 
         if cv_type == 'Cross Validation':
             print(cv_type, number, metrics)
@@ -148,33 +231,7 @@ class RandomForestClassWidget(ParentMLWidget):
             cv = KFold(number=number)
             scores = cross_validate(pipe, X_data, Y_data, cv=cv, scoring=metrics, return_train_score=True)
             self.results(scores, metrics)
-            
-        # elif cv_type == 'train_test_split':
-        #     X_train, X_test, y_train, y_test = train_test_split(X_data, Y_data, test_size=train_test_split_value, random_state=1)
-        #     # jednokrotna predykcja
-        #     clf = clf.fit(X_train, y_train)
 
-        #     y_pred = clf.predict(X_test)
-        #     y_train_pred = clf.predict(X_train)
-
-        #     labels = [0,1]
-        #     print('Test acc: ', accuracy_score(y_test, y_pred))
-
-        #     # print(classification_report(y_test, y_pred, labels=labels))
-
-        #     print('Train acc: ', accuracy_score(y_train, y_train_pred))
-        #     # print(classification_report(y_train, y_train_pred, labels=labels))
-
-
-        #     # cv = cross_val_score(clf_org, X_data, Y_data, cv=10, scoring='accuracy')
-        #     # cv1 = cross_val_score(clf_org, X_test, y_test, cv=2, scoring='accuracy')
-
-        #     print(cv)
-        #     print(cv.mean())
-        #     # print(cv1)
-
-
-            # print('Accuracy (std): %0.3f' % scores_acc.std())
 
 
     def get_parameters(self, as_list = False, return_labels=False):
@@ -206,42 +263,46 @@ class DecisionTreeClassWidget(ParentMLWidget):
         self.lay2.addWidget(self.l_sp)
         self.lay2.addWidget(self.slider_min_samples_split)
 
-    def predict(self, table, Y_index, cv_type, number, metrics, multiclass_type, pipe):
-
-
-        print(self.name + ' predict')
+    def get_clf(self, table, Y_index, multiclass_type, pipe):
 
         dataframe = table
-        X_data = dataframe.drop(Y_index, 1)
         Y_data = dataframe[Y_index]
+
         Y_data_unique = np.unique(Y_data)
         print(Y_data_unique)
 
         max_depth_arg, min_samples_split_arg = self.get_parameters(as_list=False)
 
-
-        # max_depth_arg = self.l_sp.get_value()
-        # min_samples_split_arg = int(self.slider_min_samples_split.get_current_value())
-
-        # print(f"train test split {train_test_split_value}, \n"
-        #       f"min samples split {min_samples_split_arg}, \n "
-        #       f"max depth arg {max_depth_arg}")
-
-
-        if len(Y_data_unique) > 1:
+        if len(Y_data_unique) > 2:
             print(multiclass_type)
             if multiclass_type == 'OneVsRest':
                 clf = OneVsRestClassifier(DecisionTreeClassifier(max_depth=max_depth_arg, min_samples_split= min_samples_split_arg))
+            
             elif multiclass_type == 'OneVsOne':
                 clf = OneVsOneClassifier(DecisionTreeClassifier(max_depth=max_depth_arg, min_samples_split= min_samples_split_arg))
                 
         elif len(Y_data_unique) == 0:
             clf = DecisionTreeClassifier(max_depth=max_depth_arg, min_samples_split= min_samples_split_arg)
 
+        return clf
 
-        print('pipe ', pipe)
-        pipe.steps.append(("class", clf))
-        print('create with pipe ', pipe)
+
+    def predict(self, table, Y_index, cv_type, number, metrics, pipe, clf=None, predict_type = None):
+
+        print(self.name + ' predict')
+        print('pipe ' , pipe)
+        print(Y_index)
+
+        dataframe = table
+
+        X_data = dataframe.drop(Y_index, 1)
+        Y_data = dataframe[Y_index]
+
+        if predict_type == 'clf':
+            print('pipe ', pipe)
+            pipe.steps.append(("class", clf))
+            print('create with pipe ', pipe)
+
 
         if cv_type == 'Cross Validation':
             scores = cross_validate(pipe, X_data, Y_data, cv=number, scoring=metrics, return_train_score=True)
@@ -252,17 +313,7 @@ class DecisionTreeClassWidget(ParentMLWidget):
             scores = cross_validate(pipe, X_data, Y_data, cv=cv, scoring=metrics, return_train_score=True)
             self.results(scores, metrics)
 
-        else:
-            clf = clf.fit(X_train, y_train)
-            y_train_pred = clf.predict(X_train)
 
-            print("Accuracy (train): %0.3f" % accuracy_score(y_train, y_train_pred))
-
-            y_pred = clf.predict(X_test)
-            print("Accuracy (test): %0.3f" % accuracy_score(y_test, y_pred))
-
-            labels = np.unique(Y_data)
-            print('\n Classification report: \n', classification_report(y_test, y_pred, labels=labels))
 
     def get_parameters(self, as_list=False, return_labels=False):
         print('get parameters from ')
@@ -353,37 +404,31 @@ class SupportVectorMachineClassWidget(ParentMLWidget):
         self.lay2.addWidget(self.l_combobox_poly_gamma, 7, 0)
         self.lay2.addWidget(self.l_sp_poly_degree, 7, 1)
 
+        self.enable_widgets_linear = [self.l_combobox_linear_penalty, self.l_combobox_linear_loss, self.l_rb_linear_dual]
+        self.enable_widgets_poly = [self.l_combobox_poly_gamma, self.l_sp_poly_degree]
+        self.enable_widgets_rbf = [self.l_combobox_poly_gamma]
+        self.enable_widgets_sigmoid = [self.l_combobox_poly_gamma]
 
-
+        self.all_widgets_list = list(set(self.enable_widgets_linear + self.enable_widgets_poly+self.enable_widgets_rbf ))
+        
         self.l_combobox_kernel.signal_current_text_changed(self.manage_disability_of_widgets)
+
 
 
     def manage_disability_of_widgets(self):
         # this function is triggered by text changed signal
 
-        self.l_combobox_linear_penalty.setEnabled(True)
-        self.l_sp_poly_degree.setEnabled(True)
-        self.l_combobox_linear_loss.setEnabled(True)
-        self.l_rb_linear_dual.setEnabled(True)
-        self.l_combobox_linear_penalty.setEnabled(True)
-        self.l_combobox_poly_gamma.setEnabled(True)
-
         kernel = self.l_combobox_kernel.get_text()
 
         if kernel == 'rbf' or kernel =='sigmoid':
-            self.l_combobox_linear_penalty.setEnabled(False)
-            self.l_sp_poly_degree.setEnabled(False)
-            self.l_combobox_linear_loss.setEnabled(False)
-            self.l_rb_linear_dual.setEnabled(False)
+            [widget.setEnabled(True) if widget in self.enable_widgets_rbf else widget.setEnabled(False) for widget in self.all_widgets_list]
 
         elif kernel == 'poly':
-            self.l_combobox_linear_penalty.setEnabled(False)
-            self.l_combobox_linear_loss.setEnabled(False)
-            self.l_rb_linear_dual.setEnabled(False)
+            [widget.setEnabled(True) if widget in self.enable_widgets_poly else widget.setEnabled(False) for widget in self.all_widgets_list]
+
 
         elif kernel == 'linear':
-            self.l_sp_poly_degree.setEnabled(False)
-            self.l_combobox_poly_gamma.setEnabled(False)
+            [widget.setEnabled(True) if widget in self.enable_widgets_linear else widget.setEnabled(False) for widget in self.all_widgets_list]
 
 
     def get_parameters(self, as_list=False, return_labels=False, as_dict = False):
@@ -443,32 +488,18 @@ class SupportVectorMachineClassWidget(ParentMLWidget):
         if as_dict:
             return parameters_dict
 
-
-    def predict(self, table, Y_index, cv_type, number, metrics,multiclass_type, pipe):
-
-
-        print(self.name + ' predict')
+    def get_clf(self, table, Y_index, multiclass_type, pipe):
 
         kernel = self.l_combobox_kernel.get_text()
 
         dataframe = table
-        X_data = dataframe.drop(Y_index, 1)
         Y_data = dataframe[Y_index]
+
         Y_data_unique = np.unique(Y_data)
-        # train_test_split_value = int(self.slider.get_current_value())/100.0
-        # print(train_test_split_value)
-        print('1')
+        print(Y_data_unique)
+
         pars = self.get_parameters(as_dict=True)
-        print('xd')
-        # X_train, X_test, y_train, y_test = train_test_split(X_data, Y_data, test_size=train_test_split_value, random_state=1)
 
-        # max_depth_arg = self.l_sp.get_value()
-        # min_samples_split_arg = int(self.slider_min_samples_split.get_current_value())
-
-        # print(f"train test split {train_test_split_value}, \n"
-        #       f"min samples split {min_samples_split_arg}, \n "
-        #       f"max depth arg {max_depth_arg}")
-        print(pars)
 
         if kernel == 'linear':
             clf = LinearSVC(**pars)
@@ -476,7 +507,7 @@ class SupportVectorMachineClassWidget(ParentMLWidget):
             clf = SVC(**pars)
         print(clf)
 
-        if len(Y_data_unique) > 1:
+        if len(Y_data_unique) > 2:
             print(multiclass_type)
 
             if multiclass_type == 'OneVsRest':
@@ -487,10 +518,24 @@ class SupportVectorMachineClassWidget(ParentMLWidget):
         elif len(Y_data_unique) == 0:
             pass
 
+        return clf
 
-        print('pipe ', pipe)
-        pipe.steps.append(("class", clf))
-        print('create with pipe ', pipe)
+
+    def predict(self, table, Y_index, cv_type, number, metrics, pipe, clf=None, predict_type = None):
+
+        print(self.name + ' predict')
+
+        dataframe = table
+        X_data = dataframe.drop(Y_index, 1)
+        Y_data = dataframe[Y_index]
+        Y_data_unique = np.unique(Y_data)
+
+
+        if predict_type == 'clf':
+            print('pipe ', pipe)
+            pipe.steps.append(("class", clf))
+            print('create with pipe ', pipe)
+
 
         if cv_type == 'Cross Validation':
             scores = cross_validate(pipe, X_data, Y_data, cv=number, scoring=metrics, return_train_score=True)

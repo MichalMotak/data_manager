@@ -97,7 +97,7 @@ class MainWindow(QMainWindow):
 
         # Plot Menu 
 
-        self.plot_menu = self.menubar.addMenu('&Plot')
+        self.plot_menu = self.menubar.addMenu('&Table')
 
         self.clear_table_action = QAction('clear table')
         self.plot_menu.addAction(self.clear_table_action)
@@ -289,7 +289,7 @@ class MainWindow(QMainWindow):
                 obj.hide()
 
         if sender_text == 'Plot':
-            fun(self.frame_center)
+            fun(self.frame_PlotWidget)
 
         elif sender_text == 'Table':
             fun(self.frame_left)
@@ -298,7 +298,7 @@ class MainWindow(QMainWindow):
             fun(self.frame_MLWidget)
 
         elif sender_text == 'Right Table':
-            fun(self.frame_right_table)
+            fun(self.frame_results_table)
 
         elif sender_text == 'Preprocessing Widget':
             fun(self.frame_preproc_widget)
@@ -503,7 +503,7 @@ class MainWindow(QMainWindow):
 
                 row_labels = list(d.index)
                 self.table_describe.set_row_labeles(row_labels)
-            except AttributeError:
+            except AttributeError or ValueError:
                 d = CustomDialogWidgets.CustomMessageBoxWarning('Data not found')
 
         else:
