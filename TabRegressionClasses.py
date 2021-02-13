@@ -50,10 +50,9 @@ class TabLinearReg(ParentMLWidget):
         print('get parameters from ')
 
         alpha = self.slider_alpha.get_current_value()
-        print(alpha)
         l1_ratio = self.slider_l1_ratio.get_current_value()
-        print(l1_ratio)
-        print(alpha,  l1_ratio)
+
+
         if as_list and return_labels:
             return [alpha,  l1_ratio], [self.slider_alpha.name, self.slider_l1_ratio.name]
         elif not as_list:
@@ -112,26 +111,6 @@ class TabLinearReg(ParentMLWidget):
             scores = cross_validate(pipe, X_data, Y_data, cv=cv, scoring=metrics, return_train_score=True)
             self.results(scores, metrics)
 
-        else:
-            clf = reg.fit(X_train, y_train)
-
-            y_pred = clf.predict(X_test)
-            y_train_pred = clf.predict(X_train)
-
-            labels = [0,1]
-            print('Test acc: ', accuracy_score(y_test, y_pred))
-
-
-            print('Train acc: ', accuracy_score(y_train, y_train_pred))
-            # print(classification_report(y_train, y_train_pred, labels=labels))
-
-
-            # cv = cross_val_score(clf_org, X_data, Y_data, cv=10, scoring='accuracy')
-            # cv1 = cross_val_score(clf_org, X_test, y_test, cv=2, scoring='accuracy')
-
-            print(cv)
-            print(cv.mean())
-            # print(cv1)
 
 # Decision_Tree_Classifier
 class TabDecisionTreeReg(ParentMLWidget):
@@ -157,18 +136,24 @@ class TabDecisionTreeReg(ParentMLWidget):
         self.lay2.addWidget(self.l_combobox_criterion)
         self.lay2.addWidget(self.slider_min_samples_split)
 
-    def get_parameters(self, as_list=False, return_labels=False):
+    def get_parameters(self, as_list=False, return_labels=False, as_dict = True):
         print('get parameters from ')
         # print(self.get_parameters.__name__)
         max_depth_arg = int(self.l_sp_max_depth.get_value())
         min_samples_split_arg = int(self.slider_min_samples_split.get_current_value())
         criterion = self.l_combobox_criterion.get_text()
-        print(max_depth_arg,  min_samples_split_arg, criterion)
+
+
         if as_list and return_labels:
             return [max_depth_arg, min_samples_split_arg, criterion], [self.l_sp_max_depth.name, self.slider_min_samples_split.name, self.l_combobox_criterion.name]
 
-        elif not as_list:
+        elif not as_list and not as_dict:
             return max_depth_arg, min_samples_split_arg, criterion
+
+        elif as_dict:
+            parameters_dict = {"max_depth": max_depth_arg, "min_samples_split": min_samples_split_arg, "criterion": criterion}
+            return parameters_dict
+
 
     def predict(self, table, Y_index, cv_type, number, metrics, pipe):
 
@@ -180,10 +165,10 @@ class TabDecisionTreeReg(ParentMLWidget):
         X_data = dataframe.drop(Y_index, 1)
         Y_data = dataframe[Y_index]
 
-        max_depth_arg, min_samples_split_arg, criterion = self.get_parameters(as_list=False)
+        # max_depth_arg, min_samples_split_arg, criterion = self.get_parameters(as_list=False)
+        parameters_dict = self.get_parameters(as_dict=True)
 
-        print(Y_index,  min_samples_split_arg, criterion)
-        reg = DecisionTreeRegressor(criterion = criterion, max_depth=max_depth_arg, min_samples_split= min_samples_split_arg)
+        reg = DecisionTreeRegressor(**parameters_dict)
 
 
         print('pipe ', pipe)
@@ -202,27 +187,6 @@ class TabDecisionTreeReg(ParentMLWidget):
             scores = cross_validate(pipe, X_data, Y_data, cv=cv, scoring=metrics, return_train_score=True)
             self.results(scores, metrics)
 
-        else:
-            clf = reg.fit(X_train, y_train)
-
-            y_pred = clf.predict(X_test)
-            y_train_pred = clf.predict(X_train)
-
-            labels = [0,1]
-            print('Test acc: ', accuracy_score(y_test, y_pred))
-
-            # print(classification_report(y_test, y_pred, labels=labels))
-
-            print('Train acc: ', accuracy_score(y_train, y_train_pred))
-            # print(classification_report(y_train, y_train_pred, labels=labels))
-
-
-            # cv = cross_val_score(clf_org, X_data, Y_data, cv=10, scoring='accuracy')
-            # cv1 = cross_val_score(clf_org, X_test, y_test, cv=2, scoring='accuracy')
-
-            print(cv)
-            print(cv.mean())
-            # print(cv1)
 
 
 # Decision_Tree_Classifier
@@ -248,19 +212,22 @@ class TabRandomForestReg(ParentMLWidget):
         self.lay2.addWidget(self.l_sp_max_depth)
 
 
-    def get_parameters(self, as_list=False, return_labels=False):
+    def get_parameters(self, as_list=False, return_labels=False, as_dict=True):
         print('get parameters from ')
         # print(self.get_parameters.__name__)
         num_of_estimators =self.l_sp.get_value()
         max_depth = self.l_sp_max_depth.get_value()
         min_samples_split_arg = int(self.slider.get_current_value())
 
-        print(num_of_estimators, max_depth, min_samples_split_arg)
         if as_list and return_labels:
             return [num_of_estimators, max_depth, min_samples_split_arg], [self.l_sp.name,self.l_sp_max_depth.name, self.slider.name]
 
-        elif not as_list:
+        elif not as_list and not as_dict:
             return num_of_estimators,max_depth, min_samples_split_arg
+        
+        elif as_dict:
+            parameters_dict = {"max_depth": max_depth_arg, "min_samples_split": min_samples_split_arg, "n_estimator": num_of_estimators}
+            return parameters_dict
 
     def predict(self, table, Y_index, cv_type, number, metrics, pipe):
 
@@ -271,19 +238,9 @@ class TabRandomForestReg(ParentMLWidget):
         X_data = dataframe.drop(Y_index, 1)
         Y_data = dataframe[Y_index]
 
+        parameters_dict = self.get_parameters(as_dict=True)
 
-        # train_test_split_value = int(self.slider.get_current_value())/100.0
-        # X_train, X_test, y_train, y_test = train_test_split(X_data, Y_data, test_size=train_test_split_value, random_state=1)
-
-        n_estim, max_depth, min_samples_split_arg = self.get_parameters(as_list=False)
-        print('zzz')
-        print('xd ', n_estim, max_depth, min_samples_split_arg)
-
-        reg = RandomForestRegressor(n_estimators=n_estim,
-                                         min_samples_split = min_samples_split_arg,
-                                         max_depth = max_depth,
-                                         bootstrap=True,
-                                         max_features='sqrt')
+        reg = RandomForestRegressor(**parameters_dict)
 
 
         print('pipe ', pipe)
@@ -304,27 +261,6 @@ class TabRandomForestReg(ParentMLWidget):
             scores = cross_validate(pipe, X_data, Y_data, cv=cv, scoring=metrics, return_train_score=True)
             self.results(scores, metrics)
 
-        else:
-            clf = reg.fit(X_train, y_train)
-
-            y_pred = clf.predict(X_test)
-            y_train_pred = clf.predict(X_train)
-
-            labels = [0,1]
-            print('Test acc: ', accuracy_score(y_test, y_pred))
-
-            # print(classification_report(y_test, y_pred, labels=labels))
-
-            print('Train acc: ', accuracy_score(y_train, y_train_pred))
-            # print(classification_report(y_train, y_train_pred, labels=labels))
-
-
-            # cv = cross_val_score(clf_org, X_data, Y_data, cv=10, scoring='accuracy')
-            # cv1 = cross_val_score(clf_org, X_test, y_test, cv=2, scoring='accuracy')
-
-            print(cv)
-            print(cv.mean())
-            # print(cv1)
 
 
 

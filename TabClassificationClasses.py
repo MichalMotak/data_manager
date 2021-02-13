@@ -104,10 +104,19 @@ class EnsembleClassWidget(ParentMLWidget):
         self.l_sp_n_estimators.set_step(5)
         self.l_sp_n_estimators.set_range(1,300)
 
-        self.lay2.addWidget(self.l_combobox_method)
-        self.lay2.addWidget(self.l_sp_learning_rate)
-        self.lay2.addWidget(self.l_sp_n_estimators)
+        self.l_sp_max_samples = UpgradedWidgets.LabelAndSpinbox('max_samples', double_spinbox=True)
+        self.l_sp_max_samples.set_value(1.0)
+        self.l_sp_max_samples.set_step(0.05)
 
+        self.l_rb_bootstrap = UpgradedWidgets.LabelAndRadioButton('bootstrap')
+
+
+        self.lay2.addWidget(self.l_combobox_method, 0,0,1,2)
+        self.lay2.addWidget(self.l_sp_learning_rate,1,0,1,2)
+        self.lay2.addWidget(self.l_sp_n_estimators, 2,0,1,1)
+
+        self.lay2.addWidget(self.l_sp_max_samples, 2,1,1,1)
+        self.lay2.addWidget(self.l_rb_bootstrap, 3,0,1,1)
 
     def update_pipe(self, clf, pipe):
         print('update_pipe ensemble')
@@ -130,7 +139,7 @@ class EnsembleClassWidget(ParentMLWidget):
         return pipe
 
 
-    def get_parameters(self, as_list = False, return_labels=False):
+    def get_parameters(self, as_list = False, return_labels=False, as_dict = False):
         print('get parameters from ')
 
         method = self.l_combobox_method.get_text()
@@ -141,19 +150,21 @@ class EnsembleClassWidget(ParentMLWidget):
             learning_rate = self.l_sp_learning_rate.get_value()
 
             if as_list and return_labels:
-                return [n_estimators, learning_rate], [self.l_sp_n_estimators, self.l_sp_learning_rate]
+                return [n_estimators, learning_rate], [self.l_sp_n_estimators.name, self.l_sp_learning_rate.name]
 
             elif not as_list:
                 return n_estimators, learning_rate
 
 
         elif method == 'Bagging':
+            max_samples = self.l_sp_max_samples.get_value()
+            bootstrap = self.l_rb_bootstrap.get_state()
 
             if as_list and return_labels:
-                return [n_estimators], [self.l_sp_n_estimators]
+                return [n_estimators, max_samples, bootstrap], [self.l_sp_n_estimators.name, self.l_sp_max_samples.name, self.l_rb_bootstrap.name]
 
             elif not as_list:
-                return n_estimators
+                return n_estimators, max_samples, bootstrap
 #
 
 class RandomForestClassWidget(ParentMLWidget):
@@ -271,18 +282,24 @@ class DecisionTreeClassWidget(ParentMLWidget):
         Y_data_unique = np.unique(Y_data)
         print(Y_data_unique)
 
-        max_depth_arg, min_samples_split_arg = self.get_parameters(as_list=False)
+        # max_depth_arg, min_samples_split_arg = self.get_parameters(as_list=False)
+        parameters_dict = self.get_parameters(as_dict=True)
 
         if len(Y_data_unique) > 2:
             print(multiclass_type)
             if multiclass_type == 'OneVsRest':
-                clf = OneVsRestClassifier(DecisionTreeClassifier(max_depth=max_depth_arg, min_samples_split= min_samples_split_arg))
+                clf = OneVsRestClassifier(DecisionTreeClassifier(**parameters_dict))
             
             elif multiclass_type == 'OneVsOne':
-                clf = OneVsOneClassifier(DecisionTreeClassifier(max_depth=max_depth_arg, min_samples_split= min_samples_split_arg))
+                clf = OneVsOneClassifier(DecisionTreeClassifier(**parameters_dict))
                 
-        elif len(Y_data_unique) == 0:
-            clf = DecisionTreeClassifier(max_depth=max_depth_arg, min_samples_split= min_samples_split_arg)
+        elif len(Y_data_unique) == 2:
+            print('dd')
+            print(parameters_dict)
+            # clf = DecisionTreeClassifier(max_depth=max_depth_arg, min_samples_split= min_samples_split_arg)
+            clf = DecisionTreeClassifier(**parameters_dict)
+            print(clf)
+
 
         return clf
 
@@ -315,17 +332,22 @@ class DecisionTreeClassWidget(ParentMLWidget):
 
 
 
-    def get_parameters(self, as_list=False, return_labels=False):
+    def get_parameters(self, as_list=False, return_labels=False, as_dict = False):
         print('get parameters from ')
-        # print(self.get_parameters.__name__)
+
         max_depth_arg = self.l_sp.get_value()
         min_samples_split_arg = int(self.slider_min_samples_split.get_current_value())
 
         if as_list and return_labels:
             return [max_depth_arg, min_samples_split_arg], [self.l_sp.name, self.slider_min_samples_split.name]
 
-        elif not as_list:
+        elif not as_list and not as_dict:
             return max_depth_arg, min_samples_split_arg
+
+        elif as_dict:
+            parameters_dict = {"max_depth":max_depth_arg, "min_samples_split":min_samples_split_arg}
+            print('as dict ', parameters_dict)
+            return parameters_dict
 
 
 class SupportVectorMachineClassWidget(ParentMLWidget):
@@ -515,7 +537,7 @@ class SupportVectorMachineClassWidget(ParentMLWidget):
             elif multiclass_type == 'OneVsOne':
                 clf = OneVsOneClassifier(clf)
                 
-        elif len(Y_data_unique) == 0:
+        elif len(Y_data_unique) == 2:
             pass
 
         return clf

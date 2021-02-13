@@ -195,7 +195,7 @@ class TabClassification(QWidget):
             print('predict no ensemble')
             # current_widget.predict(tab, predict_label, cv_type, number, metrics, multiclass_type, pipe = pipe)
             clf = current_widget.get_clf(tab, predict_label, multiclass_type, pipe)
-
+            print('clf ', clf)
             current_widget.predict(tab, predict_label, cv_type, number, metrics, pipe, clf, predict_type = 'clf')
 
 
