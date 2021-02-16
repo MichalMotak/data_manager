@@ -34,14 +34,14 @@ class EnsembleRegWidget(EnsembleClassWidget):
         kind = self.l_combobox_method.get_text()
 
         if kind == 'AdaBoost':
-            n_estimators, learning_rate = self.get_parameters(as_list=False)
-            print(n_estimators, learning_rate)
-            ensemble_reg = AdaBoostRegressor(reg, n_estimators=n_estimators, learning_rate=learning_rate)
+            parameters_dict = self.get_parameters(as_dict=True)
+            ensemble_reg = AdaBoostRegressor(reg, **parameters_dict)
 
         elif kind == 'Bagging':
-            n_estimators = self.get_parameters(as_list=False)
+            parameters_dict = self.get_parameters(as_dict=True)
 
-            ensemble_reg = BaggingRegressor(reg, n_estimators=n_estimators)
+            ensemble_reg = BaggingRegressor(reg, **parameters_dict)
+
 
         print('pipe ', pipe)
         pipe.steps.append(("ensemble reg", ensemble_reg))

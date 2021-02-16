@@ -215,6 +215,7 @@ class EnsembleClassWidget(ParentMLWidget):
 
         elif kind == 'Bagging':
             parameters_dict = self.get_parameters(as_dict=True)
+            print('par bagging ', parameters_dict)
 
             ensemble_clf = BaggingClassifier(clf, **parameters_dict)
 

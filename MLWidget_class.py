@@ -352,8 +352,10 @@ class TabRegression(TabClassification):
         else:
             reg = current_widget.get_reg()
             print('reg ', reg)
+            pipe.steps.append(("reg", reg))
 
-            current_widget.predict(tab, predict_label, 'Regression', cv_type, number, metrics, pipe, reg, predict_type = 'clf')
+
+            current_widget.predict(tab, predict_label, 'Regression', cv_type, number, metrics, pipe)
 
             # current_widget.predict(tab, predict_label, cv_type, number, metrics, pipe = pipe)
 
