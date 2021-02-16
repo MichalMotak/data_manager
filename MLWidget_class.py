@@ -137,7 +137,7 @@ class TabClassification(QWidget):
         return output
 
     def radio_button_clicked(self):
-
+        print('radio_button_clicked')
         radioButton = self.sender()
         widget_on = radioButton.widget
         widget_type = radioButton.type
@@ -196,7 +196,9 @@ class TabClassification(QWidget):
             # current_widget.predict(tab, predict_label, cv_type, number, metrics, multiclass_type, pipe = pipe)
             clf = current_widget.get_clf(tab, predict_label, multiclass_type, pipe)
             print('clf ', clf)
-            current_widget.predict(tab, predict_label, 'Classification', cv_type, number, metrics, pipe, clf, predict_type = 'clf')
+            pipe.steps.append(("class", clf))
+
+            current_widget.predict(tab, predict_label, 'Classification', cv_type, number, metrics, pipe)
 
 
     def update_outputcombobox(self, col_labels):
@@ -224,6 +226,9 @@ class TabRegression(TabClassification):
         self.w2 = TabRandomForestReg('Random Forest')
         self.w3 = TabLinearReg('Linear Models')
 
+        self.w4 = EnsembleRegWidget('Ensemble')
+        self.w4.setEnabled(False)
+
         self.radiobutton = QRadioButton("")
         self.radiobutton.widget = self.w
         self.radiobutton.type = 'Random Forest'
@@ -239,11 +244,57 @@ class TabRegression(TabClassification):
         self.radiobutton3.type = 'Linear'
         self.radiobutton3.toggled.connect(self.radio_button_clicked)
 
-        self.widgets_list = [self.w, self.w2, self.w3]
-        self.radio_buttons_list = [self.radiobutton, self.radiobutton2, self.radiobutton3]
+        self.radiobutton4 = QRadioButton("")
+        self.radiobutton4.setAutoExclusive(False)
+        self.radiobutton4.widget = self.w4
+        self.radiobutton4.type = 'Ensemble'
+        self.radiobutton4.toggled.connect(self.radio_button_clicked)
+
+        self.widgets_list = [self.w, self.w2, self.w3, self.w4]
+        self.radio_buttons_list = [self.radiobutton, self.radiobutton2, self.radiobutton3, self.radiobutton4]
         self.widgets_types_list = [w.type for w in self.radio_buttons_list]
         self.radiobutton.setChecked(True)
 
+
+    # def radio_button_clicked(self):
+    #     print('radio_button_clicked')
+    #     radioButton = self.sender()
+    #     widget_on = radioButton.widget
+    #     widget_type = radioButton.type
+
+
+        
+    #     if widget_type == 'Ensemble':
+        
+    #         if self.radiobutton4.isChecked():
+    #             # print('enxemble był on ')
+    #             self.w4.setEnabled(True)
+    #         else:
+    #             self.w4.setEnabled(False)
+
+    #     if radioButton.isChecked():
+    #         print('button checked')
+    #         print(widget_on, widget_type)
+
+    #     # if widget_type == 'Ensemble':
+        
+    #         # if self.radiobutton4.isChecked():
+    #         #     # print('enxemble był on ')
+    #         #     self.w4.setEnabled(True)
+    #         # else:
+    #         #     self.w4.setEnabled(False)
+
+    #         for w, t in zip(self.widgets_list, self.widgets_types_list):
+    #             print(w,t)
+
+    #             if t == 'Ensemble':
+    #                 pass
+
+    #             elif t == widget_type:
+    #                 w.setEnabled(True)
+
+    #             else:
+    #                 w.setEnabled(False)
 
     def create_layout(self):
         self.lay2 = QVBoxLayout()
@@ -257,6 +308,8 @@ class TabRegression(TabClassification):
         self.formLayout.addRow(self.radiobutton, self.w)
         self.formLayout.addRow(self.radiobutton2, self.w2)
         self.formLayout.addRow(self.radiobutton3, self.w3)
+        self.formLayout.addRow(self.radiobutton4, self.w4)
+
         self.scroll.setWidget(self.groupBox)
 
         self.lay2.addWidget(self.scroll)
@@ -271,6 +324,7 @@ class TabRegression(TabClassification):
 
     def predict(self, current_widget, tab, cv_type, number, pipe, ensemble_method_enabled):
         print('regression predict')
+        print(current_widget)
         metrics = self.l_combobox_metrics.get_text()
         metrics = list(metrics.split(', '))
         predict_label = self.l_combobox_prediction.get_text()
@@ -290,7 +344,11 @@ class TabRegression(TabClassification):
         #     current_widget.predict(tab, predict_label, cv_type, number, metrics, pipe, clf, predict_type = 'clf')
 
         if ensemble_method_enabled:
-            pass
+            reg = current_widget.get_reg()
+            new_pipe = self.w4.update_pipe(reg, pipe)
+            print('new pipe', new_pipe)
+
+            current_widget.predict(tab, predict_label, 'Regression', cv_type, number, metrics, new_pipe)
         else:
             reg = current_widget.get_reg()
             print('reg ', reg)

@@ -230,7 +230,7 @@ class ResultsTableWidget(QWidget):
     def get_signal_from_ml_widget(self, parameters):
         print("From ML WIDGET:  ", parameters)
 
-        self.update_table_with_results(parameters[0], parameters[1], parameters[2])
+        self.update_table_with_results(parameters)
         self.raise_()
 
     # ======================= METHODS ==============================
@@ -312,6 +312,7 @@ class ResultsTableWidget(QWidget):
         print(parameters_labels[:a])
         print(parameters_labels[a:b])
         print(parameters_labels[b:c])
+        
         self.labels_a.append(parameters_labels[:a])
         self.labels_b.append(parameters_labels[a:b])
         self.labels_c.append(parameters_labels[b:c])
@@ -405,10 +406,12 @@ class ResultsTableWidget(QWidget):
         self.update_lens(parameters_labels, len)
 
 
-    def update_table_with_results(self, par, parameters_labels, len):
+    def update_table_with_results(self, parameters_list):
         print('update_table_with_results')
         print(self.dataframe)
-        # self.complete_data.append(len)
+
+        par, parameters_labels, len = parameters_list
+
         # Jeśli pierwsze dodanie
         if self.first_time_value is True:
             print('f')

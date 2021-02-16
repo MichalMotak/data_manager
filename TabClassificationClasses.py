@@ -17,7 +17,6 @@ from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, Bagging
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.svm import LinearSVC, SVC
 
-
 from sklearn.metrics import auc, accuracy_score, roc_auc_score, roc_curve, precision_score, recall_score, f1_score, confusion_matrix, classification_report, plot_confusion_matrix, ConfusionMatrixDisplay
 from sklearn.model_selection import train_test_split, cross_val_score, cross_val_predict, cross_validate, KFold
 from sklearn.multiclass import OneVsOneClassifier, OneVsRestClassifier
@@ -77,7 +76,7 @@ class ParentMLWidget(QWidget):
         return self.results_dict
 
 
-    def predict(self, table, Y_index, tab_type, cv_type, number, metrics, pipe, clf=None, predict_type = None):
+    def predict(self, table, Y_index, tab_type, cv_type, number, metrics, pipe):
 
         print(self.name + ' predict')
         print('pipe ' , pipe)
@@ -88,10 +87,10 @@ class ParentMLWidget(QWidget):
         X_data = dataframe.drop(Y_index, 1)
         Y_data = dataframe[Y_index]
 
-        if predict_type == 'clf':
-            print('pipe ', pipe)
-            pipe.steps.append(("class", clf))
-            print('create with pipe ', pipe)
+        # if predict_type == 'clf':
+        #     print('pipe ', pipe)
+        #     pipe.steps.append(("class", clf))
+        #     print('create with pipe ', pipe)
 
 
         if cv_type == 'Cross Validation':
@@ -107,8 +106,8 @@ class ParentMLWidget(QWidget):
             X_train, X_test, y_train, y_test = train_test_split(X_data, Y_data, test_size=0.25, shuffle=True, random_state=0)
             pipe.fit(X_train, y_train)
 
-            pred_train = clf.predict(X_train)
-            pred_test = clf.predict(X_test) 
+            pred_train = pipe.predict(X_train)
+            pred_test = pipe.predict(X_test) 
 
             self.save_one_time_validation_predictions(y_test, pred_test)
 
@@ -185,20 +184,39 @@ class EnsembleClassWidget(ParentMLWidget):
         self.lay2.addWidget(self.l_sp_max_samples, 2,1,1,1)
         self.lay2.addWidget(self.l_rb_bootstrap, 3,0,1,1)
 
-    def update_pipe(self, clf, pipe):
-        print('update_pipe ensemble')
+            
+        self.l_combobox_method.signal_current_text_changed(self.manage_disability_of_widgets)
 
+
+
+    def manage_disability_of_widgets(self):
+        # this function is triggered by text changed signal
         kind = self.l_combobox_method.get_text()
 
         if kind == 'AdaBoost':
-            n_estimators, learning_rate = self.get_parameters(as_list=False)
-            print(n_estimators, learning_rate)
-            ensemble_clf = AdaBoostClassifier(clf, n_estimators=n_estimators, learning_rate=learning_rate)
+            self.l_sp_learning_rate.setEnabled(True)
+            self.l_sp_max_samples.setEnabled(False)
+            self.l_rb_bootstrap.setEnabled(False)
 
         elif kind == 'Bagging':
-            n_estimators = self.get_parameters(as_list=False)
+            self.l_sp_max_samples.setEnabled(True)
+            self.l_rb_bootstrap.setEnabled(True)
+            self.l_sp_learning_rate.setEnabled(False)
 
-            ensemble_clf = BaggingClassifier(clf, n_estimators=n_estimators)
+
+    def update_pipe(self, clf, pipe):
+        print('update_pipe ensemble')
+        kind = self.l_combobox_method.get_text()
+
+        if kind == 'AdaBoost':
+            parameters_dict = self.get_parameters(as_dict=True)
+
+            ensemble_clf = AdaBoostClassifier(clf, **parameters_dict)
+
+        elif kind == 'Bagging':
+            parameters_dict = self.get_parameters(as_dict=True)
+
+            ensemble_clf = BaggingClassifier(clf, **parameters_dict)
 
         print('pipe ', pipe)
         pipe.steps.append(("ensemble class", ensemble_clf))
@@ -219,9 +237,12 @@ class EnsembleClassWidget(ParentMLWidget):
             if as_list and return_labels:
                 return [n_estimators, learning_rate], [self.l_sp_n_estimators.name, self.l_sp_learning_rate.name]
 
-            elif not as_list:
+            elif not as_list and not as_dict:
                 return n_estimators, learning_rate
 
+            elif as_dict:
+                parameters_dict = {"n_estimators" : n_estimators, "learning_rate" : learning_rate }
+                return parameters_dict
 
         elif method == 'Bagging':
             max_samples = self.l_sp_max_samples.get_value()
@@ -230,9 +251,13 @@ class EnsembleClassWidget(ParentMLWidget):
             if as_list and return_labels:
                 return [n_estimators, max_samples, bootstrap], [self.l_sp_n_estimators.name, self.l_sp_max_samples.name, self.l_rb_bootstrap.name]
 
-            elif not as_list:
+            elif not as_list and not as_dict:
                 return n_estimators, max_samples, bootstrap
 #
+            elif as_dict:
+                parameters_dict = {"n_estimators" : n_estimators, "max_samples" : max_samples, "bootstrap":bootstrap }
+                return parameters_dict
+
 
 class RandomForestClassWidget(ParentMLWidget):
     def __init__(self, name):
@@ -334,65 +359,9 @@ class DecisionTreeClassWidget(ParentMLWidget):
                 clf = OneVsOneClassifier(DecisionTreeClassifier(**parameters_dict))
                 
         elif len(Y_data_unique) == 2:
-            print('dd')
-            print(parameters_dict)
             # clf = DecisionTreeClassifier(max_depth=max_depth_arg, min_samples_split= min_samples_split_arg)
             clf = DecisionTreeClassifier(**parameters_dict)
-            print(clf)
-
-
         return clf
-
-
-    # def predict(self, table, Y_index, cv_type, number, metrics, pipe, clf=None, predict_type = None):
-
-    #     print(self.name + ' predict')
-    #     print('pipe ' , pipe)
-    #     print(Y_index)
-
-    #     dataframe = table
-
-    #     X_data = dataframe.drop(Y_index, 1)
-    #     Y_data = dataframe[Y_index]
-
-    #     if predict_type == 'clf':
-    #         print('pipe ', pipe)
-    #         pipe.steps.append(("class", clf))
-    #         print('create with pipe ', pipe)
-
-
-    #     if cv_type == 'Cross Validation':
-    #         scores = cross_validate(pipe, X_data, Y_data, cv=number, scoring=metrics, return_train_score=True)
-    #         self.results(scores, metrics)
-
-    #     elif cv_type == 'K-Fold':
-    #         cv = KFold(number=number)
-    #         scores = cross_validate(pipe, X_data, Y_data, cv=cv, scoring=metrics, return_train_score=True)
-    #         self.results(scores, metrics)
-
-    #     elif cv_type == 'One_Time_Validation':
-    #         X_train, X_test, y_train, y_test = train_test_split(X_data, Y_data, test_size=0.25, shuffle=True, random_state=0)
-    #         pipe.fit(X_train, y_train)
-
-    #         pred_train = clf.predict(X_train)
-    #         pred_test = clf.predict(X_test) 
-
-    #         scores = {}
-
-    #         for name,fun in zip(class_metrics_list,class_metrics_list_functions):
-    #             if name in metrics:
-    #                 train_score = fun(y_train, pred_train)
-    #                 test_score = fun(y_test, pred_test)
-                                    
-    #                 print(f"score: {name}, values: {train_score}, {test_score}")
-    #                 scores[f"train_{name}"] = train_score
-    #                 scores[f"test_{name}"] = test_score
-
-    #         print(scores)
-    #         self.results(scores, metrics)
-
-
-
 
 
     def get_parameters(self, as_list=False, return_labels=False, as_dict = False):

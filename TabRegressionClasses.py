@@ -9,14 +9,44 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
-from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
+from sklearn.ensemble import  RandomForestRegressor, AdaBoostRegressor, BaggingRegressor
+from sklearn.tree import  DecisionTreeRegressor
 
 from sklearn.metrics import auc, accuracy_score, roc_auc_score, roc_curve, precision_score, recall_score, f1_score, confusion_matrix, classification_report, plot_confusion_matrix, ConfusionMatrixDisplay
 from sklearn.model_selection import train_test_split, cross_val_score, cross_val_predict, cross_validate, KFold
 from sklearn.linear_model import LinearRegression, Ridge, Lasso, ElasticNet
 
-from TabClassificationClasses import ParentMLWidget
+from TabClassificationClasses import ParentMLWidget, EnsembleClassWidget
+
+
+
+
+
+
+class EnsembleRegWidget(EnsembleClassWidget):
+    def __init__(self, name):
+        super(EnsembleRegWidget, self).__init__(name)
+        self.name = name
+
+    def update_pipe(self, reg, pipe):
+        print('update_pipe ensemble')
+
+        kind = self.l_combobox_method.get_text()
+
+        if kind == 'AdaBoost':
+            n_estimators, learning_rate = self.get_parameters(as_list=False)
+            print(n_estimators, learning_rate)
+            ensemble_reg = AdaBoostRegressor(reg, n_estimators=n_estimators, learning_rate=learning_rate)
+
+        elif kind == 'Bagging':
+            n_estimators = self.get_parameters(as_list=False)
+
+            ensemble_reg = BaggingRegressor(reg, n_estimators=n_estimators)
+
+        print('pipe ', pipe)
+        pipe.steps.append(("ensemble reg", ensemble_reg))
+
+        return pipe
 
 
 # Tab_Linear_Reg
@@ -34,10 +64,10 @@ class TabLinearReg(ParentMLWidget):
         self.l_combobox_linear_model.add_items(linear_reg_models)
 
 
-        self.slider_alpha = ImprovedSlider(0,100, 'Alpha (Ridge, Lasso, ElasticNet)')
+        self.slider_alpha = ImprovedSlider(0,100, 'Alpha')
         self.slider_alpha.set_float()
 
-        self.slider_l1_ratio = ImprovedSlider(0, 100, 'l1_ratio (ElasticNet)')
+        self.slider_l1_ratio = ImprovedSlider(0, 100, 'l1_ratio')
         self.slider_l1_ratio.set_float()
 
         self.lay2.addWidget(self.label_name)
@@ -46,6 +76,25 @@ class TabLinearReg(ParentMLWidget):
         self.lay2.addWidget(self.slider_l1_ratio)
 
 
+        self.l_combobox_linear_model.signal_current_text_changed(self.manage_enability_of_widgets)
+
+
+    def manage_enability_of_widgets(self):
+        
+        type_ = self.l_combobox_linear_model.get_text()
+
+        if type_ == 'LinearRegression':
+            self.slider_alpha.setEnabled(False)
+            self.slider_l1_ratio.setEnabled(False)
+ 
+        elif type_ == 'Ridge' or type_ == 'Lasso':
+            self.slider_alpha.setEnabled(True)
+            self.slider_l1_ratio.setEnabled(False)
+ 
+        elif type_ == 'ElasticNet':
+            self.slider_alpha.setEnabled(True)
+            self.slider_l1_ratio.setEnabled(True)
+ 
     def get_parameters(self, as_list=False, return_labels=False, as_dict=True):
         print('get parameters from ')
 
