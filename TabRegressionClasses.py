@@ -46,70 +46,105 @@ class TabLinearReg(ParentMLWidget):
         self.lay2.addWidget(self.slider_l1_ratio)
 
 
-    def get_parameters(self, as_list=False, return_labels=False):
+    def get_parameters(self, as_list=False, return_labels=False, as_dict=True):
         print('get parameters from ')
 
-        alpha = self.slider_alpha.get_current_value()
-        l1_ratio = self.slider_l1_ratio.get_current_value()
+        type_ = self.l_combobox_linear_model.get_text()
+
+        if type_ == 'LinearRegression':
+
+            # DO ZMIANY 
+
+            alpha = self.slider_alpha.get_current_value()
+            l1_ratio = self.slider_l1_ratio.get_current_value()
+
+            if as_list and return_labels:
+                return [alpha,  l1_ratio], [self.slider_alpha.name, self.slider_l1_ratio.name]
+
+            elif not as_list and not as_dict:
+                return alpha,  l1_ratio
+
+            elif as_dict:
+                parameters = {"alpha" : alpha, "l1_ratio" : l1_ratio}
+                return parameters
+
+        elif type_ == 'Ridge' or type_ == 'Lasso':
+            alpha = self.slider_alpha.get_current_value()
 
 
-        if as_list and return_labels:
-            return [alpha,  l1_ratio], [self.slider_alpha.name, self.slider_l1_ratio.name]
-        elif not as_list:
-            return alpha,  l1_ratio
+            if as_list and return_labels:
+                return [alpha], [self.slider_alpha.name]
+            elif not as_list and not as_dict:
+                return alpha
 
-    def get_model(self, type):
+            elif as_dict:
+                parameters = {"alpha" : alpha}
+                return parameters
+
+        elif type_ == 'ElasticNet':
+            alpha = self.slider_alpha.get_current_value()
+            l1_ratio = self.slider_l1_ratio.get_current_value()
+
+            if as_list and return_labels:
+                return [alpha,  l1_ratio], [self.slider_alpha.name, self.slider_l1_ratio.name]
+
+            elif not as_list and not as_dict:
+                return alpha,  l1_ratio
+
+            elif as_dict:
+                parameters = {"alpha" : alpha, "l1_ratio" : l1_ratio}
+                return parameters
+
+    def get_reg(self):
         print('get model')
-        print(type)
-        alpha_value, l1_ratio_value = self.get_parameters(as_list=False)
-        print('a l;', alpha_value, l1_ratio_value)
-
-        if type == 'LinearRegression':
-            reg = LinearRegression()
-        elif type == 'Ridge':
-            print(type)
-            reg = Ridge(alpha= alpha_value)
-        elif type == 'Lasso':
-            print(type)
-            reg = Lasso(alpha= alpha_value)
-        elif type == 'ElasticNet':
-            print(type)
-            reg = ElasticNet(alpha= alpha_value, l1_ratio = l1_ratio_value)
-        print(reg)
-        return reg
-
-    def predict(self, table, Y_index, cv_type, number, metrics, pipe):
-
-        print(self.name + ' zzzz predict')
-
-        print(Y_index)
-        dataframe = table
-
-        X_data = dataframe.drop(Y_index, 1)
-        Y_data = dataframe[Y_index]
-
-        print('zz')
-        print(Y_index)
 
         type_ = self.l_combobox_linear_model.get_text()
-        print(type_)
-        reg = self.get_model(type_)
-        print(reg)
 
-        print('pipe ', pipe)
-        pipe.steps.append(("class", reg))
-        print('create with pipe ', pipe)
+        parameters = self.get_parameters(as_dict=True)
 
-        if cv_type == 'Cross Validation':
-            print(cv_type, number, metrics)
-            scores = cross_validate(pipe, X_data, Y_data, cv=number, scoring=metrics, return_train_score=True)
-            self.results(scores, metrics)
 
-        elif cv_type == 'K-Fold':
-            print(cv_type, number, metrics)
-            cv = KFold(number=number)
-            scores = cross_validate(pipe, X_data, Y_data, cv=cv, scoring=metrics, return_train_score=True)
-            self.results(scores, metrics)
+        # alpha_value, l1_ratio_value = self.get_parameters(as_list=False)
+        # print(alpha_value, l1_ratio_value)
+
+        if type_ == 'LinearRegression':
+            reg = LinearRegression()
+        elif type_ == 'Ridge':
+            reg = Ridge(**parameters)
+        elif type_ == 'Lasso':
+            reg = Lasso(**parameters)
+        elif type_ == 'ElasticNet':
+            reg = ElasticNet(**parameters)
+
+        return reg
+
+
+    # def predict(self, table, Y_index, cv_type, number, metrics, pipe):
+
+    #     print(self.name + ' predict')
+
+    #     dataframe = table
+
+    #     X_data = dataframe.drop(Y_index, 1)
+    #     Y_data = dataframe[Y_index]
+
+
+    #     reg = self.get_reg()
+    #     print(reg)
+
+    #     print('pipe ', pipe)
+    #     pipe.steps.append(("class", reg))
+    #     print('create with pipe ', pipe)
+
+    #     if cv_type == 'Cross Validation':
+    #         print(cv_type, number, metrics)
+    #         scores = cross_validate(pipe, X_data, Y_data, cv=number, scoring=metrics, return_train_score=True)
+    #         self.results(scores, metrics)
+
+    #     elif cv_type == 'K-Fold':
+    #         print(cv_type, number, metrics)
+    #         cv = KFold(number=number)
+    #         scores = cross_validate(pipe, X_data, Y_data, cv=cv, scoring=metrics, return_train_score=True)
+    #         self.results(scores, metrics)
 
 
 # Decision_Tree_Classifier
@@ -154,38 +189,42 @@ class TabDecisionTreeReg(ParentMLWidget):
             parameters_dict = {"max_depth": max_depth_arg, "min_samples_split": min_samples_split_arg, "criterion": criterion}
             return parameters_dict
 
+    def get_reg(self):
 
-    def predict(self, table, Y_index, cv_type, number, metrics, pipe):
-
-        print(self.name + ' predict')
-
-        print(Y_index)
-        dataframe = table
-
-        X_data = dataframe.drop(Y_index, 1)
-        Y_data = dataframe[Y_index]
-
-        # max_depth_arg, min_samples_split_arg, criterion = self.get_parameters(as_list=False)
         parameters_dict = self.get_parameters(as_dict=True)
 
         reg = DecisionTreeRegressor(**parameters_dict)
 
+        return reg
 
-        print('pipe ', pipe)
-        pipe.steps.append(("class", reg))
-        print('create with pipe ', pipe)
 
-        if cv_type == 'Cross Validation':
-            print(cv_type, criterion, number, metrics)
-            print(type(metrics))
-            scores = cross_validate(pipe, X_data, Y_data, cv=number, scoring=metrics, return_train_score=True)
-            self.results(scores, metrics)
+    # def predict(self, table, Y_index, cv_type, number, metrics, pipe):
 
-        elif cv_type == 'K-Fold':
-            print(cv_type)
-            cv = KFold(number=number)
-            scores = cross_validate(pipe, X_data, Y_data, cv=cv, scoring=metrics, return_train_score=True)
-            self.results(scores, metrics)
+    #     print(self.name + ' predict')
+
+    #     print(Y_index)
+    #     dataframe = table
+
+    #     X_data = dataframe.drop(Y_index, 1)
+    #     Y_data = dataframe[Y_index]
+
+    #     # max_depth_arg, min_samples_split_arg, criterion = self.get_parameters(as_list=False)
+    #     reg = self.get_reg()
+
+    #     print('pipe ', pipe)
+    #     pipe.steps.append(("class", reg))
+    #     print('create with pipe ', pipe)
+
+    #     if cv_type == 'Cross Validation':
+    #         print(type(metrics))
+    #         scores = cross_validate(pipe, X_data, Y_data, cv=number, scoring=metrics, return_train_score=True)
+    #         self.results(scores, metrics)
+
+    #     elif cv_type == 'K-Fold':
+    #         print(cv_type)
+    #         cv = KFold(number=number)
+    #         scores = cross_validate(pipe, X_data, Y_data, cv=cv, scoring=metrics, return_train_score=True)
+    #         self.results(scores, metrics)
 
 
 
@@ -226,40 +265,46 @@ class TabRandomForestReg(ParentMLWidget):
             return num_of_estimators,max_depth, min_samples_split_arg
         
         elif as_dict:
-            parameters_dict = {"max_depth": max_depth_arg, "min_samples_split": min_samples_split_arg, "n_estimator": num_of_estimators}
+            parameters_dict = {"max_depth": max_depth, "min_samples_split": min_samples_split_arg, "n_estimators": num_of_estimators}
             return parameters_dict
 
-    def predict(self, table, Y_index, cv_type, number, metrics, pipe):
-
-        print(self.name + ' predict')
-        print(Y_index)
-        dataframe = table
-
-        X_data = dataframe.drop(Y_index, 1)
-        Y_data = dataframe[Y_index]
-
+    def get_reg(self):
         parameters_dict = self.get_parameters(as_dict=True)
 
         reg = RandomForestRegressor(**parameters_dict)
 
+        return reg
 
-        print('pipe ', pipe)
-        pipe.steps.append(("class", reg))
-        print('create with pipe ', pipe)
+    # def predict(self, table, Y_index, cv_type, number, metrics, pipe):
 
-        print(cv_type)
-        if cv_type == 'Cross Validation':
-            print(cv_type, number, metrics)
-            print(type(metrics))
-            scores = cross_validate(pipe, X_data, Y_data, cv=number, scoring=metrics, return_train_score=True)
-            print(scores)
-            self.results(scores, metrics)
+    #     print(self.name + ' predict')
+    #     print(Y_index)
+    #     dataframe = table
 
-        elif cv_type == 'K-Fold':
-            print(cv_type)
-            cv = KFold(number=number)
-            scores = cross_validate(pipe, X_data, Y_data, cv=cv, scoring=metrics, return_train_score=True)
-            self.results(scores, metrics)
+    #     X_data = dataframe.drop(Y_index, 1)
+    #     Y_data = dataframe[Y_index]
+
+
+    #     reg = self.get_reg()
+
+
+    #     print('pipe ', pipe)
+    #     pipe.steps.append(("class", reg))
+    #     print('create with pipe ', pipe)
+
+    #     print(cv_type)
+    #     if cv_type == 'Cross Validation':
+    #         print(cv_type, number, metrics)
+    #         print(type(metrics))
+    #         scores = cross_validate(pipe, X_data, Y_data, cv=number, scoring=metrics, return_train_score=True)
+    #         print(scores)
+    #         self.results(scores, metrics)
+
+    #     elif cv_type == 'K-Fold':
+    #         print(cv_type)
+    #         cv = KFold(number=number)
+    #         scores = cross_validate(pipe, X_data, Y_data, cv=cv, scoring=metrics, return_train_score=True)
+    #         self.results(scores, metrics)
 
 
 

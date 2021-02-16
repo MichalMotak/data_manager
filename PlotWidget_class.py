@@ -23,6 +23,7 @@ from sklearn import pipeline
 from sklearn import impute 
 from sklearn import preprocessing
 from sklearn import decomposition
+from sklearn import metrics
 
 
 
@@ -37,6 +38,118 @@ class ParentPlotTab(QWidget):
         self.main_layout = QVBoxLayout(self)
         self.main_layout.setContentsMargins(5,5,5,5)
         self.setLayout(self.main_layout)
+
+class TabPlotClassResults(ParentPlotTab):
+    signal_for_ml_widget = pyqtSignal(int)
+
+    def __init__(self, name):
+        super(TabPlotClassResults, self).__init__(name)
+        self.name = name
+
+    def create_layout(self):
+        self.main_layout = QGridLayout(self)
+        self.main_layout.setContentsMargins(5,5,5,5)
+
+
+        self.rb = QPushButton()
+        self.rb.setText('plot')
+
+        self.l_combobox_tyle = UpgradedWidgets.LabelAndCombobox('Annotation type')
+        self.l_combobox_tyle.add_items(['decimal', 'percentage'])
+
+
+        self.main_layout.addWidget(self.rb, 0,0)
+        self.main_layout.addWidget(self.l_combobox_tyle, 1,0)
+
+        # self.rb.clicked.connect(self.get_list)
+
+
+        # self.l_combobox_kind.signal_current_text_changed(self.manage_enability_of_widgets)
+
+        self.setLayout(self.main_layout)
+
+    # def manage_enability_of_widgets(self):
+
+    #     kind = self.l_combobox_kind.get_text()
+
+    #     if kind == 'line':
+    #         self.l_sp_alpha.setEnabled(False)
+    #         self.l_combobox_err_style.setEnabled(True)
+ 
+    #     elif kind == 'scatter':
+    #         self.l_combobox_err_style.setEnabled(False)
+    #         self.l_sp_alpha.setEnabled(True)
+
+
+    def get_parameters(self, plot_kind):
+
+        alpha = self.l_sp_alpha.get_value()
+        err_style = self.l_combobox_err_style.get_text()
+        markers = self.l_radiobutton_markers.get_state()
+
+        if plot_kind == 'line':
+            pars = {"err_style": err_style, "markers" : markers}
+            return pars
+
+        elif plot_kind == 'scatter':
+            pars = {"alpha": alpha, "markers" : markers}
+            return pars
+    
+    def plot_confusion_matrix(self):
+        y, y_pred = self.list_
+        cm = metrics.confusion_matrix(y, y_pred)
+        return cm
+
+
+    # def get_list(self):
+    #     print(self.name + ' plot')
+
+    #     self.emit_signal_to_ML_widget()
+
+    #     # kind = self.l_combobox_kind.get_text()
+    #     # pars = self.get_parameters(kind)
+
+    def plot(self, table, x_, y_, hue_, ax_):
+
+        self.emit_signal_to_ML_widget()
+
+        cm = self.plot_confusion_matrix()
+
+        type_ = self.l_combobox_tyle.get_text()
+
+        if type_ == 'decimal':
+
+            plot = sns.heatmap(cm, annot=True, fmt = 'd', ax = ax_)
+
+        elif type_ == 'percentage':
+            cm_sums = np.sum(cm, axis = 1)
+            cm_percentage = cm/cm_sums[:, np.newaxis]
+
+            plot = sns.heatmap(cm_percentage, annot=True, fmt = '.2%', ax = ax_)
+
+
+        xlabel = 'Predicted label'
+        ylabel = 'True label'
+        ax_.set_xlabel(xlabel) 
+        ax_.set_ylabel(ylabel)
+
+
+        return plot
+
+
+    @pyqtSlot()
+    def emit_signal_to_ML_widget(self):
+        print('emit_signal_to_ML_widget')
+
+        self.signal_for_ml_widget.emit(2)
+
+    @pyqtSlot(list)
+    def get_signal_from_ML_widget(self, list_):
+        print('get_signal_from_ML_widget')
+        print(len(list_))
+        self.list_ = list_
+
+        self.raise_()
 
         
 class TabPlotRelatonships(ParentPlotTab):
@@ -744,6 +857,7 @@ class PlotWidget(QWidget):
         self.tab4 = TabPlotCategoricalDistribution("Categorical_Distribution")
         self.tab5 = TabPlotCategoricalEstimate("Categorical_Estimate")
         self.tab6 = TabPlotDimentionReduction("Dimention Reduction")
+        self.tab7 = TabPlotClassResults("Class Results")
 
 
         self.tabs.addTab(self.tab1, self.tab1.name)
@@ -752,9 +866,10 @@ class PlotWidget(QWidget):
         self.tabs.addTab(self.tab4, self.tab4.name)
         self.tabs.addTab(self.tab5, self.tab5.name)
         self.tabs.addTab(self.tab6, self.tab6.name)
+        self.tabs.addTab(self.tab7, self.tab7.name)
 
 
-        self.list_of_tabs = [self.tab1, self.tab2, self.tab3, self.tab4, self.tab5, self.tab6]
+        self.list_of_tabs = [self.tab1, self.tab2, self.tab3, self.tab4, self.tab5, self.tab6, self.tab7]
 
         self.l_sp_number_of_plots = UpgradedWidgets.LabelAndSpinbox('Number of plots',stretches=[6,4], lay_dir = 'Horizontal', minimal_size=[25,50])
         self.l_sp_number_of_plots.set_range(0,6)
@@ -886,6 +1001,7 @@ class PlotWidget(QWidget):
 
     def reset_current_plot_value(self):
         self.l_sp_number_of_plots.set_value(0)
+        self.l_sp_current_of_plots.set_value(0)
 
     def plot(self):
         print('Plot Widget plot')
@@ -921,60 +1037,35 @@ class PlotWidget(QWidget):
                 x, y = self.get_x_y_axis()
                 hue = self.get_hue()
 
-                if current_tab.name != 'Distribution':
+                if current_tab.name == 'Distribution':
+                    if x not in self.table.col_labels:
+                        d = CustomDialogWidgets.CustomMessageBoxWarning('Wrong X label')
+                        return 0
 
+                elif current_tab.name == 'Class Results':
+                    pass
+
+                else:                     
                     if x not in self.table.col_labels:
                         d = CustomDialogWidgets.CustomMessageBoxWarning('Wrong X label')
                         return 0
                     elif y not in self.table.col_labels:
                         d = CustomDialogWidgets.CustomMessageBoxWarning('Wrong Y label')
                         return 0
-                elif current_tab.name == 'Distribution':
-                    if x not in self.table.col_labels:
-                        d = CustomDialogWidgets.CustomMessageBoxWarning('Wrong X label')
-                        return 0
-                
-                # hue = self.get_hue()
-                # if hue not in self.table.col_labels:
-                #     d = CustomMessageBoxWarning('Wrong Hue label')
-                #     return 0
-
-                
+            
                 plot = current_tab.plot(self.table, x,y, hue, self.canv.fig.axes[ax_ind-1])
       
-                self.canv.fig.tight_layout()
+                # self.canv.fig.tight_layout()
                 self.canv.draw()
+
             except IndexError:
                 pass
-                # d = Custom_Message_Box_Warning('plots not found')
         else:
             d = CustomDialogWidgets.CustomMessageBoxWarning(f'plot number {ax_ind} is\'nt activated')
 
-    def plot_PCA(self, list_):
-        print('plot pca')
 
+    def get_current_plot_index_value(self):
         ax_ind = self.l_sp_current_of_plots.get_value()
-        reset_plots = self.checkbox_reset_plots.isChecked()
-        print('reset ', reset_plots)
-
-        if ax_ind <= self.l_sp_number_of_plots.get_value():
-
-            try:
-                if reset_plots:
-                    self.canv.clear_current_plot(ax_ind)
-                plot = sns.barplot(np.arange(1,len(list_)+1), list_, ax =self.canv.fig.axes[ax_ind-1])
-                print('plot type ', type(plot))
-
-                self.canv.fig.tight_layout()
-                self.canv.draw()
-
-            except IndexError:
-                pass
-
-        else:
-            d = CustomDialogWidgets.CustomMessageBoxWarning(f'plot number {ax_ind} is\'nt activated')
-
-
 
     @pyqtSlot(list)
     def get_signal_from_preprocessing_widget(self, list_):
@@ -994,6 +1085,23 @@ class PlotWidget(QWidget):
         self.tab6.update_combobox(list_)
         self.raise_()
 
+    @pyqtSlot()
+    def emit_signal_to_ML_widget(self):
+        print('emit_signal_to_ML_widget')
+
+        self.raise_()
+
+    @pyqtSlot(list)
+    def get_signal_from_ML_widget(self, list_):
+        """ Receive list of columns labels from TableWidget. Update Dimension Reduction with list.
+
+        Args:
+            list_ (list): list of columns labels 
+        """
+        print("signal_from table widget ")
+
+        self.tab7.update_combobox(list_)
+        self.raise_()
 
     
 class PlotCanvas(FigureCanvas):
@@ -1091,7 +1199,7 @@ class PlotCanvas(FigureCanvas):
 
         # FigureCanvas.__init__(self, self.fig)
         self.grid_for_all_plots()
-        self.fig.tight_layout()
+        # self.fig.tight_layout()
         self.draw()
         print('d')
 
@@ -1137,142 +1245,142 @@ class PlotCanvas(FigureCanvas):
 
 
 
-    def plot_indexes(self, t, x, y, h):
+    # def plot_indexes(self, t, x, y, h):
 
-        print('plot indexes')
-        self.ax.clear()
-        print(type(int(x)))
+    #     print('plot indexes')
+    #     self.ax.clear()
+    #     print(type(int(x)))
 
-        c = self.table.col_labels.tolist()
-        ys = y.split(',')
-        xs = x.split(',')
-        hs = h.split(',')
+    #     c = self.table.col_labels.tolist()
+    #     ys = y.split(',')
+    #     xs = x.split(',')
+    #     hs = h.split(',')
 
-        print(h)
-        # ..............................................
-        labels = []
-        if len(xs) == 1:
-            if h:
-                for y in ys:
-                    if t == 'Line plot':
-                        sns.lineplot(x=c[int(x)], y=c[int(y)],hue = c[int(h)], data=self.table.dataframe, ax=self.ax)
-                    elif t == 'Bar plot':
-                        sns.barplot(x = c[int(x)], y = c[int(y)],hue = c[int(h)], data = self.table.dataframe, ax = self.ax)
-                    elif t =='Scatter plot':
-                        sns.scatterplot(x = c[int(x)], y = c[int(y)],hue = c[int(h)], data = self.table.dataframe, ax = self.ax)
-                    else:
-                        None
-                    labels.append(c[int(y)])
-
-
-            elif not h:
-                for y in ys:
-                    if t == 'Line plot':
-                        x2 = c[int(x)]
-                        y2= c[int(y)]
-                        print(x2,y2)
-                        sns.lineplot(x=c[int(x)], y=c[int(y)], data=self.table.dataframe, ax=self.ax)
-                    elif t == 'Bar plot':
-                        sns.barplot(x = c[int(x)], y = c[int(y)], data = self.table.dataframe, ax = self.ax)
-                    elif t =='Scatter plot':
-                        sns.scatterplot(x = c[int(x)], y = c[int(y)], data = self.table.dataframe, ax = self.ax)
-                    else:
-                        None
-                    labels.append(c[int(y)])
-
-        # if len(xs) == 1:
-        #     if len(ys) == 2:
-        #         print('2')
-        #         if t == 'Line plot':
-        #             sns.lineplot(x=c[int(x)], y=c[int(ys[0])],  data=self.table.dataframe, ax=self.ax)
-        #             self.ax2 = self.ax.twinx()
-        #             sns.lineplot(x=c[int(x)], y=c[int(ys[1])], data=self.table.dataframe, ax=self.ax2)
-        #         elif t == 'Bar plot':
-        #             sns.barplot(x=c[int(x)], y=c[int(y)], data=self.table.dataframe, ax=self.ax)
-        #         elif t == 'Scatter plot':
-        #             sns.scatterplot(x=c[int(x)], y=c[int(y)], data=self.table.dataframe,ax=self.ax)
-        #         else:
-        #             None
-        #         # self.ax = self.ax.twinx()
+    #     print(h)
+    #     # ..............................................
+    #     labels = []
+    #     if len(xs) == 1:
+    #         if h:
+    #             for y in ys:
+    #                 if t == 'Line plot':
+    #                     sns.lineplot(x=c[int(x)], y=c[int(y)],hue = c[int(h)], data=self.table.dataframe, ax=self.ax)
+    #                 elif t == 'Bar plot':
+    #                     sns.barplot(x = c[int(x)], y = c[int(y)],hue = c[int(h)], data = self.table.dataframe, ax = self.ax)
+    #                 elif t =='Scatter plot':
+    #                     sns.scatterplot(x = c[int(x)], y = c[int(y)],hue = c[int(h)], data = self.table.dataframe, ax = self.ax)
+    #                 else:
+    #                     None
+    #                 labels.append(c[int(y)])
 
 
+    #         elif not h:
+    #             for y in ys:
+    #                 if t == 'Line plot':
+    #                     x2 = c[int(x)]
+    #                     y2= c[int(y)]
+    #                     print(x2,y2)
+    #                     sns.lineplot(x=c[int(x)], y=c[int(y)], data=self.table.dataframe, ax=self.ax)
+    #                 elif t == 'Bar plot':
+    #                     sns.barplot(x = c[int(x)], y = c[int(y)], data = self.table.dataframe, ax = self.ax)
+    #                 elif t =='Scatter plot':
+    #                     sns.scatterplot(x = c[int(x)], y = c[int(y)], data = self.table.dataframe, ax = self.ax)
+    #                 else:
+    #                     None
+    #                 labels.append(c[int(y)])
 
-            print('labels', labels)
-            self.ax.set_xlabel(c[int(x)])
-            self.ax.set_ylabel(c[int(y)])
-            # self.ax.legend(labels = labels)
-            self.ax.legend()
-            self.fig.tight_layout()
-            self.draw()
-
-
-    def plot_col_names(self, t, x, y, h):
-
-        print('plot4')
-        self.ax.clear()
-
-        c = self.table.col_labels.tolist()
-        ys = y.split(',')
-        xs = x.split(',')
-        hs = h.split(',')
-        xs = [c.index(i) for i in xs]
-        ys = [c.index(i) for i in ys]
-        xs2 = xs[0]
-        print(xs, ys)
-
-
-        # ..............................................
-        labels = []
-        if len(xs) == 1:
-            if h:
-                print('h')
-                for y in ys:
-                    if t == 'Line plot':
-                        sns.lineplot(x=c[int(xs2)], y=c[int(y)], hue = c[int(h)], data=self.table.dataframe, ax=self.ax)
-                    elif t == 'Bar plot':
-                        sns.barplot(x=c[int(xs2)], y=c[int(y)], data = self.table.dataframe, ax = self.ax)
-                    elif t =='Scatter plot':
-                        sns.scatterplot(x=c[int(xs2)], y=c[int(y)], data = self.table.dataframe, ax = self.ax)
-                    else:
-                        None
-                    # labels.append(c[int(y)])
-
-
-            elif not h:
-                print('not h')
-                for y in ys:
-                    if t == 'Line plot':
-                        print(xs2, y)
-                        sns.lineplot(x=c[int(xs2)], y=c[int(y)], data=self.table.dataframe, ax=self.ax)
-                    elif t == 'Bar plot':
-                        sns.barplot(x=c[int(xs2)], y=c[int(y)], data = self.table.dataframe, ax = self.ax)
-                    elif t =='Scatter plot':
-                        sns.scatterplot(x=c[int(xs2)], y=c[int(y)], data = self.table.dataframe, ax = self.ax)
-                    else:
-                        None
-                    # labels.append(c[int(y)])
-
-        # if len(xs) == 1:
-        #     if len(ys) == 2:
-        #         print('2')
-        #         if t == 'Line plot':
-        #             sns.lineplot(x=c[int(x)], y=c[int(ys[0])],  data=self.table.dataframe, ax=self.ax)
-        #             self.ax2 = self.ax.twinx()
-        #             sns.lineplot(x=c[int(x)], y=c[int(ys[1])], data=self.table.dataframe, ax=self.ax2)
-        #         elif t == 'Bar plot':
-        #             sns.barplot(x=c[int(x)], y=c[int(y)], data=self.table.dataframe, ax=self.ax)
-        #         elif t == 'Scatter plot':
-        #             sns.scatterplot(x=c[int(x)], y=c[int(y)], data=self.table.dataframe,ax=self.ax)
-        #         else:
-        #             None
-        #         # self.ax = self.ax.twinx()
+    #     # if len(xs) == 1:
+    #     #     if len(ys) == 2:
+    #     #         print('2')
+    #     #         if t == 'Line plot':
+    #     #             sns.lineplot(x=c[int(x)], y=c[int(ys[0])],  data=self.table.dataframe, ax=self.ax)
+    #     #             self.ax2 = self.ax.twinx()
+    #     #             sns.lineplot(x=c[int(x)], y=c[int(ys[1])], data=self.table.dataframe, ax=self.ax2)
+    #     #         elif t == 'Bar plot':
+    #     #             sns.barplot(x=c[int(x)], y=c[int(y)], data=self.table.dataframe, ax=self.ax)
+    #     #         elif t == 'Scatter plot':
+    #     #             sns.scatterplot(x=c[int(x)], y=c[int(y)], data=self.table.dataframe,ax=self.ax)
+    #     #         else:
+    #     #             None
+    #     #         # self.ax = self.ax.twinx()
 
 
 
-            print(labels)
-            # self.ax.set_xlabel(c[int(x)])
-            # self.ax.set_ylabel(c[int(y)])
-            # self.ax.legend(labels = labels)
-            self.ax.legend()
-            self.fig.tight_layout()
-            self.draw()
+    #         print('labels', labels)
+    #         self.ax.set_xlabel(c[int(x)])
+    #         self.ax.set_ylabel(c[int(y)])
+    #         # self.ax.legend(labels = labels)
+    #         self.ax.legend()
+    #         self.fig.tight_layout()
+    #         self.draw()
+
+
+    # def plot_col_names(self, t, x, y, h):
+
+    #     print('plot4')
+    #     self.ax.clear()
+
+    #     c = self.table.col_labels.tolist()
+    #     ys = y.split(',')
+    #     xs = x.split(',')
+    #     hs = h.split(',')
+    #     xs = [c.index(i) for i in xs]
+    #     ys = [c.index(i) for i in ys]
+    #     xs2 = xs[0]
+    #     print(xs, ys)
+
+
+    #     # ..............................................
+    #     labels = []
+    #     if len(xs) == 1:
+    #         if h:
+    #             print('h')
+    #             for y in ys:
+    #                 if t == 'Line plot':
+    #                     sns.lineplot(x=c[int(xs2)], y=c[int(y)], hue = c[int(h)], data=self.table.dataframe, ax=self.ax)
+    #                 elif t == 'Bar plot':
+    #                     sns.barplot(x=c[int(xs2)], y=c[int(y)], data = self.table.dataframe, ax = self.ax)
+    #                 elif t =='Scatter plot':
+    #                     sns.scatterplot(x=c[int(xs2)], y=c[int(y)], data = self.table.dataframe, ax = self.ax)
+    #                 else:
+    #                     None
+    #                 # labels.append(c[int(y)])
+
+
+    #         elif not h:
+    #             print('not h')
+    #             for y in ys:
+    #                 if t == 'Line plot':
+    #                     print(xs2, y)
+    #                     sns.lineplot(x=c[int(xs2)], y=c[int(y)], data=self.table.dataframe, ax=self.ax)
+    #                 elif t == 'Bar plot':
+    #                     sns.barplot(x=c[int(xs2)], y=c[int(y)], data = self.table.dataframe, ax = self.ax)
+    #                 elif t =='Scatter plot':
+    #                     sns.scatterplot(x=c[int(xs2)], y=c[int(y)], data = self.table.dataframe, ax = self.ax)
+    #                 else:
+    #                     None
+    #                 # labels.append(c[int(y)])
+
+    #     # if len(xs) == 1:
+    #     #     if len(ys) == 2:
+    #     #         print('2')
+    #     #         if t == 'Line plot':
+    #     #             sns.lineplot(x=c[int(x)], y=c[int(ys[0])],  data=self.table.dataframe, ax=self.ax)
+    #     #             self.ax2 = self.ax.twinx()
+    #     #             sns.lineplot(x=c[int(x)], y=c[int(ys[1])], data=self.table.dataframe, ax=self.ax2)
+    #     #         elif t == 'Bar plot':
+    #     #             sns.barplot(x=c[int(x)], y=c[int(y)], data=self.table.dataframe, ax=self.ax)
+    #     #         elif t == 'Scatter plot':
+    #     #             sns.scatterplot(x=c[int(x)], y=c[int(y)], data=self.table.dataframe,ax=self.ax)
+    #     #         else:
+    #     #             None
+    #     #         # self.ax = self.ax.twinx()
+
+
+
+    #         print(labels)
+    #         # self.ax.set_xlabel(c[int(x)])
+    #         # self.ax.set_ylabel(c[int(y)])
+    #         # self.ax.legend(labels = labels)
+    #         self.ax.legend()
+    #         self.fig.tight_layout()
+    #         self.draw()

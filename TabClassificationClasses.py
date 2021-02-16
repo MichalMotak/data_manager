@@ -2,7 +2,7 @@
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
-from globals_ import *
+from globals_ import class_metrics_list, class_metrics_list_functions, reg_metrics_list, reg_metrics_list_functions
 
 
 import CustomDialogWidgets
@@ -70,10 +70,77 @@ class ParentMLWidget(QWidget):
                 metric_value_std = np.round(metric_value.std()*100, 3)
                 print(f"{type_metric_name} -> mean: {metric_value_mean}, std: {metric_value_std}")
                 self.results_dict[type_metric_name] = metric_value_mean
+
         print(self.results_dict)
 
     def get_last_results(self):
         return self.results_dict
+
+
+    def predict(self, table, Y_index, tab_type, cv_type, number, metrics, pipe, clf=None, predict_type = None):
+
+        print(self.name + ' predict')
+        print('pipe ' , pipe)
+        print(Y_index)
+
+        dataframe = table
+
+        X_data = dataframe.drop(Y_index, 1)
+        Y_data = dataframe[Y_index]
+
+        if predict_type == 'clf':
+            print('pipe ', pipe)
+            pipe.steps.append(("class", clf))
+            print('create with pipe ', pipe)
+
+
+        if cv_type == 'Cross Validation':
+            scores = cross_validate(pipe, X_data, Y_data, cv=number, scoring=metrics, return_train_score=True)
+            self.results(scores, metrics)
+
+        elif cv_type == 'K-Fold':
+            cv = KFold(number=number)
+            scores = cross_validate(pipe, X_data, Y_data, cv=cv, scoring=metrics, return_train_score=True)
+            self.results(scores, metrics)
+
+        elif cv_type == 'One_Time_Validation':
+            X_train, X_test, y_train, y_test = train_test_split(X_data, Y_data, test_size=0.25, shuffle=True, random_state=0)
+            pipe.fit(X_train, y_train)
+
+            pred_train = clf.predict(X_train)
+            pred_test = clf.predict(X_test) 
+
+            self.save_one_time_validation_predictions(y_test, pred_test)
+
+            scores = {}
+
+            if tab_type == 'Classification':
+                metrics_list = class_metrics_list
+                metrics_list_functions = class_metrics_list_functions
+
+            elif tab_type == 'Regression':
+                metrics_list = reg_metrics_list
+                metrics_list_functions = reg_metrics_list_functions
+
+
+            for name, fun in zip(metrics_list, metrics_list_functions):
+                if name in metrics:
+                    train_score = fun(y_train, pred_train)
+                    test_score = fun(y_test, pred_test)
+                                    
+                    print(f"score: {name}, values: {train_score}, {test_score}")
+                    scores[f"train_{name}"] = train_score
+                    scores[f"test_{name}"] = test_score
+
+            print(scores)
+            self.results(scores, metrics)
+
+    def save_one_time_validation_predictions(self, y_test, pred_test):
+        self.y_test = y_test
+        self.pred_test = pred_test
+
+    def get_one_time_validation_predictions(self):
+        return self.y_test, self.pred_test
 
 
 class EnsembleClassWidget(ParentMLWidget):
@@ -216,33 +283,6 @@ class RandomForestClassWidget(ParentMLWidget):
 
         return clf
 
-    def predict(self, table, Y_index, cv_type, number, metrics, pipe, clf=None, predict_type = None):
-
-        print(self.name + ' predict')
-        print('pipe ' , pipe)
-        print(Y_index)
-
-        dataframe = table
-
-        X_data = dataframe.drop(Y_index, 1)
-        Y_data = dataframe[Y_index]
-
-        if predict_type == 'clf':
-            print('pipe ', pipe)
-            pipe.steps.append(("class", clf))
-            print('create with pipe ', pipe)
-
-        if cv_type == 'Cross Validation':
-            print(cv_type, number, metrics)
-            scores = cross_validate(pipe, X_data, Y_data, cv=number, scoring=metrics, return_train_score=True)
-            self.results(scores, metrics)
-
-        elif cv_type == 'K-Fold':
-            print(cv_type)
-            cv = KFold(number=number)
-            scores = cross_validate(pipe, X_data, Y_data, cv=cv, scoring=metrics, return_train_score=True)
-            self.results(scores, metrics)
-
 
 
     def get_parameters(self, as_list = False, return_labels=False):
@@ -304,31 +344,54 @@ class DecisionTreeClassWidget(ParentMLWidget):
         return clf
 
 
-    def predict(self, table, Y_index, cv_type, number, metrics, pipe, clf=None, predict_type = None):
+    # def predict(self, table, Y_index, cv_type, number, metrics, pipe, clf=None, predict_type = None):
 
-        print(self.name + ' predict')
-        print('pipe ' , pipe)
-        print(Y_index)
+    #     print(self.name + ' predict')
+    #     print('pipe ' , pipe)
+    #     print(Y_index)
 
-        dataframe = table
+    #     dataframe = table
 
-        X_data = dataframe.drop(Y_index, 1)
-        Y_data = dataframe[Y_index]
+    #     X_data = dataframe.drop(Y_index, 1)
+    #     Y_data = dataframe[Y_index]
 
-        if predict_type == 'clf':
-            print('pipe ', pipe)
-            pipe.steps.append(("class", clf))
-            print('create with pipe ', pipe)
+    #     if predict_type == 'clf':
+    #         print('pipe ', pipe)
+    #         pipe.steps.append(("class", clf))
+    #         print('create with pipe ', pipe)
 
 
-        if cv_type == 'Cross Validation':
-            scores = cross_validate(pipe, X_data, Y_data, cv=number, scoring=metrics, return_train_score=True)
-            self.results(scores, metrics)
+    #     if cv_type == 'Cross Validation':
+    #         scores = cross_validate(pipe, X_data, Y_data, cv=number, scoring=metrics, return_train_score=True)
+    #         self.results(scores, metrics)
 
-        elif cv_type == 'K-Fold':
-            cv = KFold(number=number)
-            scores = cross_validate(pipe, X_data, Y_data, cv=cv, scoring=metrics, return_train_score=True)
-            self.results(scores, metrics)
+    #     elif cv_type == 'K-Fold':
+    #         cv = KFold(number=number)
+    #         scores = cross_validate(pipe, X_data, Y_data, cv=cv, scoring=metrics, return_train_score=True)
+    #         self.results(scores, metrics)
+
+    #     elif cv_type == 'One_Time_Validation':
+    #         X_train, X_test, y_train, y_test = train_test_split(X_data, Y_data, test_size=0.25, shuffle=True, random_state=0)
+    #         pipe.fit(X_train, y_train)
+
+    #         pred_train = clf.predict(X_train)
+    #         pred_test = clf.predict(X_test) 
+
+    #         scores = {}
+
+    #         for name,fun in zip(class_metrics_list,class_metrics_list_functions):
+    #             if name in metrics:
+    #                 train_score = fun(y_train, pred_train)
+    #                 test_score = fun(y_test, pred_test)
+                                    
+    #                 print(f"score: {name}, values: {train_score}, {test_score}")
+    #                 scores[f"train_{name}"] = train_score
+    #                 scores[f"test_{name}"] = test_score
+
+    #         print(scores)
+    #         self.results(scores, metrics)
+
+
 
 
 

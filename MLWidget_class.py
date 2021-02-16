@@ -189,14 +189,14 @@ class TabClassification(QWidget):
             clf = current_widget.get_clf(tab, predict_label, multiclass_type, pipe)
             new_pipe = self.w4.update_pipe(clf, pipe)
 
-            current_widget.predict(tab, predict_label, cv_type, number, metrics, new_pipe)
+            current_widget.predict(tab, predict_label, 'Classification', cv_type, number, metrics, new_pipe)
 
         else:
             print('predict no ensemble')
             # current_widget.predict(tab, predict_label, cv_type, number, metrics, multiclass_type, pipe = pipe)
             clf = current_widget.get_clf(tab, predict_label, multiclass_type, pipe)
             print('clf ', clf)
-            current_widget.predict(tab, predict_label, cv_type, number, metrics, pipe, clf, predict_type = 'clf')
+            current_widget.predict(tab, predict_label, 'Classification', cv_type, number, metrics, pipe, clf, predict_type = 'clf')
 
 
     def update_outputcombobox(self, col_labels):
@@ -276,15 +276,34 @@ class TabRegression(TabClassification):
         predict_label = self.l_combobox_prediction.get_text()
         print(metrics)
 
+        # if ensemble_method_enabled:
+        #     clf = current_widget.get_clf(tab, predict_label, multiclass_type, pipe)
+        #     new_pipe = self.w4.update_pipe(clf, pipe)
+
+        #     current_widget.predict(tab, predict_label, cv_type, number, metrics, new_pipe)
+
+        # else:
+        #     print('predict no ensemble')
+        #     # current_widget.predict(tab, predict_label, cv_type, number, metrics, multiclass_type, pipe = pipe)
+        #     clf = current_widget.get_clf(tab, predict_label, multiclass_type, pipe)
+        #     print('clf ', clf)
+        #     current_widget.predict(tab, predict_label, cv_type, number, metrics, pipe, clf, predict_type = 'clf')
+
         if ensemble_method_enabled:
             pass
         else:
-            current_widget.predict(tab, predict_label, cv_type, number, metrics, pipe = pipe)
+            reg = current_widget.get_reg()
+            print('reg ', reg)
+
+            current_widget.predict(tab, predict_label, 'Regression', cv_type, number, metrics, pipe, reg, predict_type = 'clf')
+
+            # current_widget.predict(tab, predict_label, cv_type, number, metrics, pipe = pipe)
 
 
 class MLWidget(QWidget):
     signal_for_results_table = pyqtSignal(tuple)
     signal_for_preprocessing_widget = pyqtSignal()
+    signal_for_classplot_widget = pyqtSignal(list)
 
     def __init__(self):
         print('subwindow init')
@@ -324,12 +343,23 @@ class MLWidget(QWidget):
 
         self.sp_number = UpgradedWidgets.LabelAndSpinbox('Number', lay_dir='Vertical')
 
+
+        self.l_rb_one_time_validation = UpgradedWidgets.LabelAndRadioButton('One time val', lay_dir='Vertical', minimal_size = [10,70] )
+        self.slider_train_test_split = UpgradedWidgets.ImprovedSlider(0, 100, 'train_test_split')
+
+
         self.hbox = QHBoxLayout()
         self.hbox.addWidget(self.l_combobox_cv_type)
         self.hbox.addWidget(self.sp_number)
 
-        self.layout_MLWidget_lower.addLayout(self.hbox, 0, 0)
-        self.layout_MLWidget_lower.addWidget(self.b_predict, 1, 0)
+        self.layout_MLWidget_lower.addLayout(self.hbox, 0, 0, 1, 2)
+        # self.layout_MLWidget_lower.addWidget(self.b_predict, 1, 0, 1, 2)
+
+        self.layout_MLWidget_lower.addWidget(self.l_rb_one_time_validation, 2, 0, 1, 1)
+        self.layout_MLWidget_lower.addWidget(self.slider_train_test_split, 2, 1, 1, 1)
+
+        self.layout_MLWidget_lower.addWidget(self.b_predict, 3, 0, 1, 2)
+
         # self.frame_MLWidget_lower.setLayout(self.layout_MLWidget_lower)
 
 
@@ -390,6 +420,26 @@ class MLWidget(QWidget):
         # print("signal_from_preprocessing widget ", pipeline)
         self.pipeline = pipeline
         self.raise_()
+
+    @pyqtSlot(int)
+    def get_signal_from_classplot_widget(self, intt):
+        print("get_signal_from_classplot_widget  ", intt)
+
+        self.emit_signal_for_classplot_widget()
+        self.raise_()
+
+    @pyqtSlot()
+    def emit_signal_for_classplot_widget(self):
+        print("emit_signal_for_classplot_widget widget ")
+
+        _, current_widget, _ = self.which_widget_is_opened()
+        current_widget_name = current_widget.name
+
+        print(current_widget_name)
+
+        y1, y2 = current_widget.get_one_time_validation_predictions()
+
+        self.signal_for_classplot_widget.emit([y1, y2])
 
 
     # ======================= METHODS ==============================
@@ -485,10 +535,16 @@ class MLWidget(QWidget):
             _, current_tab = self.which_tab_is_opened()
             _, current_widget, ensemble_method_enabled = self.which_widget_is_opened()
 
-            cv_type = self.l_combobox_cv_type.get_text()
-            number = self.sp_number.get_value()
+            if self.l_rb_one_time_validation.get_state():
+                # One Time Validation Mode
+                cv_type = 'One_Time_Validation'
+                number = int(self.slider_train_test_split.get_current_value())
 
+            else:
+                cv_type = self.l_combobox_cv_type.get_text()
+                number = self.sp_number.get_value()
 
+            print(cv_type, number)
             print('przed pred')
             print(' ensemble_method_enabled ', ensemble_method_enabled)
 

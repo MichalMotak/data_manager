@@ -1,12 +1,14 @@
 
+from sklearn.metrics import accuracy_score, roc_auc_score, precision_score, recall_score, f1_score, mean_absolute_error, mean_squared_error, r2_score, max_error 
 
 class_metrics_list = ['accuracy', 'recall', 'precision', 'f1', 'roc_auc']
+class_metrics_list_functions = [accuracy_score, recall_score, precision_score, f1_score, roc_auc_score]
 
 
 
 
 reg_metrics_list = ['neg_mean_absolute_error', 'neg_mean_squared_error', 'r2', 'max_error']
-
+reg_metrics_list_functions = [mean_absolute_error, mean_squared_error, r2_score, max_error ]
 # Decison Tree Regressor
 
 decision_tree_reg_criterion_list = ["mse", "friedman_mse", "mae", "poisson"]
