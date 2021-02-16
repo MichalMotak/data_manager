@@ -303,7 +303,9 @@ class TabRegression(TabClassification):
 class MLWidget(QWidget):
     signal_for_results_table = pyqtSignal(tuple)
     signal_for_preprocessing_widget = pyqtSignal()
+    
     signal_for_classplot_widget = pyqtSignal(list)
+    signal_for_regplot_widget = pyqtSignal(list)
 
     def __init__(self):
         print('subwindow init')
@@ -421,25 +423,36 @@ class MLWidget(QWidget):
         self.pipeline = pipeline
         self.raise_()
 
-    @pyqtSlot(int)
-    def get_signal_from_classplot_widget(self, intt):
-        print("get_signal_from_classplot_widget  ", intt)
+    @pyqtSlot(str)
+    def get_signal_from_classplot_widget(self, str_):
+        print("get_signal_from_classplot_widget  ", str_)
+        print("or get_signal_from_regsplot_widget  ", str_)
 
-        self.emit_signal_for_classplot_widget()
+        self.emit_signal_for_classplot_widget(str_)
         self.raise_()
 
     @pyqtSlot()
-    def emit_signal_for_classplot_widget(self):
+    def emit_signal_for_classplot_widget(self, string):
         print("emit_signal_for_classplot_widget widget ")
 
         _, current_widget, _ = self.which_widget_is_opened()
         current_widget_name = current_widget.name
 
+        _ , current_tab = self.which_tab_is_opened()
+        print(current_tab, current_tab.name)
+
         print(current_widget_name)
 
         y1, y2 = current_widget.get_one_time_validation_predictions()
 
-        self.signal_for_classplot_widget.emit([y1, y2])
+        if current_tab.name == 'Classification':
+            self.signal_for_classplot_widget.emit([y1, y2])
+
+        elif current_tab.name == 'Regression':
+            self.signal_for_regplot_widget.emit([y1, y2])
+
+
+
 
 
     # ======================= METHODS ==============================

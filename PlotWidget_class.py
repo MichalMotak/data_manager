@@ -39,8 +39,9 @@ class ParentPlotTab(QWidget):
         self.main_layout.setContentsMargins(5,5,5,5)
         self.setLayout(self.main_layout)
 
+
 class TabPlotClassResults(ParentPlotTab):
-    signal_for_ml_widget = pyqtSignal(int)
+    signal_for_ml_widget = pyqtSignal(str)
 
     def __init__(self, name):
         super(TabPlotClassResults, self).__init__(name)
@@ -50,64 +51,24 @@ class TabPlotClassResults(ParentPlotTab):
         self.main_layout = QGridLayout(self)
         self.main_layout.setContentsMargins(5,5,5,5)
 
-
         self.rb = QPushButton()
         self.rb.setText('plot')
 
         self.l_combobox_tyle = UpgradedWidgets.LabelAndCombobox('Annotation type')
         self.l_combobox_tyle.add_items(['decimal', 'percentage'])
 
-
         self.main_layout.addWidget(self.rb, 0,0)
         self.main_layout.addWidget(self.l_combobox_tyle, 1,0)
 
-        # self.rb.clicked.connect(self.get_list)
-
-
-        # self.l_combobox_kind.signal_current_text_changed(self.manage_enability_of_widgets)
-
         self.setLayout(self.main_layout)
 
-    # def manage_enability_of_widgets(self):
 
-    #     kind = self.l_combobox_kind.get_text()
-
-    #     if kind == 'line':
-    #         self.l_sp_alpha.setEnabled(False)
-    #         self.l_combobox_err_style.setEnabled(True)
- 
-    #     elif kind == 'scatter':
-    #         self.l_combobox_err_style.setEnabled(False)
-    #         self.l_sp_alpha.setEnabled(True)
-
-
-    def get_parameters(self, plot_kind):
-
-        alpha = self.l_sp_alpha.get_value()
-        err_style = self.l_combobox_err_style.get_text()
-        markers = self.l_radiobutton_markers.get_state()
-
-        if plot_kind == 'line':
-            pars = {"err_style": err_style, "markers" : markers}
-            return pars
-
-        elif plot_kind == 'scatter':
-            pars = {"alpha": alpha, "markers" : markers}
-            return pars
     
     def plot_confusion_matrix(self):
         y, y_pred = self.list_
         cm = metrics.confusion_matrix(y, y_pred)
         return cm
 
-
-    # def get_list(self):
-    #     print(self.name + ' plot')
-
-    #     self.emit_signal_to_ML_widget()
-
-    #     # kind = self.l_combobox_kind.get_text()
-    #     # pars = self.get_parameters(kind)
 
     def plot(self, table, x_, y_, hue_, ax_):
 
@@ -141,7 +102,7 @@ class TabPlotClassResults(ParentPlotTab):
     def emit_signal_to_ML_widget(self):
         print('emit_signal_to_ML_widget')
 
-        self.signal_for_ml_widget.emit(2)
+        self.signal_for_ml_widget.emit('Class_Results')
 
     @pyqtSlot(list)
     def get_signal_from_ML_widget(self, list_):
@@ -151,7 +112,79 @@ class TabPlotClassResults(ParentPlotTab):
 
         self.raise_()
 
-        
+
+class TabPlotRegResults(ParentPlotTab):
+    signal_for_ml_widget = pyqtSignal(str)
+
+    def __init__(self, name):
+        super(TabPlotRegResults, self).__init__(name)
+        self.name = name
+
+    def create_layout(self):
+        self.main_layout = QGridLayout(self)
+        self.main_layout.setContentsMargins(5,5,5,5)
+
+        self.rb = QPushButton()
+        self.rb.setText('plot')
+        # self.l_combobox_tyle = UpgradedWidgets.LabelAndCombobox('Annotation type')
+        # self.l_combobox_tyle.add_items(['decimal', 'percentage'])
+        self.main_layout.addWidget(self.rb, 0,0)
+        # self.main_layout.addWidget(self.l_combobox_tyle, 1,0)
+        self.setLayout(self.main_layout)
+
+    def plot_confusion_matrix(self):
+        y, y_pred = self.list_
+        cm = metrics.confusion_matrix(y, y_pred)
+        return cm
+
+    def plot(self, table, x_, y_, hue_, ax_):
+        print('regplot plot')
+        self.emit_signal_to_ML_widget()
+        y_true, y_pred = self.list_
+        print(y_true.shape, y_pred.shape)
+
+
+        # cm = self.plot_confusion_matrix()
+
+        # type_ = self.l_combobox_tyle.get_text()
+
+        # if type_ == 'decimal':
+
+        #     plot = sns.heatmap(cm, annot=True, fmt = 'd', ax = ax_)
+
+        # elif type_ == 'percentage':
+        #     cm_sums = np.sum(cm, axis = 1)
+        #     cm_percentage = cm/cm_sums[:, np.newaxis]
+
+        #     plot = sns.heatmap(cm_percentage, annot=True, fmt = '.2%', ax = ax_)
+
+        plot = sns.scatterplot(y_true, y_pred,  ax = ax_)
+        sns.lineplot([y_true.min(), y_true.max()], [y_true.min(), y_true.max()], color = 'r', ax= ax_)
+
+        xlabel = 'True value'
+        ylabel = 'Predicted value'
+        ax_.set_xlabel(xlabel) 
+        ax_.set_ylabel(ylabel)
+
+        return plot
+
+    @pyqtSlot()
+    def emit_signal_to_ML_widget(self):
+        print('emit_signal_to_ML_widget')
+        self.signal_for_ml_widget.emit('Reg_Results')
+
+
+    @pyqtSlot(list)
+    def get_signal_from_ML_widget(self, list_):
+        print('get_signal_from_ML_widget')
+        print(len(list_))
+        self.list_ = list_
+
+        self.raise_()
+
+
+
+
 class TabPlotRelatonships(ParentPlotTab):
 
 
@@ -239,7 +272,6 @@ class TabPlotRelatonships(ParentPlotTab):
 
 
 class TabPlotDistribution(ParentPlotTab):
-
 
     def __init__(self, name):
         super(TabPlotDistribution, self).__init__(name)
@@ -858,6 +890,7 @@ class PlotWidget(QWidget):
         self.tab5 = TabPlotCategoricalEstimate("Categorical_Estimate")
         self.tab6 = TabPlotDimentionReduction("Dimention Reduction")
         self.tab7 = TabPlotClassResults("Class Results")
+        self.tab8 = TabPlotRegResults("Reg Results")
 
 
         self.tabs.addTab(self.tab1, self.tab1.name)
@@ -867,9 +900,10 @@ class PlotWidget(QWidget):
         self.tabs.addTab(self.tab5, self.tab5.name)
         self.tabs.addTab(self.tab6, self.tab6.name)
         self.tabs.addTab(self.tab7, self.tab7.name)
+        self.tabs.addTab(self.tab8, self.tab8.name)
 
 
-        self.list_of_tabs = [self.tab1, self.tab2, self.tab3, self.tab4, self.tab5, self.tab6, self.tab7]
+        self.list_of_tabs = [self.tab1, self.tab2, self.tab3, self.tab4, self.tab5, self.tab6, self.tab7, self.tab8]
 
         self.l_sp_number_of_plots = UpgradedWidgets.LabelAndSpinbox('Number of plots',stretches=[6,4], lay_dir = 'Horizontal', minimal_size=[25,50])
         self.l_sp_number_of_plots.set_range(0,6)
@@ -1042,7 +1076,7 @@ class PlotWidget(QWidget):
                         d = CustomDialogWidgets.CustomMessageBoxWarning('Wrong X label')
                         return 0
 
-                elif current_tab.name == 'Class Results':
+                elif current_tab.name == 'Class Results' or current_tab.name == 'Reg Results':
                     pass
 
                 else:                     
@@ -1084,6 +1118,8 @@ class PlotWidget(QWidget):
         print("signal_from table widget ")
         self.tab6.update_combobox(list_)
         self.raise_()
+
+
 
     @pyqtSlot()
     def emit_signal_to_ML_widget(self):

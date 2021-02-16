@@ -264,7 +264,12 @@ class MainWindow(QMainWindow):
         self.table.signal_for_plot_widget.connect(self.plot_widget.get_signal_from_table_widget)
 
         self.plot_widget.tab7.signal_for_ml_widget.connect(self.ml_widget.get_signal_from_classplot_widget)
+
         self.ml_widget.signal_for_classplot_widget.connect(self.plot_widget.tab7.get_signal_from_ML_widget)
+
+        self.plot_widget.tab8.signal_for_ml_widget.connect(self.ml_widget.get_signal_from_classplot_widget)
+
+        self.ml_widget.signal_for_regplot_widget.connect(self.plot_widget.tab8.get_signal_from_ML_widget)
 
     def manage_layout_checked_action(self):
         """
