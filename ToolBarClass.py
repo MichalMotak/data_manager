@@ -1,5 +1,5 @@
 
-from PyQt5.QtWidgets import *
+from PyQt5.QtWidgets import QAction, QToolBar, QMenu, QPushButton
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 
@@ -14,20 +14,22 @@ class MyToolBarClass(QToolBar):
 
         self.setOrientation(QtCore.Qt.Vertical)
 
-        self.open_action = QAction(QtGui.QIcon(), "TEST")
+        # self.open_action = QAction(QtGui.QIcon(), "TEST")
 
-        self.addAction(self.open_action)
-        self.addAction(QtGui.QIcon(), "TEST2")
+        # self.addAction(self.open_action)
+        # self.addAction(QtGui.QIcon(), "TEST2")
 
-        font = QtGui.QFont()
-        font.setPointSize(30)
-        self.setFont(font)
+        # font = QtGui.QFont()
+        # font.setPointSize(30)
+        # self.setFont(font)
 
-        self.setStyleSheet("""
-                                  QPushButton{
-                                      padding: 6px;
-                                      font-size: 22px;}
-                            """)
+        # self.setStyleSheet("""
+        #                           QPushButton{
+        #                               padding: 6px;
+        #                               font-size: 22px;}
+        #                     """)
+
+        
         # self.setStyleSheet("""
         #                        QToolBar {
         #                     background: #eee;
@@ -99,22 +101,40 @@ class MyToolBarClass(QToolBar):
 
     def update_tab(self, name):
         print('update tab')
+        self.clear_toolbar()
 
         if name == 'Plotting':
-            pass
+            
+            self.open_action = QAction(QtGui.QIcon(), "Plotting test")
+            self.addAction(self.open_action)
+
         elif name == 'Data description':
-            self.clear_table = QAction(QtGui.QIcon('icons/table--minus.png'), "Clear Table")
-            self.description_table = QAction(QtGui.QIcon(''), "Description Table")
+            self.clear_table_action = QAction(QtGui.QIcon('icons/table--minus.png'), "Clear Table")
+            self.description_table_action = QAction(QtGui.QIcon(''), "Description Table")
 
-            self.addAction(self.clear_table)
-            self.addAction(self.description_table)
+            self.addAction(self.clear_table_action)
+            self.addAction(self.description_table_action)
 
-            self.clear_table.triggered.connect(self.clear_table_signal)
-            self.description_table.triggered.connect(self.clear_table_signal)
+            self.clear_table_action.triggered.connect(self.clear_table_signal)
+            self.description_table_action.triggered.connect(self.clear_table_signal)
 
             # print(self.addAction.menu())
-            print(self.clear_table.menu())
+            print(self.clear_table_action.menu())
 
+        elif name == "Machine Learning":
+            self.open_action = QAction(QtGui.QIcon(), "ML test")
+            self.addAction(self.open_action)
+
+
+    def clear_toolbar(self):
+        to_delete = False
+        for action in self.actions():
+            if to_delete:
+                self.removeAction(action)
+            if action.isSeparator():
+                to_delete = True
+
+        
     def clear_table_signal(self):
         print('ct signal')
         sender_text = self.sender().text()

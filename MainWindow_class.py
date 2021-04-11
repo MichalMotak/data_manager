@@ -356,9 +356,9 @@ class MainWindow(QMainWindow):
         Returns:
             [type]: [description]
         """
-        print('event')
-        print(source, event)
-        print(type(source), type(event))
+        # print('event')
+        # print(source, event)
+        # print(type(source), type(event))
 
         # if event.type  == MouseButtonPress and button is Right Mouse Click on self.table 
         if(event.type() == QEvent.MouseButtonPress
