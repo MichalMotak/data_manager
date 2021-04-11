@@ -71,6 +71,9 @@ class MainWindow(QMainWindow):
         # "border-style: solid;"
         # "border-color: rgb(100,57,0);"
         # "background-color: #ABABAB;"
+
+
+
         self.menubar = QMenuBar()
         self.menubar.setStyleSheet(
 
@@ -80,19 +83,12 @@ class MainWindow(QMainWindow):
 
 
         self.setMenuBar(self.menubar)
-        self.File_menu = self.menubar.addMenu('&File')
-
-        self.load_file_action = QAction('Load file')
-        self.File_menu.addAction(self.load_file_action)
-        self.save_file_action = QAction('Save file')
-        self.File_menu.addAction(self.save_file_action)
-
-        self.load_file_action.triggered.connect(lambda:self.load_file_act())
-        self.save_file_action.triggered.connect(lambda: self.save_file_act())
-
-
-
+        
         # ToolBar signals
+
+        self.toolbarBox.load_file_action.triggered.connect(lambda:self.load_file_act())
+        self.toolbarBox.save_file_action.triggered.connect(lambda: self.save_file_act())
+
 
         self.toolbarBox.set_layout_action_data.triggered.connect(self.set_layout_checked_action)
         self.toolbarBox.set_layout_action_plot.triggered.connect(self.set_layout_checked_action)
@@ -104,17 +100,6 @@ class MainWindow(QMainWindow):
         self.toolbarBox.manage_layout_action_preprocessing_widget.triggered.connect(self.manage_layout_checked_action)
         self.toolbarBox.manage_layout_action_plot.triggered.connect(self.manage_layout_checked_action)
 
-        # Plot Menu 
-
-        self.plot_menu = self.menubar.addMenu('&Table')
-
-        self.clear_table_action = QAction('clear table')
-        self.plot_menu.addAction(self.clear_table_action)
-        self.describe_dataframe_action = QAction('Describe dataframe')
-        self.plot_menu.addAction(self.describe_dataframe_action)
-
-        self.clear_table_action.triggered.connect(lambda:self.table.reset())
-        self.describe_dataframe_action.triggered.connect(lambda: self.show_describe())
 
         # ===========================================
 

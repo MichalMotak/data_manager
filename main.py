@@ -15,5 +15,5 @@ if __name__ == '__main__':
     app.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
     mw = MainWindow_class.MainWindow()
     sys.exit(app.exec_())
-
+  
 

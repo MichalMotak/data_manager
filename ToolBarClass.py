@@ -1,5 +1,5 @@
 
-from PyQt5.QtWidgets import QAction, QToolBar, QMenu, QPushButton
+from PyQt5.QtWidgets import QAction, QToolBar, QMenu, QPushButton,QMenuBar
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 
@@ -50,6 +50,23 @@ class MyToolBarClass(QToolBar):
         #
         #                     """)
 
+
+        self.file_menu = QMenu('&File')
+        self.file_menu_button = QPushButton("File")
+        self.addWidget(self.file_menu_button)
+        self.file_menu_button.setMenu(self.file_menu)
+
+        self.load_file_action = QAction('Load file')
+        self.file_menu.addAction(self.load_file_action)
+        self.save_file_action = QAction('Save file')
+        self.file_menu.addAction(self.save_file_action)
+
+        # self.load_file_action.triggered.connect(lambda:self.load_file_act())
+        # self.save_file_action.triggered.connect(lambda: self.save_file_act())
+
+
+
+
         self.manage_layout_menu = QMenu('&Manage layout')
         self.manage_layout_button = QPushButton("Manage \n Layout")
         self.addWidget(self.manage_layout_button)
@@ -99,6 +116,8 @@ class MyToolBarClass(QToolBar):
 
         self.addSeparator()
 
+        self.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
+
     def update_tab(self, name):
         print('update tab')
         self.clear_toolbar()
@@ -110,6 +129,7 @@ class MyToolBarClass(QToolBar):
 
         elif name == 'Data description':
             self.clear_table_action = QAction(QtGui.QIcon('icons/table--minus.png'), "Clear Table")
+    
             self.description_table_action = QAction(QtGui.QIcon(''), "Description Table")
 
             self.addAction(self.clear_table_action)
