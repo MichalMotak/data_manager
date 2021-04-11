@@ -1000,14 +1000,16 @@ class PlotWidget(QWidget):
         print(x,y)
         return x,y
     
-    def add_axis(self, col_ind, axis = None):
+    def add_axis(self, item, axis = None):
+        col_ind = item.column()
         col_name = self.table.col_labels.tolist()[col_ind]
         if axis == 'x':
             self.l_le_x_axis.update_text(col_name)
         elif axis == 'y':
             self.l_le_y_axis.update_text(col_name)
     
-    def add_hue(self, col_ind):
+    def add_hue(self, item):
+        col_ind = item.column()
         col_name = self.table.col_labels.tolist()[col_ind]
         self.l_le_hue.update_text(col_name)
 

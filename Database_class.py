@@ -1,4 +1,4 @@
-import mysql.connector as sql
+# import mysql.connector as sql
 import pandas as pd
 
 from PyQt5.QtWidgets import *

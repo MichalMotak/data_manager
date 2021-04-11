@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QTableWidget, QApplication, QMainWindow, QTableWidgetItem, QPushButton
+from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 import pandas as pd
 import os
@@ -26,7 +26,12 @@ class TableWidget(QTableWidget):
         self.table_test = 'table_test'
         self.horizontalHeader().setDefaultAlignment(Qt.AlignHCenter | Qt.Alignment(Qt.TextWordWrap))
         self.resized.connect(self.resized_fun)
-        # self.show()
+        self.setContextMenuPolicy(Qt.CustomContextMenu)
+
+        self.horizontalHeader().setContextMenuPolicy(Qt.CustomContextMenu)
+
+
+        self.horizontalHeader().sectionDoubleClicked.connect(self.changeHorizontalHeader)
 
     def resizeEvent(self, event):
         self.resized.emit()
@@ -88,7 +93,8 @@ class TableWidget(QTableWidget):
         self.emit_signal_for_plot_widget()
 
 
-    def add_row_bottom(self, row):
+    def add_row_bottom(self, item):
+        row = item.row()
 
         df1 = self.dataframe.iloc[:row+1,:]  # split df
         df2 = self.dataframe.iloc[row+1:,:]
@@ -100,8 +106,12 @@ class TableWidget(QTableWidget):
 
         self.update_from_df(final_df)
 
-    def add_col_right(self, col, header_name):
+    def add_col_right(self, item):
+
         print('add col right')
+
+        col = item.column()
+        header_name = self.le_add_col.text()
 
         final_df = self.dataframe
         final_df[header_name] = ""
@@ -125,7 +135,8 @@ class TableWidget(QTableWidget):
             item = self.takeItem(row,col)
             item.setText('')
 
-    def clear_column(self, col):
+    def clear_column(self, item):
+        col = item.column()
         print(col)
         rows = self.rowCount()
         print(rows)
@@ -133,6 +144,7 @@ class TableWidget(QTableWidget):
         # Clear in Table
         for row in range(rows):
             item = self.takeItem(row, col)
+            print(item)
             item.setText('')
 
         # Clear Dataframe
@@ -140,7 +152,8 @@ class TableWidget(QTableWidget):
         
         
 
-    def clear_row(self, row):
+    def clear_row(self, item):
+        row = item.row()
         print(row)
         columns = self.columnCount()
 
@@ -149,7 +162,9 @@ class TableWidget(QTableWidget):
             item.setText('')
         
 
-    def delete_row(self, row):
+    def delete_row(self, item):
+        row = item.row()
+
         print('delete row')
         print(row)
         # self.removeRow(row)
@@ -157,7 +172,8 @@ class TableWidget(QTableWidget):
         print(df)
         self.update_from_df(df)
 
-    def delete_column(self, column):
+    def delete_column(self, item):
+        column = item.column()
         print('delete column')
         print(column)
         print(self.col_labels)
@@ -179,7 +195,11 @@ class TableWidget(QTableWidget):
         print(df)
         self.update_from_df(df)
 
-    def sort_columns(self, columns_l, type):
+    def sort_columns(self, item, type):
+        print('sort col', item, type)
+        col = item.column()
+        columns_l = [col]
+        print(col, columns_l)
 
         c = self.col_labels.tolist()
         columns_l = [c[i] for i in columns_l]
@@ -223,6 +243,20 @@ class TableWidget(QTableWidget):
             return None
 
         self.update_from_df(self.dataframe)
+
+
+    def changeHorizontalHeader(self, index):
+        header_item = self.horizontalHeaderItem(index).text()
+        new_header_item, ok = QInputDialog.getText(self,
+                                                      'Change header label for column %d' % index,
+                                                      'Header:',
+                                                       QLineEdit.Normal,
+                                                       header_item)
+        if ok:
+            self.horizontalHeaderItem(index).setText(new_header_item)
+            new_col_labels = self.col_labels.tolist()
+            new_col_labels[index] = new_header_item
+            self.set_column_labels(pd.Index(new_col_labels))
 
 
     @pyqtSlot()

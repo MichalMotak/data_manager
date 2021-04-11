@@ -59,18 +59,17 @@ class ResultsTableWidget(QWidget):
 
         self.lay_right = QGridLayout()
         self.lay_right.addWidget(self.b_predict, 0,0)
-        self.lay_right.addWidget(self.b_clear, 1,0)
-        self.lay_right.addWidget(self.b_save, 2,0)
+        self.lay_right.addWidget(self.b_clear, 0,1)
+        self.lay_right.addWidget(self.b_save, 0,2)
 
 
 
         # self.main_layout.addWidget(self.label, 0,0)
         # self.main_layout.addWidget(self.table, 1,0)
         # self.main_layout.addLayout(self.lay_right, 0,1,2,1)
-
-        self.main_layout.addLayout(self.lay_right, 0,0, 3,1)
-        self.main_layout.addWidget(self.label, 0,1, 1,4)
-        self.main_layout.addWidget(self.table, 1,1, 6,4)
+        self.main_layout.addWidget(self.label, 0,0)
+        self.main_layout.addWidget(self.table, 1,0)
+        self.main_layout.addLayout(self.lay_right, 2,0)
 
 
 

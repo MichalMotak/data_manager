@@ -19,6 +19,7 @@ import ResultsTable_class
 import PlotWidget_class
 import CustomDialogWidgets
 import PreprocessingWidget_class
+import ToolBarClass
 
 # from CustomDialogWidgets import CustomMessageBoxInformation, CustomMessageBoxWarning
 
@@ -50,8 +51,35 @@ class MainWindow(QMainWindow):
         # self.setCentralWidget(self.table)
         # self.canv = PlotCanvas(self.table, 5, 3)
 
+        self.xxxx = 34
+        self.toolbarBox = ToolBarClass.MyToolBarClass()
+        self.toolbarBox.setOrientation(QtCore.Qt.Vertical)
+        self.addToolBar(QtCore.Qt.LeftToolBarArea, self.toolbarBox)
 
-        self.menubar = self.menuBar()
+        # self.toolbarBox.open_action.triggered.connect(self.fun3)
+
+
+        # font = self.toolbarBox.font()
+        # font.setPointSize(18)
+        # self.toolbarBox.setFont(font)
+
+        # self.toolbarBox.actionTriggered[QAction].connect(self.toolbtnpressed)
+        # self.open_action.triggered.connect(self.fun_open)
+
+        # "border-width: 1;"
+        # "border-radius: 1;"
+        # "border-style: solid;"
+        # "border-color: rgb(100,57,0);"
+        # "background-color: #ABABAB;"
+        self.menubar = QMenuBar()
+        self.menubar.setStyleSheet(
+
+                                          "padding: 2px;"
+                                          "font-size: 26px;}"
+                                      )
+
+
+        self.setMenuBar(self.menubar)
         self.File_menu = self.menubar.addMenu('&File')
 
         self.load_file_action = QAction('Load file')
@@ -59,41 +87,22 @@ class MainWindow(QMainWindow):
         self.save_file_action = QAction('Save file')
         self.File_menu.addAction(self.save_file_action)
 
-
         self.load_file_action.triggered.connect(lambda:self.load_file_act())
         self.save_file_action.triggered.connect(lambda: self.save_file_act())
 
 
 
-        # Menu Manage Layout
+        # ToolBar signals
 
-        self.manage_layout_menu = self.menubar.addMenu('&Manage layout')
+        self.toolbarBox.set_layout_action_data.triggered.connect(self.set_layout_checked_action)
+        self.toolbarBox.set_layout_action_plot.triggered.connect(self.set_layout_checked_action)
+        self.toolbarBox.set_layout_action_ML.triggered.connect(self.set_layout_checked_action)
 
-        self.manage_layout_action_table = QAction('Table', checkable=True)
-        self.manage_layout_menu.addAction(self.manage_layout_action_table)
-        self.manage_layout_action_table.setChecked(True)
-        self.manage_layout_action_table.triggered.connect(self.manage_layout_checked_action)
-
-        self.manage_layout_action_plot = QAction('Plot', checkable=True)
-        self.manage_layout_menu.addAction(self.manage_layout_action_plot)
-        self.manage_layout_action_plot.setChecked(True)
-        self.manage_layout_action_plot.triggered.connect(self.manage_layout_checked_action)
-
-        self.manage_layout_action_MLWidget = QAction('ML Widget', checkable=True)
-        self.manage_layout_menu.addAction(self.manage_layout_action_MLWidget)
-        self.manage_layout_action_MLWidget.setChecked(True)
-        self.manage_layout_action_MLWidget.triggered.connect(self.manage_layout_checked_action)
-
-        self.manage_layout_action_right_table = QAction('Right Table', checkable=True)
-        self.manage_layout_menu.addAction(self.manage_layout_action_right_table)
-        self.manage_layout_action_right_table.setChecked(True)
-        self.manage_layout_action_right_table.triggered.connect(self.manage_layout_checked_action)
-
-        self.manage_layout_action_preprocessing_widget = QAction('Preprocessing Widget', checkable=True)
-        self.manage_layout_menu.addAction(self.manage_layout_action_preprocessing_widget)
-        self.manage_layout_action_preprocessing_widget.setChecked(True)
-        self.manage_layout_action_preprocessing_widget.triggered.connect(self.manage_layout_checked_action)
-
+        self.toolbarBox.manage_layout_action_table.triggered.connect(self.manage_layout_checked_action)
+        self.toolbarBox.manage_layout_action_MLWidget.triggered.connect(self.manage_layout_checked_action)
+        self.toolbarBox.manage_layout_action_right_table.triggered.connect(self.manage_layout_checked_action)
+        self.toolbarBox.manage_layout_action_preprocessing_widget.triggered.connect(self.manage_layout_checked_action)
+        self.toolbarBox.manage_layout_action_plot.triggered.connect(self.manage_layout_checked_action)
 
         # Plot Menu 
 
@@ -104,13 +113,13 @@ class MainWindow(QMainWindow):
         self.describe_dataframe_action = QAction('Describe dataframe')
         self.plot_menu.addAction(self.describe_dataframe_action)
 
-        self.clear_table_action.triggered.connect(lambda:self.clear_table())
+        self.clear_table_action.triggered.connect(lambda:self.table.reset())
         self.describe_dataframe_action.triggered.connect(lambda: self.show_describe())
 
         # ===========================================
 
-        self.main_layout = QVBoxLayout(self._main)
-
+        self.main_layout = QVBoxLayout()
+        self._main.setLayout(self.main_layout)
 
         # ================== Menu Database ==================
 
@@ -123,9 +132,15 @@ class MainWindow(QMainWindow):
         # ================== Tables Widgets ==================
 
         self.table = TableWidget_class.TableWidget(20, 5)
-        self.table.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)  
-        self.table.customContextMenuRequested.connect(self.generateMenu) 
+        self.table.customContextMenuRequested.connect(self.generateMenu)
         self.table.viewport().installEventFilter(self)
+
+        self.table.horizontalHeader().customContextMenuRequested.connect(self.generateMenu_hor)
+        self.table.horizontalHeader().installEventFilter(self)
+
+        print('eeee', self.table.horizontalHeader().sectionsClickable())
+
+
 
         self.table_describe = TableWidget_class.TableWidget(5,3)
         self.table_describe.hide()
@@ -233,16 +248,17 @@ class MainWindow(QMainWindow):
         self.splitter_hor.addWidget(self.frame_left)
         self.splitter_hor.addWidget(self.frame_PlotWidget)
         self.splitter_hor.addWidget(self.frame_MLWidget)
+        self.splitter_hor.addWidget(self.frame_results_table)
 
-        self.splitter_vert = QSplitter(Qt.Vertical)
-        self.splitter_vert.addWidget(self.splitter_hor)
-        self.splitter_vert.addWidget(self.frame_results_table)
-
-        self.splitter_vert.setStretchFactor(0, 10)
-        self.splitter_vert.setStretchFactor(1, 3)
-
-        self.main_layout.addWidget(self.splitter_vert)
-
+        # self.splitter_vert = QSplitter(Qt.Vertical)
+        # self.splitter_vert.addWidget(self.splitter_hor)
+        # self.splitter_vert.addWidget(self.frame_results_table)
+        #
+        # self.splitter_vert.setStretchFactor(0, 10)
+        # self.splitter_vert.setStretchFactor(1, 3)
+        #
+        # self.main_layout.addWidget(self.splitter_vert)
+        self.main_layout.addWidget(self.splitter_hor)
 
         # ============== Connect Signals ================================
 
@@ -270,6 +286,20 @@ class MainWindow(QMainWindow):
         self.plot_widget.tab8.signal_for_ml_widget.connect(self.ml_widget.get_signal_from_classplot_widget)
 
         self.ml_widget.signal_for_regplot_widget.connect(self.plot_widget.tab8.get_signal_from_ML_widget)
+
+
+        # ToolBarClass signals
+
+        self.toolbarBox.signal_for_mainwindow.connect(self.receive_toolbar_signals)
+
+
+
+
+
+
+
+        self.set_layout('Data description')
+
 
     def manage_layout_checked_action(self):
         """
@@ -307,7 +337,12 @@ class MainWindow(QMainWindow):
             fun(self.frame_results_table)
 
         elif sender_text == 'Preprocessing Widget':
-            fun(self.frame_preproc_widget)
+            print(self.frame_left.isHidden())
+            if self.frame_left.isHidden():
+                self.frame_left.show()
+                self.plot_widget.hide()
+            self.frame_preproc_widget.show()
+            # fun(self.frame_preproc_widget)
 
     # Menu for right mouse click on cells in table, with functions
 
@@ -321,15 +356,14 @@ class MainWindow(QMainWindow):
         Returns:
             [type]: [description]
         """
-        # print('event')
-        # print(source, event)
-        # print(type(source), type(event))
+        print('event')
+        print(source, event)
+        print(type(source), type(event))
 
         # if event.type  == MouseButtonPress and button is Right Mouse Click on self.table 
-        if(event.type() == QEvent.MouseButtonPress 
+        if(event.type() == QEvent.MouseButtonPress
             and event.buttons() == Qt.RightButton
             and source is self.table.viewport()):
-
 
             item = self.table.itemAt(event.pos())
 
@@ -347,9 +381,9 @@ class MainWindow(QMainWindow):
                 self.act1 = QAction('X axis', checkable = True)
                 self.act2 = QAction('Y axis',  checkable = True)
                 self.act10 = QAction('Hue',  checkable=True)
-                self.act1.triggered.connect(lambda: self.add_x_axis(item))
-                self.act2.triggered.connect(lambda: self.add_y_axis(item))
-                self.act10.triggered.connect(lambda: self.add_hue(item))
+                self.act1.triggered.connect(lambda: self.plot_widget.add_axis(item, 'x'))
+                self.act2.triggered.connect(lambda: self.plot_widget.add_axis(item, 'y'))
+                self.act10.triggered.connect(lambda: self.plot_widget.add_hue(item))
                 self.submenu_add_plot.addAction(self.act1)
                 self.submenu_add_plot.addAction(self.act2)
                 self.submenu_add_plot.addAction(self.act10)
@@ -357,8 +391,8 @@ class MainWindow(QMainWindow):
                 self.submenu_add_data = QMenu('Add data', self)
                 self.act3 = QAction('Add column on the right', self.menu, checkable = True)
                 self.act4 = QAction('Add row on the bottom', self.menu, checkable=True)
-                self.act3.triggered.connect(lambda: self.add_column_right(item))
-                self.act4.triggered.connect(lambda: self.add_row_bottom(item))
+                self.act3.triggered.connect(lambda: self.table.add_col_right(item))
+                self.act4.triggered.connect(lambda: self.table.add_row_bottom(item))
                 self.submenu_add_data.addAction(self.act3)
                 self.submenu_add_data.addAction(self.act4)
 
@@ -366,30 +400,30 @@ class MainWindow(QMainWindow):
                 self.submenu_clear_data = QMenu('Clear data',self)
                 self.act5 = QAction('Clear column')
                 self.act6 = QAction('Clear row')
-                self.act5.triggered.connect(lambda: self.clear_column(item))
-                self.act6.triggered.connect(lambda: self.clear_row(item))
+                self.act5.triggered.connect(lambda: self.table.clear_column(item))
+                self.act6.triggered.connect(lambda: self.table.clear_row(item))
                 self.submenu_clear_data.addAction(self.act5)
                 self.submenu_clear_data.addAction(self.act6)
 
                 self.submenu_del_data = QMenu('Delete data', self)
                 self.act7 = QAction('Delete column')
                 self.act8 = QAction('Delete row')
-                self.act7.triggered.connect(lambda: self.delete_column(item))
-                self.act8.triggered.connect(lambda: self.delete_row(item))
+                self.act7.triggered.connect(lambda: self.table.delete_column(item))
+                self.act8.triggered.connect(lambda: self.table.delete_row(item))
                 self.submenu_del_data.addAction(self.act7)
                 self.submenu_del_data.addAction(self.act8)
 
                 self.act9 = QAction('Clear cell')
-                self.act9.triggered.connect(lambda: self.clear_sel_data())
+                self.act9.triggered.connect(lambda: self.table.clear_selected_data())
                 self.submenu_clear_data.addAction(self.act9)
 
                 self.submenu_sort_data = QMenu('Sort data', self)
                 self.act11 = QAction('Sort ascending data')
-                self.act11.triggered.connect(lambda: self.sort_column(item, 'ascending'))
+                self.act11.triggered.connect(lambda: self.table.sort_columns(item, 'ascending'))
                 self.submenu_sort_data.addAction(self.act11)
 
                 self.act12 = QAction('Sort descending data')
-                self.act12.triggered.connect(lambda: self.sort_column(item, 'descending'))
+                self.act12.triggered.connect(lambda: self.table.sort_columns(item, 'descending'))
                 self.submenu_sort_data.addAction(self.act12)
 
 
@@ -405,79 +439,42 @@ class MainWindow(QMainWindow):
                 #menu.exec_(event.globalPos())
         return super(MainWindow, self).eventFilter(source, event)
 
+    # @QtCore.pyqtSlot(QtCore.QPoint)
+    # def header_connection(self, source, event):
+    #     print('d')
+    #     # print(pos)
+    #     source = self.sender()
+    #     print(source)
+    #     event = self.event()
+    #     print(event)
+    #     if(event.type() == QEvent.MouseButtonPress
+    #         and event.buttons() == Qt.RightButton
+    #         and source is self.table.horizontal_header):
+    #             print('clicked horizontal header')
+    #
+    #     return super(MainWindow, self).eventFilter(source, event)
+
+    @QtCore.pyqtSlot(QtCore.QPoint)
     def generateMenu(self, pos):
         print("pos======", pos)
         try:
-            self.menu.exec_(self.table.mapToGlobal(pos))  # +++
+            self.menu.exec_(self.table.mapToGlobal(pos))
         except AttributeError:
             d = CustomDialogWidgets.CustomMessageBoxWarning('Load data to table')
 
-    # Functions managing QActions on self.table QTableWidget
+    @QtCore.pyqtSlot(QtCore.QPoint)
+    def generateMenu_hor(self, pos):
+        print('gen menu hor')
 
-    def add_column_right(self, item):
-        print('add column right')
-        col = item.column()
-        header_name = self.le_add_col.text()
-        print(col, header_name)
-        self.table.add_col_right(col, header_name)
-
-    def add_row_bottom(self, item):
-        print('add row bottom')
-        col = item.row()
-        self.table.add_row_bottom(col)
-
-    def clear_column(self, item):
-        print('clear column')
-        col = item.column()
-        self.table.clear_column(col)
-
-    def clear_row(self, item):
-        print('clear row')
-        row = item.row()
-        self.table.clear_row(row)
-
-    def delete_column(self, item):
-        col = item.column()
-        self.table.delete_column(col)
-
-    def delete_row(self, item):
-        row = item.row()
-        self.table.delete_row(row)
-
-    def clear_sel_data(self):
-        # cols = self.table.selectionModel().selectedColumns()
-        # indexes = []
-        # for c in cols:  # c is QModelndex object
-        #     print(c.column())
-        #     indexes.append(c.column())
-        # print('indexes ', indexes)
-
-        self.table.clear_selected_data()
-
-    def add_x_axis(self, item):
-        print('add x axis')
-        col = item.column()
-        self.plot_widget.add_axis(col, 'x')
+        menu = QMenu(self)
+        # self.menu.addAction(item.text())         #(QAction('test'))
+        ag = QActionGroup(self, exclusive=True)
+        act0 = QAction('default', menu, checkable=True, checked = True)
+        # z = ag.addAction(act0)
+        menu.addAction(act0)
 
 
-    def add_y_axis(self, item):
-        print('add y axis')
-        col = item.column()
-        self.plot_widget.add_axis(col, 'y')
-
-    def add_hue(self, item):
-        print('add hue')
-        col = item.column()
-        self.plot_widget.add_hue(col)
-
-
-    def sort_column(self, item, type):
-
-        # only one column,
-
-        print(type)
-        col = item.column()
-        self.table.sort_columns([col], type)
+        menu.exec_(self.table.horizontalHeader().mapToGlobal(pos))
 
 
     # ===============================================================================
@@ -490,9 +487,9 @@ class MainWindow(QMainWindow):
         self.move(qtRectangle.topLeft())
 
 
-    def clear_table(self):
-        print('clear table')
-        self.table.reset()
+    # def clear_table(self):
+    #     print('clear table')
+    #     self.table.reset()
 
     def show_describe(self):
         print('show_describe')
@@ -572,4 +569,91 @@ class MainWindow(QMainWindow):
                         else:
                             row_data.append('')
                     writer.writerow(row_data)
+
+
+    def set_layout(self, text):
+        print('set layout ', text)
+        self.frame_PlotWidget.hide()
+        self.frame_left.hide()
+        self.frame_preproc_widget.hide()
+        self.frame_MLWidget.hide()
+        self.frame_results_table.hide()
+
+        self.toolbarBox.manage_layout_action_plot.setChecked(True)
+        self.toolbarBox.manage_layout_action_preprocessing_widget.setChecked(True)
+        self.toolbarBox.manage_layout_action_MLWidget.setChecked(True)
+        self.toolbarBox.manage_layout_action_table.setChecked(True)
+        self.toolbarBox.manage_layout_action_right_table.setChecked(True)
+
+        if text == 'Plotting':
+            self.frame_PlotWidget.show()
+            self.frame_left.show()
+
+            self.toolbarBox.manage_layout_action_preprocessing_widget.setChecked(False)
+            self.toolbarBox.manage_layout_action_MLWidget.setChecked(False)
+            self.toolbarBox.manage_layout_action_right_table.setChecked(False)
+
+        elif text == 'Data description':
+            # pass
+            self.frame_left.show()
+            self.frame_preproc_widget.show()
+            #
+            self.toolbarBox.manage_layout_action_plot.setChecked(False)
+            self.toolbarBox.manage_layout_action_MLWidget.setChecked(False)
+            self.toolbarBox.manage_layout_action_right_table.setChecked(False)
+
+        elif text == 'Machine Learning':
+
+            self.toolbarBox.manage_layout_action_plot.setChecked(False)
+            self.toolbarBox.manage_layout_action_preprocessing_widget.setChecked(False)
+            self.toolbarBox.manage_layout_action_table.setChecked(False)
+
+            self.frame_MLWidget.show()
+            self.frame_results_table.show()
+
+
+    def set_layout_checked_action(self):
+        print('set lay')
+        # sender PyQt5.QtWidgets.QAction, element of self.manage_layout_menu submenu
+        sender = self.toolbarBox.sender()
+        print(sender)
+        # sender Text, Plot, Table etc.
+        sender_text = sender.text()
+
+        print(sender_text)
+        self.set_layout(sender_text)
+        self.toolbarBox.update_tab(sender_text)
+
+    def manage_layout_checked_action(self):
+        sender_text = self.sender().text()
+        print(sender_text)
+
+        def fun(frame):
+            print(frame.isHidden())
+            if frame.isHidden():
+                frame.show()
+            else:
+                frame.hide()
+        if sender_text == 'Table':
+            fun(self.frame_left)
+        elif sender_text == 'Plot':
+            fun(self.frame_PlotWidget)
+        elif sender_text == 'ML Widget':
+            fun(self.frame_MLWidget)
+        elif sender_text == 'Right Table':
+            fun(self.results_table)
+        elif sender_text == 'Preprocessing Widget':
+            fun(self.frame_preproc_widget)
+
+
+    @pyqtSlot(str)
+    def receive_toolbar_signals(self,sender_text):
+        print('rec ', sender_text)
+
+        if sender_text == 'Clear Table':
+            self.clear_table()
+
+        if sender_text == 'Description Table':
+            self.show_describe()
+
 
